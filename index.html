@@ -40,12 +40,12 @@
   </div>
 
   <!-- Cena WebAR -->
-  <a-scene 
-    mindar-image="imageTargetSrc: [suspicious link removed];" 
-    color-space="sRGB" 
-    renderer="colorManagement: true, physicallyCorrectLights" 
-    vr-mode-ui="enabled: false" 
-    device-orientation-permission-ui="enabled: false">
+<a-scene 
+  mindar-image="imageTargetSrc: ./targets.mind;" 
+  color-space="sRGB" 
+  renderer="colorManagement: true, physicallyCorrectLights" 
+  vr-mode-ui="enabled: false" 
+  device-orientation-permission-ui="enabled: false">
     
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
@@ -60,12 +60,7 @@
               background="#000000">
       </a-text>
     </a-entity>
-  <a-scene 
-  mindar-image="imageTargetSrc: ./targets.mind;" 
-  color-space="sRGB" 
-  renderer="colorManagement: true, physicallyCorrectLights" 
-  vr-mode-ui="enabled: false" 
-  device-orientation-permission-ui="enabled: false">
+  <a-scene>
 
 </body>
 </html>
