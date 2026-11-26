@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMUPLOC — Navegação AR</title>
+  
+  <!-- A-Frame (Motor 3D) -->
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <!-- MindAR (Reconhecimento de Câmera e Imagem) -->
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+  
+  <style>
+    body { margin: 0; overflow: hidden; font-family: sans-serif; }
+    
+    /* Painel HUD estilo jogo sobreposto na câmera */
+    #hud {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      z-index: 999;
+      background: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid #00ffcc;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+    #hud h3 { margin: 0 0 5px 0; color: #00ffcc; font-size: 16px; }
+    #hud p { margin: 0; font-size: 13px; color: #ddd; }
+  </style>
+</head>
+<body>
+
+  <!-- Painel de Orientação do Técnico -->
+  <div id="hud">
+    <h3>🎯 SMUPLOC — Rastreamento AR Ativo</h3>
+    <p>Aponta a câmera para a âncora da porta (QR Code/Marcador) para visualizar o local do sensor.</p>
+  </div>
+
+  <!-- Cena WebAR -->
+  <a-scene 
+    mindar-image="imageTargetSrc: [suspicious link removed];" 
+    color-space="sRGB" 
+    renderer="colorManagement: true, physicallyCorrectLights" 
+    vr-mode-ui="enabled: false" 
+    device-orientation-permission-ui="enabled: false">
+    
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+    <!-- Ponto de Destino 3D -->
+    <a-entity mindar-image-target="targetIndex: 0">
+      <a-box position="0 0.2 0" rotation="0 45 0" scale="0.3 0.3 0.3" material="color: #00ffcc; opacity: 0.9;"></a-box>
+      <a-text value="SARF-060 / C8A7\nRefrigerador 03 (Toxicologia)" 
+              position="0 0.7 0" 
+              scale="0.6 0.6 0.6" 
+              align="center" 
+              color="#ffffff"
+              background="#000000">
+      </a-text>
+    </a-entity>
+  </a-scene>
+
+</body>
+</html>
