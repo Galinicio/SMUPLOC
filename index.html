@@ -3,64 +3,102 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SMUPLOC — Navegação AR</title>
+  <title>SMUPLOC — Leitura de QR Code Real</title>
   
-  <!-- A-Frame (Motor 3D) -->
+  <!-- Motor 3D A-Frame & MindAR -->
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <!-- MindAR (Reconhecimento de Câmera e Imagem) -->
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+  <!-- Biblioteca para Decodificar QR Code -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
   
   <style>
     body { margin: 0; overflow: hidden; font-family: sans-serif; }
     
-    /* Painel HUD estilo jogo sobreposto na câmera */
+    /* Painel HUD para exibir os dados lidos do QR Code */
     #hud {
       position: absolute;
       top: 10px;
       left: 10px;
       right: 10px;
       z-index: 999;
-      background: rgba(0, 0, 0, 0.75);
+      background: rgba(0, 0, 0, 0.85);
       color: #fff;
-      padding: 12px 16px;
-      border-radius: 8px;
+      padding: 14px;
+      border-radius: 10px;
       border: 1px solid #00ffcc;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
     }
-    #hud h3 { margin: 0 0 5px 0; color: #00ffcc; font-size: 16px; }
-    #hud p { margin: 0; font-size: 13px; color: #ddd; }
+    #hud h3 { margin: 0 0 6px 0; color: #00ffcc; font-size: 15px; }
+    #hud p { margin: 0; font-size: 13px; color: #fff; word-break: break-all; }
+    #status { font-weight: bold; color: #ffaa00; }
   </style>
 </head>
 <body>
 
-  <!-- Painel de Orientação do Técnico -->
+  <!-- Painel Superior com Dados Dinâmicos -->
   <div id="hud">
-    <h3>🎯 SMUPLOC — Rastreamento AR Ativo</h3>
-    <p>Aponta a câmera para a âncora da porta (QR Code/Marcador) para visualizar o local do sensor.</p>
+    <h3>🔍 SMUPLOC — Dados do Equipamento</h3>
+    <p>Status: <span id="status">Aguardando leitura...</span></p>
+    <p id="qr-data">Conteúdo: <i>Aponta para o QR Code da SMUP</i></p>
   </div>
 
-  <!-- Cena WebAR -->
-<a-scene 
-  mindar-image="imageTargetSrc: ./targets.mind;" 
-  color-space="sRGB" 
-  renderer="colorManagement: true, physicallyCorrectLights" 
-  vr-mode-ui="enabled: false" 
-  device-orientation-permission-ui="enabled: false">
+  <a-scene 
+    mindar-image="imageTargetSrc: ./targets.mind;" 
+    color-space="sRGB" 
+    renderer="colorManagement: true, physicallyCorrectLights" 
+    vr-mode-ui="enabled: false" 
+    device-orientation-permission-ui="enabled: false">
     
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-    <!-- Ponto de Destino 3D -->
-    <a-entity mindar-image-target="targetIndex: 0">
+    <!-- Objeto 3D e Texto na Câmera -->
+    <a-entity mindar-image-target="targetIndex: 0" id="target-anchor">
       <a-box position="0 0.2 0" rotation="0 45 0" scale="0.3 0.3 0.3" material="color: #00ffcc; opacity: 0.9;"></a-box>
-      <a-text value="SARF-060 / C8A7\nRefrigerador 03 (Toxicologia)" 
+      
+      <!-- Texto 3D que vai ser preenchido dinamicamente -->
+      <a-text id="ar-card-text" 
+              value="Lendo QR Code..." 
               position="0 0.7 0" 
               scale="0.6 0.6 0.6" 
               align="center" 
-              color="#ffffff"
-              background="#000000">
+              color="#ffffff">
       </a-text>
     </a-entity>
-  <a-scene>
+  </a-scene>
+
+  <canvas id="qr-canvas" style="display:none;"></canvas>
+
+  <script>
+    // Leitura contínua da câmera para decodificar o payload do QR Code
+    setInterval(() => {
+      const video = document.querySelector('video');
+      if (!video || video.readyState !== video.HAVE_ENOUGH_DATA) return;
+
+      const canvas = document.getElementById('qr-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: "dontInvert",
+      });
+
+      if (code && code.data) {
+        // Atualiza o painel HUD do celular com a informação REAL contida no QR Code
+        document.getElementById('status').innerText = "QR Code Lido!";
+        document.getElementById('status').style.color = "#00ffcc";
+        document.getElementById('qr-data').innerText = "Dados: " + code.data;
+        
+        // Atualiza o card 3D flutuante na tela
+        const arText = document.getElementById('ar-card-text');
+        if (arText) {
+          arText.setAttribute('value', code.data);
+        }
+      }
+    }, 500); // Executa a leitura a cada meio segundo
+  </script>
 
 </body>
 </html>
