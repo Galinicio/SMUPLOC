@@ -182,9 +182,12 @@ const QRScannerModule = {
     const tiposPermitidos = ['UR', 'UC', 'US', 'PT100'];
     const tipo = tiposPermitidos.includes(tipoInformado) ? tipoInformado : 'UR';
 
+    const setor = (prompt('Setor / ambiente (opcional):', '') || '').trim().slice(0, 100);
+
     const novoEq = {
       id,
       nome: nomeCurto.slice(0, 100),
+      setor,
       tipo,
       // Não inventa coordenadas: o equipamento precisa ser posicionado na planta.
       x: 0,
