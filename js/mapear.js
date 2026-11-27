@@ -5,7 +5,7 @@
  */
 const MapearModule = {
   ativo: false,
-  escalaPxPorMetro: 22,
+  escalaPxPorMetro: (() => {\n    try {\n      const valor = Number(localStorage.getItem('smuploc_escala_mapa'));\n      return Number.isFinite(valor) && valor >= 4 && valor <= 100 ? valor : 22;\n    } catch (erro) {\n      return 22;\n    }\n  })(),
   escalaMin: 4,
   escalaMax: 100,
 
@@ -171,7 +171,7 @@ const MapearModule = {
 
     const area = this.calcularArea(State.cantosMapear);
     if (areaEl) {
-      areaEl.textContent = area.toFixed(2) + ' (estimada)';
+      areaEl.textContent = area.toFixed(2);
     }
   }
 };
