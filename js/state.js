@@ -176,7 +176,7 @@ const State = {
       return false;
     }
 
-    const confirmado = confirm('Isso apagará equipamentos, cantos e a planta salva neste navegador. Deseja continuar?');
+    const confirmado = confirm('Isso apagará equipamentos, cantos, escala e a planta salva neste navegador. Deseja continuar?');
     if (!confirmado) return false;
 
     this.equipamentos = [];
@@ -193,6 +193,12 @@ const State = {
         console.warn(`SMUPLOC: não foi possível remover "${chave}".`, erro);
       }
     });
+
+    if (typeof MapearModule !== 'undefined') {
+      MapearModule.escalaPxPorMetro = 22;
+      MapearModule.pontosAnteriores = [];
+      MapearModule.atualizarInstrucoes();
+    }
 
     const inputPlanta = document.getElementById('input-planta');
     if (inputPlanta) inputPlanta.value = '';
