@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SMUPLOC — AR & Navegação Espacial</title>
   
   <!-- Libs Externas -->
@@ -54,9 +54,9 @@
       <canvas id="canvas-expandido" width="360" height="360"></canvas>
     </div>
 
-    <div class="modal-controls">
+    <section id="painel-equipamentos" class="painel-equipamentos" hidden aria-label="Gerenciamento de equipamentos">\n      <div class="painel-equipamentos-cabecalho">\n        <strong>Equipamentos cadastrados (<span id="contador-equipamentos">0</span>)</strong>\n        <button type="button" class="btn-fechar-painel" onclick="EquipmentModule.fechar()">Fechar lista</button>\n      </div>\n      <div id="lista-equipamentos" class="lista-equipamentos"></div>\n    </section>\n\n    <div class="modal-controls">
       <button class="btn-mapear" onclick="MapearModule.iniciar()">📏 MAPEAR SALA</button>
-      <div id="controles-admin">
+      <div id="controles-admin">\n        <button class="btn-admin btn-dark" type="button" onclick="EquipmentModule.abrir()">📋 Equipamentos</button>
         <label class="btn-admin btn-blue">
           📤 Subir Planta
           <input type="file" id="input-planta" accept="image/*" style="display:none;" onchange="MinimapModule.uploadPlanta(event)">
@@ -70,9 +70,9 @@
   <div id="mapear-hud">
     <div id="mapear-tutorial">
       <h4>📐 Como Mapear o Cômodo:</h4>
-      <div class="step-item"><span class="step-num">1</span> Apunte a mira central para o primeiro canto e clique em <b>"📍 Marcar Canto"</b>.</div>
-      <div class="step-item"><span class="step-num">2</span> Caminhe até os outros cantos na sequência marcando cada um.</div>
-      <div class="step-item"><span class="step-num">3</span> Ao terminar, clique em <b>"🏁 Finalizar Planta"</b>.</div>
+      <div class="step-item"><span class="step-num">1</span> Toque no mapa exatamente onde fica cada canto do cômodo.</div>
+      <div class="step-item"><span class="step-num">2</span> Marque pelo menos três pontos, seguindo o contorno da sala.</div>
+      <div class="step-item"><span class="step-num">3</span> Ajuste a escala antes de começar; a área será uma estimativa.</div>
       <div class="stats-area">
         Cantos Marcados: <span id="mp-count">0</span> | Área Estimada: <span id="mp-area">0</span> m²
       </div>
@@ -81,8 +81,9 @@
     <div class="crosshair-center"></div>
 
     <div id="mapear-controls">
-      <button class="btn-mp-action" onclick="MapearModule.marcarCanto()">📍 Marcar Canto</button>
-      <button class="btn-mp-action btn-mp-success" onclick="MapearModule.finalizar()">🏁 Finalizar Planta</button>
+      <button class="btn-mp-action" onclick="MapearModule.ajustarEscala()">⚖️ Escala</button>
+      <button class="btn-mp-action" onclick="MapearModule.desfazerCanto()">↩ Desfazer</button>
+      <button class="btn-mp-action btn-mp-success" onclick="MapearModule.finalizar()">🏁 Finalizar</button>
       <button class="btn-mp-action btn-mp-danger" onclick="MapearModule.cancelar()">❌ Cancelar</button>
     </div>
   </div>
@@ -112,7 +113,7 @@
   <canvas id="qr-canvas" style="display:none;"></canvas>
 
   <!-- Scripts Modulares -->
-  <script src="js/state.js"></script>
+  <script src="js/state.js"></script>\n  <script src="js/equipments.js"></script>
   <script src="js/qr-scanner.js"></script>
   <script src="js/minimap.js"></script>
   <script src="js/mapear.js"></script>
