@@ -5,7 +5,14 @@
  */
 const MapearModule = {
   ativo: false,
-  escalaPxPorMetro: (() => {\n    try {\n      const valor = Number(localStorage.getItem('smuploc_escala_mapa'));\n      return Number.isFinite(valor) && valor >= 4 && valor <= 100 ? valor : 22;\n    } catch (erro) {\n      return 22;\n    }\n  })(),
+  escalaPxPorMetro: (() => {
+    try {
+      const valor = Number(localStorage.getItem('smuploc_escala_mapa'));
+      return Number.isFinite(valor) && valor >= 4 && valor <= 100 ? valor : 22;
+    } catch (erro) {
+      return 22;
+    }
+  })(),
   escalaMin: 4,
   escalaMax: 100,
 
@@ -106,6 +113,11 @@ const MapearModule = {
     }
 
     this.escalaPxPorMetro = valor;
+    try {
+      localStorage.setItem('smuploc_escala_mapa', String(valor));
+    } catch (erro) {
+      console.warn('Não foi possível persistir a escala do mapa.', erro);
+    }
     this.atualizarStats();
     MinimapModule.renderExpandido();
   },
