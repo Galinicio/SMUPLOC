@@ -6,6 +6,8 @@
 const MapearModule = {
   ativo: false,
   pontosAnteriores: [],
+  calibracaoAtiva: false,
+  pontosCalibracao: [],
   escalaPxPorMetro: (() => {
     try {
       const valor = Number(localStorage.getItem('smuploc_escala_mapa'));
@@ -60,7 +62,43 @@ const MapearModule = {
   },
 
   registrarToque(evento) {
-    if (!this.ativo || State.perfilAtual === 'cliente') return;
+    if (State.perfilAtual === 'cliente') return;
+    if (this.calibracaoAtiva) {
+      if (evento.target !== document.getElementById('canvas-expandido')) return;
+      if (evento.cancelable) evento.preventDefault();
+      const ponto = this.obterPontoCanvas(evento);
+      if (!ponto) return;
+      this.pontosCalibracao.push(ponto);
+      if (this.pontosCalibracao.length === 1) {
+        alert('Primeiro ponto marcado. Toque no segundo ponto da mesma medida conhecida.');
+        return;
+      }
+      const [a, b] = this.pontosCalibracao;
+      this.calibracaoAtiva = false;
+      this.pontosCalibracao = [];
+      const pixels = Math.hypot(b.x - a.x, b.y - a.y);
+      const resposta = prompt('Qual é a distância REAL entre os dois pontos, em metros?');
+      if (resposta === null) return;
+      const metros = Number(String(resposta).replace(',', '.'));
+      if (!Number.isFinite(metros) || metros <= 0 || pixels <= 0) {
+        alert('Medida inválida. Repita a calibração e informe uma distância maior que zero.');
+        return;
+      }
+      const novaEscala = pixels / metros;
+      if (novaEscala < this.escalaMin || novaEscala > this.escalaMax) {
+        alert('A escala calculada (' + novaEscala.toFixed(2) + ' px/m) ficou fora do intervalo suportado (4–100 px/m). Use uma medida maior ou uma imagem com resolução melhor.');
+        return;
+      }
+      this.escalaPxPorMetro = novaEscala;
+      try { localStorage.setItem('smuploc_escala_mapa', String(novaEscala)); } catch (erro) {}
+      State.sincronizarAmbienteAtual();
+      this.atualizarInstrucoes();
+      MinimapModule.renderExpandido();
+      MinimapModule.renderPequeno();
+      alert('Escala calibrada: ' + novaEscala.toFixed(2) + ' px/m. A calibração foi salva neste ambiente.');
+      return;
+    }
+    if (!this.ativo) return;
     if (evento.target.closest('#mapear-controls, #mapear-tutorial')) return;
 
     const canvas = document.getElementById('canvas-expandido');
@@ -95,6 +133,18 @@ const MapearModule = {
     State.cantosMapear.pop();
     this.atualizarStats();
     MinimapModule.renderExpandido();
+  },
+
+  iniciarCalibracao() {
+    if (State.perfilAtual === 'cliente') { alert('A calibração exige perfil de edição.'); return; }
+    if (!State.plantaImageBase64) { alert('Importe a planta baixa antes de calibrar.'); return; }
+    this.ativo = false;
+    this.calibracaoAtiva = true;
+    this.pontosCalibracao = [];
+    const hud = document.getElementById('mapear-hud');
+    if (hud) hud.style.display = 'none';
+    MinimapModule.abrirModal();
+    alert('Calibração em 2 pontos: toque nas extremidades de uma medida identificável na planta (por exemplo, uma parede de 5,00 m).');
   },
 
   ajustarEscala() {
@@ -165,6 +215,7 @@ const MapearModule = {
   },
 
   cancelar() {
+    if (this.calibracaoAtiva) { this.calibracaoAtiva = false; this.pontosCalibracao = []; }
     if (this.ativo) {
       const confirmar = confirm('Descartar os pontos deste mapeamento?');
       if (!confirmar) return;

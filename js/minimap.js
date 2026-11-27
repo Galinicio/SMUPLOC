@@ -53,6 +53,12 @@ const MinimapModule = {
       ctx.fillStyle = pequeno ? '#0a2540' : '#07192b';
       ctx.fillRect(0, 0, w, h);
       ctx.drawImage(State.imgPlantaObj, (w - drawW) / 2, (h - drawH) / 2, drawW, drawH);
+      if (typeof PlanAnalysis !== 'undefined' && PlanAnalysis.ativo && PlanAnalysis.canvas) {
+        ctx.save();
+        ctx.globalAlpha = 0.78;
+        ctx.drawImage(PlanAnalysis.canvas, (w - drawW) / 2, (h - drawH) / 2, drawW, drawH);
+        ctx.restore();
+      }
       return;
     }
 
@@ -231,33 +237,61 @@ const MinimapModule = {
       alert('Ação disponível apenas no modo administrador local.');
       return;
     }
-
-    const file = event && event.target && event.target.files
-      ? event.target.files[0]
-      : null;
+    const file = event && event.target && event.target.files ? event.target.files[0] : null;
     if (!file) return;
-
-    if (!file.type || !file.type.startsWith('image/')) {
-      alert('Selecione um arquivo de imagem válido.');
-      event.target.value = '';
-      return;
-    }
-
-    const limiteBytes = 3 * 1024 * 1024;
+    const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name || '');
+    const limiteBytes = isPdf ? 8 * 1024 * 1024 : 3 * 1024 * 1024;
     if (file.size > limiteBytes) {
-      alert('A imagem deve ter no máximo 3 MB.');
+      alert(isPdf ? 'O PDF deve ter no máximo 8 MB.' : 'A imagem deve ter no máximo 3 MB.');
       event.target.value = '';
       return;
     }
-
+    if (isPdf) {
+      if (typeof pdfjsLib === 'undefined') {
+        alert('O leitor de PDF não carregou. Verifique a conexão com a internet e tente novamente.');
+        event.target.value = '';
+        return;
+      }
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      const reader = new FileReader();
+      reader.onload = async e => {
+        try {
+          const bytes = new Uint8Array(e.target.result);
+          const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+          const page = await pdf.getPage(1);
+          const viewportBase = page.getViewport({ scale: 1 });
+          const scale = Math.min(2, 2400 / Math.max(viewportBase.width, viewportBase.height));
+          const viewport = page.getViewport({ scale });
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.ceil(viewport.width);
+          canvas.height = Math.ceil(viewport.height);
+          await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+          if (!State.salvarPlantaImage(dataUrl)) alert('Não foi possível salvar a planta convertida. Tente um PDF menor.');
+          else alert('Primeira página do PDF importada como planta. Confira a escala e calibre usando duas medidas conhecidas.');
+        } catch (erro) {
+          console.error('SMUPLOC: falha ao converter PDF.', erro);
+          alert('Não foi possível abrir este PDF. Tente exportar a página como imagem.');
+        } finally {
+          event.target.value = '';
+        }
+      };
+      reader.onerror = () => { alert('Falha ao ler o PDF selecionado.'); event.target.value = ''; };
+      reader.readAsArrayBuffer(file);
+      return;
+    }
+    if (!file.type || !file.type.startsWith('image/')) {
+      alert('Selecione uma imagem ou um PDF válido.');
+      event.target.value = '';
+      return;
+    }
     const reader = new FileReader();
     reader.onload = e => {
       if (typeof e.target.result !== 'string') return;
-      if (!State.salvarPlantaImage(e.target.result)) {
-        alert('Não foi possível salvar a planta. Tente uma imagem menor.');
-      }
+      if (!State.salvarPlantaImage(e.target.result)) alert('Não foi possível salvar a planta. Tente uma imagem menor.');
+      else alert('Planta importada. Agora calibre a escala usando dois pontos de distância conhecida.');
+      event.target.value = '';
     };
-    reader.onerror = () => alert('Falha ao ler a imagem selecionada.');
+    reader.onerror = () => { alert('Falha ao ler a imagem selecionada.'); event.target.value = ''; };
     reader.readAsDataURL(file);
-  }
-};
+  }};
