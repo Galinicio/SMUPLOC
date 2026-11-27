@@ -54,9 +54,18 @@
       <canvas id="canvas-expandido" width="360" height="360"></canvas>
     </div>
 
-    <section id="painel-equipamentos" class="painel-equipamentos" hidden aria-label="Gerenciamento de equipamentos">\n      <div class="painel-equipamentos-cabecalho">\n        <strong>Equipamentos cadastrados (<span id="contador-equipamentos">0</span>)</strong>\n        <button type="button" class="btn-fechar-painel" onclick="EquipmentModule.fechar()">Fechar lista</button>\n      </div>\n      <div id="lista-equipamentos" class="lista-equipamentos"></div>\n    </section>\n\n    <div class="modal-controls">
+    <section id="painel-equipamentos" class="painel-equipamentos" hidden aria-label="Gerenciamento de equipamentos">
+      <div class="painel-equipamentos-cabecalho">
+        <strong>Equipamentos cadastrados (<span id="contador-equipamentos">0</span>)</strong>
+        <button type="button" class="btn-fechar-painel" onclick="EquipmentModule.fechar()">Fechar lista</button>
+      </div>
+      <div id="lista-equipamentos" class="lista-equipamentos"></div>
+    </section>
+
+    <div class="modal-controls">
       <button class="btn-mapear" onclick="MapearModule.iniciar()">📏 MAPEAR SALA</button>
-      <div id="controles-admin">\n        <button class="btn-admin btn-dark" type="button" onclick="EquipmentModule.abrir()">📋 Equipamentos</button>
+      <div id="controles-admin">
+        <button class="btn-admin btn-dark" type="button" onclick="EquipmentModule.abrir()">📋 Equipamentos</button>
         <label class="btn-admin btn-blue">
           📤 Subir Planta
           <input type="file" id="input-planta" accept="image/*" style="display:none;" onchange="MinimapModule.uploadPlanta(event)">
@@ -113,7 +122,8 @@
   <canvas id="qr-canvas" style="display:none;"></canvas>
 
   <!-- Scripts Modulares -->
-  <script src="js/state.js"></script>\n  <script src="js/equipments.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/equipments.js"></script>
   <script src="js/qr-scanner.js"></script>
   <script src="js/minimap.js"></script>
   <script src="js/mapear.js"></script>
