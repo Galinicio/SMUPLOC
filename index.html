@@ -89,6 +89,8 @@
 
     <div class="modal-controls">
       <button class="btn-mapear" onclick="MapearModule.iniciar()">📏 MAPEAR SALA</button>
+      <button class="btn-admin btn-dark" type="button" onclick="MapearModule.iniciarCalibracao()">📐 Calibrar por 2 pontos</button>
+      <button class="btn-admin btn-dark" type="button" onclick="PlanAnalysis.analisar()">🔎 Analisar planta</button>
       <div id="controles-admin">
         <button class="btn-admin btn-dark" type="button" onclick="EquipmentModule.abrir()">📋 Equipamentos</button>
         <label class="btn-admin btn-blue">
@@ -152,6 +154,7 @@
   <script src="js/equipments.js"></script>
   <script src="js/qr-scanner.js"></script>
   <script src="js/minimap.js"></script>
+  <script src="js/plan-analysis.js"></script>
   <script src="js/scanner.js"></script>
   <script src="js/indoor-tracker.js"></script>
   <script src="js/mapear.js"></script>
