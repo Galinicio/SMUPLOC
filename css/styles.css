@@ -317,3 +317,31 @@ body.scanner-ativo > #btn-explorar {
   .scanner-cabecalho h2 { font-size:19px; }
   #navegacao-controles button { flex:1 1 42%; }
 }
+
+
+/* Rastreamento assistido por sensores e marco zero QR */
+#tracking-status {
+  flex-basis: 100%;
+  padding: 9px 11px;
+  border: 1px solid rgba(0,229,255,.35);
+  border-radius: 8px;
+  background: rgba(0,229,255,.08);
+  color: #d8f7ff;
+  font-size: 11px;
+  line-height: 1.45;
+  text-align: center;
+}
+#tracking-status[data-active="true"] {
+  border-color: rgba(0,255,102,.55);
+  color: #b7ffd0;
+  background: rgba(0,255,102,.08);
+}
+#navegacao-controles button {
+  flex: 1 1 30%;
+  min-width: 110px;
+}
+@media (max-width:520px) {
+  #navegacao-controles { left:6px; right:6px; bottom:6px; gap:5px; }
+  #navegacao-controles button { min-width:0; flex:1 1 45%; min-height:42px; }
+  #tracking-status { font-size:10px; }
+}
