@@ -8,7 +8,8 @@ const State = {
   STORAGE_KEYS: {
     equipamentos: 'smuploc_eqs',
     cantos: 'smuploc_cantos_mp',
-    planta: 'smuploc_planta_img'
+    planta: 'smuploc_planta_img',
+    escala: 'smuploc_escala_mapa'
   },
 
   perfilAtual: 'cliente',
