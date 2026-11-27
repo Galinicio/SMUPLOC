@@ -137,7 +137,8 @@ const State = {
     this.equipamentos = ambiente.equipamentos.filter(eq => eq && typeof eq === 'object');
     this.posicaoUsuario = ambiente.posicaoUsuario || null;
     this.destinoId = ambiente.destinoId || null;
-    this.marcoZero = ambiente.marcoZero || { x: 0, z: 0 };
+    this.marcoZero = ambiente.marcoZero || { x: 0, z: 0, headingOffset: 0 };
+    if (typeof IndoorTracker !== 'undefined') IndoorTracker.headingOffset = Number(this.marcoZero.headingOffset) || 0;
     this.cantosMapear = ambiente.cantos.filter(p => p && Number.isFinite(Number(p.x)) && Number.isFinite(Number(p.z)));
     this.plantaImageBase64 = ambiente.planta || null;
 
