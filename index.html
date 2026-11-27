@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>SMUPLOC — AR & Mapeamento de Sala</title>
+  <title>SMUPLOC — AR & Leitor QR Real</title>
   
   <!-- A-Frame & MindAR -->
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
@@ -13,11 +13,9 @@
   
   <style>
     body { margin: 0; overflow: hidden; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; user-select: none; }
-    
-    /* 🚫 REMOVE MOLDURAS PADRÃO DO MINDAR */
     .mindar-ui-overlay, .mindar-ui-loading, .mindar-ui-scanning { display: none !important; }
 
-    /* 🟡 TOPO CLEAN SMUP */
+    /* TOPO CLEAN SMUP */
     #badge-topo {
       position: absolute; top: 12px; right: 12px; z-index: 999;
       background: rgba(10, 37, 64, 0.9); backdrop-filter: blur(6px); color: #ffc107;
@@ -27,7 +25,7 @@
     }
     .dot-status { width: 8px; height: 8px; background: #00ff66; border-radius: 50%; display: inline-block; }
 
-    /* 🗺️ MINIMAPA CLICÁVEL (Canto Inferior Esquerdo) */
+    /* MINIMAPA CLICÁVEL */
     #mapa-container {
       position: absolute; bottom: 16px; left: 16px; width: 130px; height: 130px; z-index: 999;
       background: rgba(10, 37, 64, 0.92); border: 2px solid #0052cc; border-radius: 14px;
@@ -41,16 +39,22 @@
     }
     #mapa-canvas { width: 100%; height: 105px; display: block; }
 
-    /* 💡 TOAST INFORMATIVO AO ESCANEAR */
+    /* TOAST INFORMATIVO REATIVO AO QR CODE REAL */
     #toast-info {
       position: absolute; bottom: 16px; right: 16px; left: 160px; z-index: 999;
       background: #0a2540; color: #ffffff; border-left: 5px solid #ffc107;
-      padding: 10px 14px; border-radius: 8px; font-size: 12px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3); display: none;
+      padding: 10px 14px; border-radius: 10px; font-size: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4); display: none;
+      backdrop-filter: blur(8px); border: 1px solid rgba(255,193,7,0.3);
     }
     #toast-info b { color: #ffc107; }
+    .btn-cadastrar-qr {
+      margin-top: 6px; background: #ffc107; color: #0a2540; border: none;
+      padding: 6px 12px; border-radius: 6px; font-weight: 800; font-size: 11px;
+      cursor: pointer; display: inline-block;
+    }
 
-    /* 🔍 MODAL EXPANDIDO DA PLANTA BAIXA INTERATIVA */
+    /* MODAL PLANTA BAIXA */
     #modal-planta {
       display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 10000;
       background: rgba(5, 15, 28, 0.95); backdrop-filter: blur(10px); color: #fff;
@@ -92,12 +96,10 @@
       box-shadow: 0 0 12px rgba(255, 193, 7, 0.4);
     }
 
-    /* 📐 HUD DO MODO MAPEAR (SOBRE A CÂMERA LIMPA) */
+    /* MODO MAPEAR */
     #mapear-hud {
       display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 10001;
     }
-    
-    /* 📖 TUTORIAL SUPER DIDÁTICO NO TOPO */
     #mapear-tutorial {
       position: absolute; top: 16px; left: 16px; right: 16px;
       background: rgba(10, 37, 64, 0.95); border: 1.5px solid #ffc107; border-radius: 12px;
@@ -108,7 +110,6 @@
     .step-item { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
     .step-num { background: #ffc107; color: #0a2540; font-weight: 800; width: 16px; height: 16px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 10px; }
 
-    /* MIRA CENTRAL */
     .crosshair-center {
       position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
       width: 26px; height: 26px; border: 2px solid #ffc107; border-radius: 50%;
@@ -145,10 +146,11 @@
     <canvas id="mapa-canvas" width="130" height="105"></canvas>
   </div>
 
-  <!-- Toast Info -->
+  <!-- Toast Info Drenando QR Code Real -->
   <div id="toast-info">
-    <div id="toast-title"><b>Equipamento Identificado!</b></div>
-    <div id="toast-body" style="font-size:11px; color:#e2e8f0; margin-top:2px;">Visualizando telemetria no espaço.</div>
+    <div id="toast-title"><b>Aguardando leitura de QR...</b></div>
+    <div id="toast-body" style="font-size:11px; color:#e2e8f0; margin-top:2px;">Apunte a câmera para o QR Code SMUP.</div>
+    <div id="toast-action"></div>
   </div>
 
   <!-- MODAL DE PLANTA BAIXA INTERATIVA -->
@@ -173,7 +175,7 @@
       <canvas id="canvas-expandido" width="360" height="360"></canvas>
     </div>
 
-    <!-- Barra de Ferramentas / MAPEAR -->
+    <!-- Barra de Ferramentas -->
     <div class="modal-controls">
       <button class="btn-mapear" onclick="iniciarMapeamento()">📏 MAPEAR SALA</button>
       <div id="controles-admin" style="display:flex; gap:6px;">
@@ -186,9 +188,8 @@
     </div>
   </div>
 
-  <!-- HUD DO MODO MAPEAR (TUTORIAL DIDÁTICO + MIRA) -->
+  <!-- HUD DO MODO MAPEAR -->
   <div id="mapear-hud">
-    <!-- 📖 TUTORIAL EM 3 PASSOS SIMPLES -->
     <div id="mapear-tutorial">
       <h4>📐 Como Mapear o Cômodo:</h4>
       <div class="step-item"><span class="step-num">1</span> Apunte a mira central para o primeiro canto do cômodo e clique em <b>"📍 Marcar Canto"</b>.</div>
@@ -208,7 +209,7 @@
     </div>
   </div>
 
-  <!-- CENA 3D (Câmera Limpa sem elementos visuais feios) -->
+  <!-- CENA 3D -->
   <a-scene 
     mindar-image="imageTargetSrc: ./targets.mind; filterMinCF: 0.0001; filterBeta: 0.001; uiLoading: no; uiScanning: no;" 
     color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" 
@@ -218,27 +219,24 @@
 
     <!-- 📍 ÂNCORA 3D -->
     <a-entity mindar-image-target="targetIndex: 0" id="target-anchor">
-      
-      <!-- Anel Amarelo de Ancoragem -->
       <a-ring position="0 0 0" rotation="-90 0 0" radius-inner="0.2" radius-outer="0.25" 
               material="color: #ffc107; shader: flat; opacity: 0.95;"></a-ring>
 
       <a-cylinder position="0 0.3 0" radius="0.005" height="0.6" material="color: #0052cc; shader: flat; opacity: 0.8;"></a-cylinder>
 
-      <!-- CARD INFORMATIVO DIDÁTICO -->
+      <!-- CARD INFORMATIVO DENTRO DO ESPAÇO AR -->
       <a-entity position="0 0.7 0">
-        <a-plane width="1.2" height="0.65" material="color: #0a2540; opacity: 0.94; transparent: true; side: double;"></a-plane>
-        <a-plane width="1.24" height="0.69" position="0 0 -0.001" material="color: #ffc107; opacity: 0.95; shader: flat; side: double;"></a-plane>
+        <a-plane width="1.3" height="0.75" material="color: #0a2540; opacity: 0.94; transparent: true; side: double;"></a-plane>
+        <a-plane width="1.34" height="0.79" position="0 0 -0.001" material="color: #ffc107; opacity: 0.95; shader: flat; side: double;"></a-plane>
         
-        <a-text value="EQUIPAMENTO SMUP" position="0 0.22 0.01" scale="0.38 0.38 0.38" align="center" color="#ffc107" bold="true"></a-text>
-        <a-plane position="0 0.16 0.01" width="1.0" height="0.006" material="color: #ffc107; shader: flat;"></a-plane>
+        <a-text value="EQUIPAMENTO SMUP" position="0 0.26 0.01" scale="0.38 0.38 0.38" align="center" color="#ffc107" bold="true"></a-text>
+        <a-plane position="0 0.2 0.01" width="1.1" height="0.006" material="color: #ffc107; shader: flat;"></a-plane>
 
         <a-text id="ar-card-body" 
-                value="TAG: LENDO...\n--------------------\nTEMP: 4.2 °C (IDEAL)\nSTATUS: OPERACIONAL" 
-                position="0 -0.06 0.01" scale="0.3 0.3 0.3" align="center" color="#ffffff">
+                value="AGUARDANDO LEITURA..." 
+                position="0 -0.08 0.01" scale="0.28 0.28 0.28" align="center" color="#ffffff">
         </a-text>
       </a-entity>
-
     </a-entity>
   </a-scene>
 
@@ -252,18 +250,16 @@
     let imgPlantaObj = new Image();
     if (plantaImageBase64) imgPlantaObj.src = plantaImageBase64;
 
-    // 🧹 ZERADO! Nenhum objeto fictício cadastrado inicialmente.
     let equipamentos = JSON.parse(localStorage.getItem('smuploc_eqs')) || [];
-
     let objetoArrastando = null;
+    let ultimoQrLido = null;
+    let timerEsconderToast = null;
 
-    // EVENTOS MINDAR AR
+    // EVENTOS AR
     const targetAnchor = document.getElementById('target-anchor');
     const toastInfo = document.getElementById('toast-info');
 
-    targetAnchor.addEventListener("targetFound", () => { toastInfo.style.display = "block"; });
-    targetAnchor.addEventListener("targetLost", () => { toastInfo.style.display = "none"; });
-
+    // LEITOR DE QR CODE REAL CONTÍNUO (jsQR)
     setInterval(() => {
       const video = document.querySelector('video');
       if (!video || video.readyState !== video.HAVE_ENOUGH_DATA) return;
@@ -277,15 +273,78 @@
       const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
 
       if (code && code.data) {
-        document.getElementById('toast-title').innerHTML = `<b>TAG: ${code.data}</b>`;
+        const payloadBruto = code.data.trim();
+        ultimoQrLido = payloadBruto;
+
+        // Processa o conteúdo real (seja texto simples da SMUP ou JSON)
+        let tituloQr = "TAG SMUP DETECTADA";
+        let detalheQr = payloadBruto;
+
+        try {
+          // Se o QR Code contiver JSON
+          const jsonParsed = JSON.parse(payloadBruto);
+          tituloQr = jsonParsed.nome || jsonParsed.tag || "EQUIPAMENTO SMUP";
+          detalheQr = `ID: ${jsonParsed.id || jsonParsed.tag || payloadBruto}\nSTATUS: OPERACIONAL`;
+        } catch(e) {
+          // Se for texto/string direta (ex: smup-EEEC)
+          tituloQr = `TAG: ${payloadBruto}`;
+          detalheQr = `DADO LIDO: ${payloadBruto}\nSISTEMA: SMUP TELEMETRIA`;
+        }
+
+        // 1. Atualiza o Toast na Tela
+        document.getElementById('toast-title').innerHTML = `<b>${tituloQr}</b>`;
+        document.getElementById('toast-body').innerText = detalheQr;
+        
+        // Verifica se já está cadastrado no mapa
+        const jaCadastrado = equipamentos.some(e => e.nome === payloadBruto || e.id === payloadBruto);
+        const toastActionDiv = document.getElementById('toast-action');
+        
+        if (!jaCadastrado) {
+          toastActionDiv.innerHTML = `<button class="btn-cadastrar-qr" onclick="cadastrarQrNoMapa('${payloadBruto}')">➕ Cadastrar no Mapa</button>`;
+        } else {
+          toastActionDiv.innerHTML = `<span style="font-size:10px; color:#00ff66; font-weight:bold;">✅ Cadastrado no Mapa</span>`;
+        }
+
+        toastInfo.style.display = "block";
+
+        // Manter o Toast visível enquanto lê
+        clearTimeout(timerEsconderToast);
+        timerEsconderToast = setTimeout(() => {
+          toastInfo.style.display = "none";
+        }, 4000);
+
+        // 2. Atualiza o Card Holográfico 3D no Espaço
         const arBody = document.getElementById('ar-card-body');
         if (arBody) {
           arBody.setAttribute('value', 
-            `TAG: ${code.data.substring(0, 22)}\n--------------------\nTEMP: 4.2 °C (NORMAL)\nMODO: MONITORAMENTO`
+            `TAG REAL: ${payloadBruto}\n--------------------\nCONEXAO: OK\nMODO: NAVEGACAO AR`
           );
         }
       }
-    }, 400);
+    }, 300);
+
+    // FUNÇÃO PARA CADASTRAR O QR CODE LIDO NA PLANTA BAIXA
+    function cadastrarQrNoMapa(tagOuPayload) {
+      const nomeCurto = prompt("Digite o nome amigável deste equipamento:", tagOuPayload) || tagOuPayload;
+      const tipo = prompt("Tipo de Equipamento (UR, UC, US, PT100, etc):", "UR") || "UR";
+
+      const novoEq = {
+        id: tagOuPayload,
+        nome: nomeCurto,
+        tipo: tipo.toUpperCase(),
+        x: parseFloat(((Math.random() * 2) - 1).toFixed(1)),
+        z: parseFloat((-(Math.random() * 2) - 1).toFixed(1)),
+        cor: tipo.toUpperCase() === 'UC' ? '#0052cc' : '#ffc107'
+      };
+
+      equipamentos.push(novoEq);
+      localStorage.setItem('smuploc_eqs', JSON.stringify(equipamentos));
+      
+      alert(`Equipamento "${nomeCurto}" cadastrado com sucesso no Minimapa!`);
+      document.getElementById('toast-action').innerHTML = `<span style="font-size:10px; color:#00ff66; font-weight:bold;">✅ Cadastrado no Mapa</span>`;
+      
+      desenharMinimapaPequeno();
+    }
 
     // --- DESENHO DO MINIMAPA PEQUENO ---
     const mapaCanvas = document.getElementById('mapa-canvas');
@@ -304,7 +363,7 @@
         for (let y = 0; y < h; y += 15) { ctxMapa.beginPath(); ctxMapa.moveTo(0, y); ctxMapa.lineTo(w, y); ctxMapa.stroke(); }
       }
 
-      // Desenha paredes do Mapeador
+      // Paredes do Mapeador
       if (cantosMapear.length > 1) {
         ctxMapa.strokeStyle = "#ffc107"; ctxMapa.lineWidth = 2;
         ctxMapa.beginPath();
@@ -368,7 +427,7 @@
         for (let y = 0; y < h; y += 30) { ctxExp.beginPath(); ctxExp.moveTo(0, y); ctxExp.lineTo(w, y); ctxExp.stroke(); }
       }
 
-      // Desenha Paredes no Canvas Expandido
+      // Paredes
       if (cantosMapear.length > 1) {
         ctxExp.strokeStyle = "#ffc107"; ctxExp.lineWidth = 3;
         ctxExp.fillStyle = "rgba(255, 193, 7, 0.12)";
@@ -385,7 +444,7 @@
         });
       }
 
-      // Âncora (0,0)
+      // Âncora
       ctxExp.fillStyle = "#ffffff"; ctxExp.beginPath(); ctxExp.arc(cx, cy, 6, 0, 2 * Math.PI); ctxExp.fill();
       ctxExp.fillStyle = "#ffffff"; ctxExp.font = "10px sans-serif"; ctxExp.fillText("ÂNCORA (0,0)", cx - 25, cy + 18);
 
@@ -398,7 +457,7 @@
       });
     }
 
-    // --- MODO MAPEAR (MAPEAMENTO DA SALA) ---
+    // --- MODO MAPEAR ---
     function iniciarMapeamento() {
       fecharPlantaExpandida();
       document.getElementById('mapear-hud').style.display = 'block';
@@ -417,7 +476,7 @@
 
     function finalizarPlantaMapear() {
       if (cantosMapear.length < 3) {
-        alert("Marque pelo menos 3 cantos para fechar o perímetro da sala!");
+        alert("Marque pelo menos 3 cantos para fechar a planta da sala!");
         return;
       }
       localStorage.setItem('smuploc_cantos_mp', JSON.stringify(cantosMapear));
@@ -433,7 +492,6 @@
 
     function atualizarStatsMapear() {
       document.getElementById('mp-count').innerText = cantosMapear.length;
-      
       let area = 0;
       if (cantosMapear.length >= 3) {
         for (let i = 0; i < cantosMapear.length; i++) {
@@ -446,7 +504,7 @@
       document.getElementById('mp-area').innerText = area;
     }
 
-    // --- UPLOAD DA PLANTA (ADMIN) ---
+    // UPLOAD PLANTA
     function uploadPlantaBaixa(event) {
       if (perfilAtual !== 'admin') return;
       const file = event.target.files;
@@ -462,7 +520,7 @@
       reader.readAsDataURL(file);
     }
 
-    // --- INTERAÇÃO TOUCH/MOUSE ---
+    // INTERAÇÃO TOUCH DE ARRASTAR
     function getPosCanvas(e) {
       const rect = canvasExp.getBoundingClientRect();
       const clientX = e.touches ? e.touches.clientX : e.clientX;
