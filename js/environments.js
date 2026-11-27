@@ -92,12 +92,13 @@ const EnvironmentModule = {
     const ambiente = State.obterAmbienteAtual();
     const area = document.getElementById('ambiente-qr-area');
     if (!ambiente || !area) return;
+    State.sincronizarAmbienteAtual();
     area.hidden = false;
     area.replaceChildren();
     const titulo = document.createElement('strong');
     titulo.textContent = 'QR Code do ambiente';
     const descricao = document.createElement('p');
-    descricao.textContent = 'Fixe este código na entrada do ambiente. Ele identifica o marco zero cadastrado.';
+    descricao.textContent = 'Fixe este código exatamente no ponto marcado como marco zero na planta. Ao ler o QR, o celular inicia a estimativa de posição a partir dessas coordenadas.';
     const qr = document.createElement('div');
     qr.id = 'ambiente-qr-render';
     const codigo = document.createElement('code');
