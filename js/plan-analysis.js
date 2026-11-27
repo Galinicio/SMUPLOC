@@ -7,6 +7,13 @@ const PlanAnalysis = {
   canvas: null,
   ativo: false,
   analisar() {
+    if (this.ativo && this.canvas) {
+      this.ativo = false;
+      MinimapModule.renderExpandido();
+      MinimapModule.renderPequeno();
+      alert('Realce da análise ocultado. Toque novamente em Analisar planta para exibi-lo.');
+      return;
+    }
     const img = State.imgPlantaObj;
     if (!img || !img.complete || !img.naturalWidth) {
       alert('Importe uma planta em imagem e aguarde o carregamento antes de analisar.');
@@ -47,8 +54,7 @@ const PlanAnalysis = {
     }
     octx.putImageData(result, 0, 0);
     this.canvas = out;
-    this.ativo = !this.ativo;
-    if (!this.ativo) this.ativo = true;
+    this.ativo = true;
     MinimapModule.renderExpandido();
     MinimapModule.renderPequeno();
     const percentual = (edges / (width * height) * 100).toFixed(1);
