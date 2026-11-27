@@ -19,7 +19,7 @@ const State = {
   equipamentos: [],
   posicaoUsuario: null,
   destinoId: null,
-  marcoZero: { x: 0, z: 0 },
+  marcoZero: { x: 0, z: 0, headingOffset: 0 },
   cantosMapear: [],
   plantaImageBase64: null,
   imgPlantaObj: new Image(),
@@ -64,7 +64,7 @@ const State = {
       equipamentos: Array.isArray(dados.equipamentos) ? dados.equipamentos : [],
       posicaoUsuario: dados.posicaoUsuario && Number.isFinite(Number(dados.posicaoUsuario.x)) && Number.isFinite(Number(dados.posicaoUsuario.z)) ? { x: Number(dados.posicaoUsuario.x), z: Number(dados.posicaoUsuario.z) } : null,
       destinoId: dados.destinoId ? String(dados.destinoId).slice(0, 180) : null,
-      marcoZero: dados.marcoZero && Number.isFinite(Number(dados.marcoZero.x)) && Number.isFinite(Number(dados.marcoZero.z)) ? { x: Number(dados.marcoZero.x), z: Number(dados.marcoZero.z) } : { x: 0, z: 0 },
+      marcoZero: dados.marcoZero && Number.isFinite(Number(dados.marcoZero.x)) && Number.isFinite(Number(dados.marcoZero.z)) ? { x: Number(dados.marcoZero.x), z: Number(dados.marcoZero.z), headingOffset: Number.isFinite(Number(dados.marcoZero.headingOffset)) ? Number(dados.marcoZero.headingOffset) : 0 } : { x: 0, z: 0, headingOffset: 0 },
       cantos: Array.isArray(dados.cantos) ? dados.cantos : [],
       planta: typeof dados.planta === 'string' && dados.planta.startsWith('data:image/') ? dados.planta : null,
       escala: Number.isFinite(Number(dados.escala)) && Number(dados.escala) >= 4 && Number(dados.escala) <= 100
@@ -286,7 +286,7 @@ const State = {
     this.equipamentos = [];
     this.posicaoUsuario = null;
     this.destinoId = null;
-    this.marcoZero = { x: 0, z: 0 };
+    this.marcoZero = { x: 0, z: 0, headingOffset: 0 };
     this.cantosMapear = [];
     this.plantaImageBase64 = null;
     this.ambienteAtualId = null;
