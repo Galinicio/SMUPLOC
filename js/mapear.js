@@ -120,6 +120,7 @@ const MapearModule = {
     } catch (erro) {
       console.warn('Não foi possível persistir a escala do mapa.', erro);
     }
+    if (typeof State !== 'undefined') State.sincronizarAmbienteAtual();
     this.atualizarStats();
     MinimapModule.renderExpandido();
   },
