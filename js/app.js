@@ -62,7 +62,13 @@ document.addEventListener('DOMContentLoaded', () => {
     MinimapModule.objetoArrastando = null;
   };
 
-  canvasExp.addEventListener('pointerdown', evento => MapearModule.registrarToque(evento));
+  canvasExp.addEventListener('pointerdown', evento => {
+    if (MinimapModule.equipamentoAguardandoPosicao) {
+      MinimapModule.posicionarEquipamento(evento);
+      return;
+    }
+    MapearModule.registrarToque(evento);
+  });
   canvasExp.addEventListener('mousedown', iniciarArraste);
   canvasExp.addEventListener('mousemove', moverArraste);
   window.addEventListener('mouseup', pararArraste);
