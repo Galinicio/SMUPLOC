@@ -2,6 +2,7 @@
  * Main Controller & Event Dispatcher
  */
 document.addEventListener('DOMContentLoaded', () => {
+  State.setPerfil(State.perfilAtual);
   MinimapModule.renderPequeno();
   QRScannerModule.iniciarLoop();
 
