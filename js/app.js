@@ -19,12 +19,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const iniciarArraste = e => {
-    if (State.perfilAtual === 'cliente') return;
+    if (State.perfilAtual === 'cliente' || MapearModule.ativo) return;
 
     const pos = getPosCanvas(e);
     const cx = canvasExp.width / 2;
     const cy = canvasExp.height / 2;
-    const escala = 22;
+    const escala = MapearModule.escalaPxPorMetro || 22;
 
     State.equipamentos.forEach(eq => {
       if (eq.posicionado === false) return;
@@ -40,14 +40,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const moverArraste = e => {
     const eq = MinimapModule.objetoArrastando;
-    if (!eq || State.perfilAtual === 'cliente') return;
+    if (!eq || State.perfilAtual === 'cliente' || MapearModule.ativo) return;
 
     if (e.cancelable) e.preventDefault();
 
     const pos = getPosCanvas(e);
     const cx = canvasExp.width / 2;
     const cy = canvasExp.height / 2;
-    const escala = 22;
+    const escala = MapearModule.escalaPxPorMetro || 22;
 
     eq.x = parseFloat(((pos.x - cx) / escala).toFixed(1));
     eq.z = parseFloat(((pos.y - cy) / escala).toFixed(1));
@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
     MinimapModule.objetoArrastando = null;
   };
 
+  canvasExp.addEventListener('pointerdown', evento => MapearModule.registrarToque(evento));
   canvasExp.addEventListener('mousedown', iniciarArraste);
   canvasExp.addEventListener('mousemove', moverArraste);
   window.addEventListener('mouseup', pararArraste);
