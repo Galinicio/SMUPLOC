@@ -134,7 +134,7 @@ const MinimapModule = {
     const h = canvas.height;
     const cx = w / 2;
     const cy = h / 2;
-    const escala = 22;
+    const escala = (typeof MapearModule !== 'undefined' && MapearModule.escalaPxPorMetro) || 22;
 
     ctx.clearRect(0, 0, w, h);
     this.desenharFundo(ctx, w, h, false);
