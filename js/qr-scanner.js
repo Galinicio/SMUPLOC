@@ -91,6 +91,16 @@ const QRScannerModule = {
     };
 
     const payloadSeguro = texto(payload, 500);
+    // QR de ambiente é tratado como referência espacial, não como etiqueta de equipamento.
+    try {
+      const dadosQr = JSON.parse(payloadSeguro);
+      if (dadosQr && dadosQr.type === 'smuploc-environment') {
+        if (typeof EnvironmentModule !== 'undefined' && EnvironmentModule.ativarPorQr(dadosQr)) return;
+      }
+    } catch (erro) {
+      // QR legado ou texto simples: segue o fluxo de identificação de equipamento.
+    }
+
     let tituloQr = 'TAG SMUP DETECTADA';
     let detalheQr = `DADO LIDO: ${payloadSeguro}\nSISTEMA: SMUP TELEMETRIA`;
     let idLido = payloadSeguro;

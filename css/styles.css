@@ -147,3 +147,71 @@ a-scene video {
 /* O HUD ocupa a tela, mas sua área vazia deve deixar os toques passarem ao mapa. */
 #mapear-hud { pointer-events: none !important; }
 #mapear-tutorial, #mapear-controls { pointer-events: auto !important; }
+
+
+/* Cadastro de ambientes e compartilhamento provisório entre dispositivos */
+#ambientes-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid rgba(255,193,7,.35);
+  border-radius: 10px;
+  background: rgba(10,37,64,.96);
+  color: #fff;
+  font-size: 11px;
+}
+#ambientes-toolbar label { color: #ffc107; font-weight: 700; }
+#ambiente-select {
+  min-width: 180px;
+  max-width: 100%;
+  padding: 8px;
+  border: 1px solid #0052cc;
+  border-radius: 6px;
+  background: #07192b;
+  color: #fff;
+}
+#ambientes-toolbar button, .btn-importar-ambiente {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: #0052cc;
+  color: #fff;
+  font-weight: 700;
+  font-size: 11px;
+  cursor: pointer;
+}
+#ambiente-atual-label { color: #ffc107; font-weight: 700; }
+.aviso-sincronizacao {
+  flex-basis: 100%;
+  margin: 0;
+  color: #cbd5e1;
+  line-height: 1.4;
+}
+#ambiente-qr-area {
+  flex-basis: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #fff;
+  color: #07192b;
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+#ambiente-qr-area[hidden] { display: none !important; }
+#ambiente-qr-area p { margin: 0; text-align: center; max-width: 420px; }
+#ambiente-qr-area code { font-size: 10px; color: #334155; }
+#ambiente-qr-render { padding: 8px; background: #fff; }
+@media (max-width: 520px) {
+  #ambientes-toolbar { align-items: stretch; }
+  #ambiente-select { width: 100%; }
+  #ambientes-toolbar button, .btn-importar-ambiente { justify-content: center; flex: 1 1 42%; }
+  #ambiente-atual-label { flex-basis: 100%; }
+}

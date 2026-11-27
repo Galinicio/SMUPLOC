@@ -9,6 +9,7 @@
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   
   <!-- CSS Modular -->
   <link rel="stylesheet" href="css/styles.css">
@@ -49,6 +50,18 @@
         <button class="btn-fechar" onclick="MinimapModule.fecharModal()">❌ Fechar</button>
       </div>
     </div>
+
+    <section id="ambientes-toolbar" aria-label="Ambientes cadastrados">
+      <label for="ambiente-select">Ambiente ativo</label>
+      <select id="ambiente-select" onchange="EnvironmentModule.selecionar(this.value)"></select>
+      <button type="button" onclick="EnvironmentModule.novo()">＋ Novo ambiente</button>
+      <button type="button" onclick="EnvironmentModule.gerarQR()">QR do ambiente</button>
+      <button type="button" onclick="EnvironmentModule.exportar()">Exportar cadastro</button>
+      <label class="btn-importar-ambiente">Importar cadastro<input id="input-importar-ambiente" type="file" accept="application/json,.json" hidden></label>
+      <div id="ambiente-atual-label" aria-live="polite"></div>
+      <div id="ambiente-qr-area" hidden></div>
+      <p class="aviso-sincronizacao">Nesta etapa, cada dispositivo mantém seus dados localmente. Para compartilhar com outro técnico, exporte e importe o cadastro. A sincronização automática será feita pela futura API SMUP.</p>
+    </section>
 
     <div id="canvas-expandido-container">
       <canvas id="canvas-expandido" width="360" height="360"></canvas>
@@ -123,6 +136,7 @@
 
   <!-- Scripts Modulares -->
   <script src="js/state.js"></script>
+  <script src="js/environments.js"></script>
   <script src="js/equipments.js"></script>
   <script src="js/qr-scanner.js"></script>
   <script src="js/minimap.js"></script>
