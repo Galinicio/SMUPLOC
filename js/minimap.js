@@ -239,7 +239,7 @@ const MinimapModule = {
     }
     const file = event && event.target && event.target.files ? event.target.files[0] : null;
     if (!file) return;
-    const isPdf = file.type === 'application/pdf' || /\\.pdf$/i.test(file.name || '');
+    const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name || '');
     const limiteBytes = isPdf ? 8 * 1024 * 1024 : 3 * 1024 * 1024;
     if (file.size > limiteBytes) {
       alert(isPdf ? 'O PDF deve ter no máximo 8 MB.' : 'A imagem deve ter no máximo 3 MB.');
