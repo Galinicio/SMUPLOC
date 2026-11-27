@@ -22,11 +22,12 @@
     <span class="dot-status"></span> SMUPLOC AR
   </div>
 
-  <button id="btn-explorar" type="button" aria-haspopup="dialog" onclick="ScannerModule.abrir()">⌖ EXPLORAR</button>
+  <button id="btn-explorar" type="button" aria-haspopup="dialog" onclick="ScannerModule.abrir()">🔎 ENCONTRAR EQUIPAMENTO</button>
+  <div id="dica-inicial">Aponte a câmera para uma etiqueta QR ou toque em “Encontrar equipamento”.</div>
 
   <section id="scanner-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="scanner-title">
     <div class="scanner-painel">
-      <div class="scanner-cabecalho"><div><span class="scanner-eyebrow">SMUPLOC / BUSCA INTERNA</span><h2 id="scanner-title">Pontos de interesse</h2><p id="scanner-ambiente"></p></div><button type="button" onclick="ScannerModule.fechar()" aria-label="Fechar">✕</button></div>
+      <div class="scanner-cabecalho"><div><span class="scanner-eyebrow">SMUPLOC / BUSCA INTERNA</span><h2 id="scanner-title">O que você procura?</h2><p id="scanner-ambiente"></p></div><div class="scanner-cabecalho-acoes"><button type="button" onclick="QRScannerModule.tentarFoco()">Focar câmera</button><button type="button" onclick="ScannerModule.fechar()" aria-label="Fechar">✕</button></div></div>
       <input id="scanner-busca" type="search" placeholder="Buscar geladeira, freezer, setor..." autocomplete="off">
       <div id="scanner-lista" class="scanner-lista"></div>
       <p class="scanner-nota">Os pontos exibidos foram cadastrados previamente neste ambiente. Selecione um para marcar o destino no minimapa.</p>
@@ -35,7 +36,7 @@
 
   <!-- Minimapa Clicável -->
   <div id="mapa-container" onclick="MinimapModule.abrirModal()">
-    <div id="mapa-header">🔍 PLANTA (CLIQUE)</div>
+    <div id="mapa-header">🗺️ TOQUE PARA ABRIR A PLANTA</div>
     <canvas id="mapa-canvas" width="130" height="105"></canvas>
   </div>
 
@@ -50,7 +51,7 @@
   <div id="modal-planta">
     <div class="modal-header">
       <div>
-        <div class="modal-title">🗺️ Planta Baixa & Configuração</div>
+        <div class="modal-title">🗺️ Seu ambiente</div>
         <div class="subtitle-perfil" id="texto-modo-perfil">Modo: <b>ADMINISTRADOR</b></div>
       </div>
       <div class="modal-header-actions">
@@ -77,7 +78,20 @@
 
     <div id="canvas-expandido-container">
       <canvas id="canvas-expandido" width="360" height="360"></canvas>
-      <div id="navegacao-controles"><div id="navegacao-destino">Nenhum destino selecionado</div><div id="tracking-status" role="status">Leia o QR Code do ambiente para fixar o marco zero.</div><button type="button" onclick="IndoorTracker.iniciar()">Iniciar rastreamento</button><button type="button" onclick="IndoorTracker.parar()">Pausar rastreamento</button><button type="button" onclick="IndoorTracker.calibrarDirecaoMapa()">Calibrar direção da planta</button><button type="button" onclick="IndoorTracker.recalibrarPasso()">Ajustar passo</button><button type="button" onclick="ScannerModule.marcarMinhaPosicao()">Corrigir posição no mapa</button><button type="button" onclick="ScannerModule.limparDestino()">Limpar destino</button><button type="button" onclick="ScannerModule.definirMarcoZero()">Definir marco zero (admin)</button></div>
+      <div id="navegacao-controles">
+<div id="navegacao-destino">Nenhum destino selecionado</div>
+<div id="tracking-status" role="status">Primeiro, marque onde você está no mapa.</div>
+<div class="acoes-navegacao">
+<button class="acao-principal" type="button" onclick="ScannerModule.marcarMinhaPosicao()">📍 Marcar onde estou</button>
+<button type="button" onclick="IndoorTracker.iniciar()">▶ Começar a orientação</button>
+<button type="button" onclick="IndoorTracker.parar()">Pausar</button>
+</div>
+<details class="opcoes-secundarias"><summary>Mais opções</summary>
+<button type="button" onclick="IndoorTracker.calibrarDirecaoMapa()">Ajustar direção da planta</button>
+<button type="button" onclick="IndoorTracker.recalibrarPasso()">Ajustar tamanho do passo</button>
+<button type="button" onclick="ScannerModule.limparDestino()">Limpar destino</button>
+<button type="button" onclick="ScannerModule.definirMarcoZero()">Definir marco zero (admin)</button>
+</details></div>
     </div>
 
     <section id="painel-equipamentos" class="painel-equipamentos" hidden aria-label="Gerenciamento de equipamentos">
@@ -88,7 +102,7 @@
       <div id="lista-equipamentos" class="lista-equipamentos"></div>
     </section>
 
-    <div class="modal-controls">
+    <details id="ferramentas-avancadas"><summary>⚙️ Configurações e ferramentas</summary><div class="modal-controls">
       <button class="btn-mapear" onclick="MapearModule.iniciar()">📏 MAPEAR SALA</button>
       <button class="btn-admin btn-dark" type="button" onclick="MapearModule.iniciarCalibracao()">📐 Calibrar por 2 pontos</button>
       <button class="btn-admin btn-dark" type="button" onclick="PlanAnalysis.analisar()">🔎 Analisar planta</button>
@@ -100,7 +114,7 @@
         </label>
         <button class="btn-admin btn-dark" onclick="State.limparTudo()">🔄 Limpar Tudo</button>
       </div>
-    </div>
+    </div></details>
   </div>
 
   <!-- HUD Modo MAPEAR -->
