@@ -187,9 +187,9 @@ const QRScannerModule = {
     const nomeCurto = (prompt('Digite o nome deste equipamento:', nomePadrao) || '').trim();
     if (!nomeCurto) return;
 
-    const tipoInformado = (prompt('Tipo de Equipamento (UR, UC, US, PT100):', 'UR') || 'UR')
+    const tipoInformado = (prompt('Tipo de Equipamento (UR, UC normal, UC HYB, US, PT100):', 'UR') || 'UR')
       .trim().toUpperCase();
-    const tiposPermitidos = ['UR', 'UC', 'US', 'PT100'];
+    const tiposPermitidos = ['UR', 'UC', 'UC HYB', 'US', 'PT100'];
     const tipo = tiposPermitidos.includes(tipoInformado) ? tipoInformado : 'UR';
 
     const setor = (prompt('Setor / ambiente (opcional):', '') || '').trim().slice(0, 100);
@@ -203,7 +203,7 @@ const QRScannerModule = {
       x: 0,
       z: 0,
       posicionado: false,
-      cor: tipo === 'UC' ? '#0052cc' : '#ffc107'
+      cor: (tipo === 'UC' || tipo === 'UC HYB') ? '#0052cc' : '#ffc107'
     };
 
     if (!State.adicionarEquipamento(novoEq)) {
