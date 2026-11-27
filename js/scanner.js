@@ -4,6 +4,7 @@
  */
 const ScannerModule = {
   aguardandoPosicao: false,
+  aguardandoMarcoZero: false,
   destinoAtual: null,
 
   abrir() {
@@ -109,9 +110,21 @@ const ScannerModule = {
     const px = (evento.clientX - rect.left) * (canvas.width / rect.width);
     const py = (evento.clientY - rect.top) * (canvas.height / rect.height);
     const escala = (typeof MapearModule !== 'undefined' && MapearModule.escalaPxPorMetro) || 22;
+    const coordenada = { x: Number(((px - canvas.width / 2) / escala).toFixed(3)), z: Number(((py - canvas.height / 2) / escala).toFixed(3)) };
+    if (this.aguardandoMarcoZero) {
+      State.marcoZero = coordenada;
+      State.posicaoUsuario = { ...coordenada };
+      this.aguardandoMarcoZero = false;
+      State.sincronizarAmbienteAtual();
+      MinimapModule.renderExpandido();
+      MinimapModule.renderPequeno();
+      this.atualizarPainelDestino();
+      alert('Marco zero salvo. Gere novamente o QR Code e fixe a nova versão exatamente neste ponto do ambiente.');
+      return true;
+    }
     State.posicaoUsuario = {
-      x: Number(((px - canvas.width / 2) / escala).toFixed(3)),
-      z: Number(((py - canvas.height / 2) / escala).toFixed(3))
+      x: coordenada.x,
+      z: coordenada.z
     };
     this.aguardandoPosicao = false;
     State.sincronizarAmbienteAtual();
@@ -119,6 +132,17 @@ const ScannerModule = {
     MinimapModule.renderPequeno();
     this.atualizarPainelDestino();
     return true;
+  },
+
+  definirMarcoZero() {
+    if (State.perfilAtual !== 'admin') {
+      alert('Somente administrador local pode definir o marco zero.');
+      return;
+    }
+    this.aguardandoMarcoZero = true;
+    MinimapModule.abrirModal();
+    const status = document.getElementById('tracking-status');
+    if (status) status.textContent = 'Toque na planta exatamente onde o QR Code ficará fixado.';
   },
 
   limparDestino() {
