@@ -1,1 +1,180 @@
-/\*\* \* Pattern: Observer / Scanner Service \*/ const QRScannerModule = { timerToast: null, iniciarLoop() { setInterval(() =&gt; { const video = document.querySelector('video'); if (!video || video.readyState !== video.HAVE\_ENOUGH\_DATA) return; const canvas = document.getElementById('qr-canvas'); const ctx = canvas.getContext('2d'); canvas.width = video.videoWidth; canvas.height = video.videoHeight; ctx.drawImage(video, 0, 0, canvas.width, canvas.height); const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height); const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" }); if (code &amp;&amp; code.data) { this.processarPayload(code.data.trim()); } }, 300); }, processarPayload(payload) { let tituloQr = "TAG SMUP DETECTADA"; let detalheQr = payload; try { const jsonParsed = JSON.parse(payload); tituloQr = jsonParsed.nome || jsonParsed.tag || "EQUIPAMENTO SMUP"; detalheQr = \`ID: ${jsonParsed.id || jsonParsed.tag || payload}\\nSTATUS: OPERACIONAL\`; } catch(e) { tituloQr = \`TAG: ${payload}\`; detalheQr = \`DADO LIDO: ${payload}\\nSISTEMA: SMUP TELEMETRIA\`; } const toastInfo = document.getElementById('toast-info'); document.getElementById('toast-title').innerHTML = \`<b>${tituloQr}</b>\`; document.getElementById('toast-body').innerText = detalheQr; const jaCadastrado = State.equipamentos.some(e =&gt; e.nome === payload || e.id === payload); const toastActionDiv = document.getElementById('toast-action'); if (!jaCadastrado) { toastActionDiv.innerHTML = \`\`; } else { toastActionDiv.innerHTML = \`<span>✅ Cadastrado no Mapa</span>\`; } toastInfo.style.display = "block"; clearTimeout(this.timerToast); this.timerToast = setTimeout(() =&gt; { toastInfo.style.display = "none"; }, 4000); const arBody = document.getElementById('ar-card-body'); if (arBody) { arBody.setAttribute('value', \`TAG REAL: ${payload}\\n--------------------\\nCONEXAO: OK\\nMODO: NAVEGACAO AR\`); } }, cadastrarPrompt(payload) { const nomeCurto = prompt("Digite o nome deste equipamento:", payload) || payload; const tipo = prompt("Tipo de Equipamento (UR, UC, US, PT100):", "UR") || "UR"; const novoEq = { id: payload, nome: nomeCurto, tipo: tipo.toUpperCase(), x: parseFloat(((Math.random() \* 2) - 1).toFixed(1)), z: parseFloat((-(Math.random() \* 2) - 1).toFixed(1)), cor: tipo.toUpperCase() === 'UC' ? '#0052cc' : '#ffc107' }; State.adicionarEquipamento(novoEq); alert(\`Equipamento "${nomeCurto}" cadastrado com sucesso!\`); document.getElementById('toast-action').innerHTML = \`<span>✅ Cadastrado no Mapa</span>\`; } };
+/**
+ * QR Scanner — leitura controlada e apresentação segura dos dados.
+ */
+const QRScannerModule = {
+  timerToast: null,
+  timerLoop: null,
+  executando: false,
+  processando: false,
+  ultimoPayload: '',
+  ultimaLeituraEm: 0,
+
+  iniciarLoop() {
+    if (this.executando) return;
+    this.executando = true;
+    this.agendarLeitura();
+  },
+
+  pararLoop() {
+    this.executando = false;
+    if (this.timerLoop) {
+      clearTimeout(this.timerLoop);
+      this.timerLoop = null;
+    }
+  },
+
+  agendarLeitura() {
+    if (!this.executando) return;
+
+    this.timerLoop = setTimeout(() => {
+      this.lerFrame();
+      this.agendarLeitura();
+    }, 300);
+  },
+
+  lerFrame() {
+    if (this.processando || document.hidden) return;
+
+    const video = document.querySelector('video');
+    const canvas = document.getElementById('qr-canvas');
+
+    if (
+      !video ||
+      !canvas ||
+      video.readyState < 2 ||
+      !video.videoWidth ||
+      !video.videoHeight ||
+      typeof jsQR !== 'function'
+    ) return;
+
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return;
+
+    this.processando = true;
+
+    try {
+      // Reduz a resolução de análise para diminuir o custo por quadro.
+      const limite = 640;
+      const proporcao = Math.min(1, limite / Math.max(video.videoWidth, video.videoHeight));
+      canvas.width = Math.max(1, Math.round(video.videoWidth * proporcao));
+      canvas.height = Math.max(1, Math.round(video.videoHeight * proporcao));
+
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: 'dontInvert'
+      });
+
+      if (code && code.data) {
+        const payload = String(code.data).trim();
+        const agora = Date.now();
+
+        // Evita reprocessar a mesma etiqueta em todos os frames.
+        if (payload && (payload !== this.ultimoPayload || agora - this.ultimaLeituraEm > 3000)) {
+          this.ultimoPayload = payload;
+          this.ultimaLeituraEm = agora;
+          this.processarPayload(payload);
+        }
+      }
+    } catch (erro) {
+      console.error('SMUPLOC: falha ao analisar quadro do QR Code.', erro);
+    } finally {
+      this.processando = false;
+    }
+  },
+
+  processarPayload(payload) {
+    const texto = (valor, limite = 180) => {
+      if (valor === null || valor === undefined) return '';
+      if (typeof valor === 'object') return '';
+      return String(valor).slice(0, limite);
+    };
+
+    const payloadSeguro = texto(payload, 500);
+    let tituloQr = 'TAG SMUP DETECTADA';
+    let detalheQr = `DADO LIDO: ${payloadSeguro}\nSISTEMA: SMUP TELEMETRIA`;
+    let idLido = payloadSeguro;
+
+    try {
+      const jsonParsed = JSON.parse(payloadSeguro);
+      if (jsonParsed && typeof jsonParsed === 'object' && !Array.isArray(jsonParsed)) {
+        tituloQr = texto(jsonParsed.nome || jsonParsed.tag, 100) || 'EQUIPAMENTO SMUP';
+        idLido = texto(jsonParsed.id || jsonParsed.tag || payloadSeguro, 180);
+        detalheQr = `ID: ${idLido}\nSTATUS: OPERACIONAL`;
+      } else {
+        tituloQr = `TAG: ${payloadSeguro.slice(0, 100)}`;
+      }
+    } catch (erro) {
+      tituloQr = `TAG: ${payloadSeguro.slice(0, 100)}`;
+    }
+
+    const toastInfo = document.getElementById('toast-info');
+    const toastTitle = document.getElementById('toast-title');
+    const toastBody = document.getElementById('toast-body');
+    const toastActionDiv = document.getElementById('toast-action');
+
+    // Dados vindos do QR são texto puro, nunca HTML.
+    if (toastTitle) toastTitle.textContent = tituloQr;
+    if (toastBody) toastBody.textContent = detalheQr;
+
+    const jaCadastrado = Array.isArray(State.equipamentos) &&
+      State.equipamentos.some(eq =>
+        String(eq.id || '') === idLido || String(eq.nome || '') === idLido
+      );
+
+    if (toastActionDiv) {
+      toastActionDiv.textContent = jaCadastrado
+        ? 'Cadastrado no mapa'
+        : 'Etiqueta identificada — equipamento ainda não cadastrado';
+    }
+
+    if (toastInfo) {
+      toastInfo.style.display = 'block';
+      clearTimeout(this.timerToast);
+      this.timerToast = setTimeout(() => {
+        toastInfo.style.display = 'none';
+      }, 4000);
+    }
+
+    const arBody = document.getElementById('ar-card-body');
+    if (arBody) {
+      arBody.setAttribute(
+        'value',
+        `TAG REAL: ${payloadSeguro}\n--------------------\nCONEXAO: OK\nMODO: NAVEGACAO AR`
+      );
+    }
+  },
+
+  cadastrarPrompt(payload) {
+    const id = String(payload || '').trim().slice(0, 180);
+    if (!id) return;
+
+    const nomeCurto = (prompt('Digite o nome deste equipamento:', id) || '').trim();
+    if (!nomeCurto) return;
+
+    const tipoInformado = (prompt('Tipo de Equipamento (UR, UC, US, PT100):', 'UR') || 'UR')
+      .trim().toUpperCase();
+    const tiposPermitidos = ['UR', 'UC', 'US', 'PT100'];
+    const tipo = tiposPermitidos.includes(tipoInformado) ? tipoInformado : 'UR';
+
+    const novoEq = {
+      id,
+      nome: nomeCurto.slice(0, 100),
+      tipo,
+      // Não inventa coordenadas: o equipamento precisa ser posicionado na planta.
+      x: 0,
+      z: 0,
+      posicionado: false,
+      cor: tipo === 'UC' ? '#0052cc' : '#ffc107'
+    };
+
+    if (!State.adicionarEquipamento(novoEq)) {
+      alert('Este equipamento já está cadastrado ou não foi possível salvar.');
+      return;
+    }
+
+    alert('Equipamento cadastrado. Posicione-o manualmente na planta.');
+    const toastActionDiv = document.getElementById('toast-action');
+    if (toastActionDiv) toastActionDiv.textContent = 'Cadastrado — aguardando posicionamento na planta';
+  }
+};
