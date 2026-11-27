@@ -91,13 +91,13 @@ const EquipmentModule = {
 
     const setor = prompt('Setor / ambiente:', String(eq.setor || ''));
     if (setor === null) return;
-    const tipo = prompt('Tipo do equipamento (UR, UC, US, PT100):', String(eq.tipo || 'UR'));
+    const tipo = prompt('Tipo do equipamento (UR, UC, UC HYB, US, PT100):', String(eq.tipo || 'UR'));
     if (tipo === null) return;
 
     const tipoNormalizado = tipo.trim().toUpperCase();
-    const tiposPermitidos = ['UR', 'UC', 'US', 'PT100'];
+    const tiposPermitidos = ['UR', 'UC', 'UC HYB', 'US', 'PT100'];
     if (!tiposPermitidos.includes(tipoNormalizado)) {
-      alert('Tipo inválido. Utilize UR, UC, US ou PT100.');
+      alert('Tipo inválido. Utilize UR, UC, UC HYB, US ou PT100.');
       return;
     }
 
