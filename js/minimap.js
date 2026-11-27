@@ -5,6 +5,7 @@
 const MinimapModule = {
   objetoArrastando: null,
   equipamentoAguardandoPosicao: null,
+  bloquearArraste: false,
 
   posicionarEquipamento(evento) {
     const equipamento = this.equipamentoAguardandoPosicao;
