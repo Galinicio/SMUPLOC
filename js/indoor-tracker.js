@@ -20,6 +20,10 @@ const IndoorTracker = {
   orientationHandler: null,
 
   async iniciar() {
+    if (!State.posicaoUsuario) {
+      alert('Primeiro leia o QR Code do ambiente ou marque sua posição manualmente na planta.');
+      return;
+    }
     if (!window.isSecureContext) {
       alert('O rastreamento por sensores exige HTTPS (ou localhost). Abra o SMUPLOC por uma conexão segura.');
       return;
@@ -52,7 +56,7 @@ const IndoorTracker = {
       window.addEventListener('devicemotion', this.motionHandler, true);
       window.addEventListener('deviceorientationabsolute', this.orientationHandler, true);
       window.addEventListener('deviceorientation', this.orientationHandler, true);
-      this.atualizarInterface('Rastreamento assistido ativo · mantenha o celular apontado para a direção em que caminha.');
+      this.atualizarInterface('Sensores ativos · aguardando bússola absoluta. Segure o celular apontado para a direção em que caminha.');
     } catch (erro) {
       console.error('SMUPLOC: não foi possível iniciar sensores.', erro);
       alert('Não foi possível iniciar os sensores neste aparelho.');
@@ -95,6 +99,7 @@ const IndoorTracker = {
     if (heading !== null) {
       this.heading = heading;
       this.suporteOrientacao = true;
+      if (this.ativo && !this.ultimaAtualizacao) this.atualizarInterface('Bússola disponível · caminhe normalmente com o celular apontado para a frente.');
     }
   },
 
