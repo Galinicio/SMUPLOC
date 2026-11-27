@@ -8,6 +8,7 @@ const IndoorTracker = {
   passos: 0,
   comprimentoPasso: 0.65,
   heading: null,
+  headingOffset: 0,
   ultimaAmostraPasso: 0,
   picoDetectado: false,
   historicoMagnitude: [],
@@ -75,6 +76,7 @@ const IndoorTracker = {
     this.heading = null;
     this.passos = 0;
     this.precisaoM = 0.8;
+    this.headingOffset = Number(anchor.headingOffset) || 0;
     State.posicaoUsuario = { x: Number(anchor.x) || 0, z: Number(anchor.z) || 0 };
     State.sincronizarAmbienteAtual();
     MinimapModule.renderExpandido();
@@ -126,7 +128,8 @@ const IndoorTracker = {
       this.atualizarInterface('Passo detectado, mas sem bússola/orientação válida. Verifique a permissão de orientação.');
       return;
     }
-    const rad = this.heading * Math.PI / 180;
+    const headingMapa = (this.heading - this.headingOffset + 360) % 360;
+    const rad = headingMapa * Math.PI / 180;
     const dx = Math.sin(rad) * this.comprimentoPasso;
     const dz = -Math.cos(rad) * this.comprimentoPasso;
     State.posicaoUsuario = {
@@ -142,6 +145,19 @@ const IndoorTracker = {
     MinimapModule.renderPequeno();
     ScannerModule.atualizarPainelDestino();
     this.atualizarInterface();
+  },
+
+  calibrarDirecaoMapa() {
+    if (!Number.isFinite(this.heading)) {
+      alert('A bússola ainda não forneceu uma direção válida. Mova o celular e tente novamente.');
+      return;
+    }
+    const confirmar = confirm('Aponte a parte superior do celular exatamente para a direção que corresponde ao TOPO da planta baixa. Deseja calibrar essa direção como 0°?');
+    if (!confirmar) return;
+    this.headingOffset = this.heading;
+    State.marcoZero = { ...(State.marcoZero || { x: 0, z: 0 }), headingOffset: this.headingOffset };
+    State.sincronizarAmbienteAtual();
+    this.atualizarInterface('Direção da planta calibrada. Gere novamente o QR Code para distribuir essa calibração aos outros celulares.');
   },
 
   recalibrarPasso() {
