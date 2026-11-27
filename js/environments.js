@@ -84,7 +84,7 @@ const EnvironmentModule = {
       version: 1,
       environmentId: ambiente.id,
       environmentCode: ambiente.codigoQr,
-      anchor: ambiente.marcoZero || { x: 0, z: 0 }
+      anchor: ambiente.marcoZero || { x: 0, z: 0, headingOffset: 0 }
     });
   },
 
@@ -130,8 +130,8 @@ const EnvironmentModule = {
     }
     this.selecionar(ambiente.id);
     const ancora = dados.anchor && Number.isFinite(Number(dados.anchor.x)) && Number.isFinite(Number(dados.anchor.z))
-      ? { x: Number(dados.anchor.x), z: Number(dados.anchor.z) }
-      : (ambiente.marcoZero || { x: 0, z: 0 });
+      ? { x: Number(dados.anchor.x), z: Number(dados.anchor.z), headingOffset: Number(dados.anchor.headingOffset) || 0 }
+      : (ambiente.marcoZero || { x: 0, z: 0, headingOffset: 0 });
     if (typeof IndoorTracker !== 'undefined') IndoorTracker.iniciarNoMarcoZero(ancora);
     return true;
   },
