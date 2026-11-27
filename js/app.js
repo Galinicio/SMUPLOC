@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const iniciarArraste = e => {
-    if (State.perfilAtual === 'cliente' || MapearModule.ativo) return;
+    if (State.perfilAtual === 'cliente' || MapearModule.ativo || MinimapModule.bloquearArraste) return;
 
     const pos = getPosCanvas(e);
     const cx = canvasExp.width / 2;
@@ -64,11 +64,12 @@ document.addEventListener('DOMContentLoaded', () => {
       MinimapModule.renderPequeno();
     }
     MinimapModule.objetoArrastando = null;
+    MinimapModule.bloquearArraste = false;
   };
 
   canvasExp.addEventListener('pointerdown', evento => {
     if (MinimapModule.equipamentoAguardandoPosicao) {
-      MinimapModule.posicionarEquipamento(evento);
+      if (MinimapModule.posicionarEquipamento(evento)) MinimapModule.bloquearArraste = true;
       return;
     }
     MapearModule.registrarToque(evento);
