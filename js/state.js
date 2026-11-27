@@ -181,6 +181,11 @@ const State = {
 
     this.equipamentos = [];
     this.cantosMapear = [];
+    if (typeof MinimapModule !== 'undefined') {
+      MinimapModule.equipamentoAguardandoPosicao = null;
+      MinimapModule.objetoArrastando = null;
+      MinimapModule.bloquearArraste = false;
+    }
     this.plantaImageBase64 = null;
     this.imgPlantaObj.onload = null;
     this.imgPlantaObj.onerror = null;
