@@ -345,3 +345,98 @@ body.scanner-ativo > #btn-explorar {
   #navegacao-controles button { min-width:0; flex:1 1 45%; min-height:42px; }
   #tracking-status { font-size:10px; }
 }
+
+
+/* Experiência simplificada: primeiro o que o técnico precisa fazer */
+#btn-explorar {
+  top: max(64px, env(safe-area-inset-top)); right: 14px; min-height: 54px;
+  padding: 0 20px; border-radius: 18px; font-size: 15px; letter-spacing: 0;
+  background: #ffc107; box-shadow: 0 8px 24px rgba(0,0,0,.38);
+}
+#dica-inicial {
+  position: fixed; top: max(126px, calc(env(safe-area-inset-top) + 66px));
+  left: 14px; right: 14px; z-index: 1100; max-width: 420px; margin: auto;
+  padding: 11px 14px; border-radius: 14px; color: #fff;
+  background: rgba(7,25,43,.88); border: 1px solid rgba(255,255,255,.2);
+  text-align: center; font-size: 13px; line-height: 1.4; pointer-events: none;
+}
+#mapa-container { width: 146px; height: 146px; border: 3px solid #ffc107; }
+#mapa-header { font-size: 10px; padding: 7px 4px; }
+#mapa-canvas { height: 112px; }
+#modal-planta {
+  display: none; overflow-y: auto; overscroll-behavior: contain;
+  justify-content: flex-start; gap: 12px;
+  padding: max(10px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom));
+}
+.modal-header {
+  position: sticky; top: 0; z-index: 5; flex: 0 0 auto;
+  padding: 8px 0 12px; background: rgba(5,15,28,.97);
+}
+.modal-title { font-size: 20px; }
+#ambientes-toolbar { flex: 0 0 auto; font-size: 13px; padding: 14px; }
+#ambientes-toolbar button, .btn-importar-ambiente, #ambiente-select {
+  min-height: 46px; font-size: 14px; border-radius: 12px;
+}
+#canvas-expandido-container {
+  flex: 0 0 auto; min-height: min(48vh, 440px); margin: 0; position: relative;
+}
+#canvas-expandido {
+  width: min(100%, 560px); height: auto; max-height: 48vh; object-fit: contain;
+}
+#navegacao-controles {
+  position: absolute; left: 8px; right: 8px; bottom: 8px;
+  display: flex; flex-direction: column; align-items: stretch; gap: 8px;
+  padding: 12px; border-radius: 16px; background: rgba(7,25,43,.94);
+  border: 1px solid rgba(255,193,7,.4); color: white; font-size: 13px;
+}
+#navegacao-destino { color: #ffc107; font-size: 14px; font-weight: 800; }
+#tracking-status { line-height: 1.4; }
+.acoes-navegacao { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.acoes-navegacao button, .opcoes-secundarias button {
+  min-height: 46px; border: 0; border-radius: 12px; padding: 10px 12px;
+  background: #2456a6; color: white; font-size: 14px; font-weight: 800;
+}
+.acoes-navegacao .acao-principal {
+  grid-column: 1 / -1; background: #ffc107; color: #07192b; font-size: 16px;
+}
+.opcoes-secundarias { font-size: 13px; }
+.opcoes-secundarias summary, #ferramentas-avancadas > summary {
+  min-height: 42px; display: flex; align-items: center; cursor: pointer;
+  color: #ffc107; font-weight: 800;
+}
+.opcoes-secundarias button { width: 100%; margin-top: 6px; text-align: left; }
+#ferramentas-avancadas {
+  flex: 0 0 auto; border: 1px solid rgba(255,193,7,.35);
+  border-radius: 14px; padding: 0 12px 8px; background: rgba(10,37,64,.9);
+}
+#ferramentas-avancadas > summary { min-height: 52px; font-size: 15px; }
+#ferramentas-avancadas .modal-controls {
+  display: flex; flex-wrap: wrap; justify-content: flex-start;
+  padding: 0; border: 0; background: transparent;
+}
+#ferramentas-avancadas .modal-controls button,
+#ferramentas-avancadas .modal-controls label {
+  min-height: 46px; display: inline-flex; align-items: center;
+  justify-content: center; padding: 10px 14px; border-radius: 12px; font-size: 13px;
+}
+.scanner-cabecalho-acoes { display:flex; gap:8px; align-items:center; }
+.scanner-cabecalho-acoes button {
+  min-height: 42px; border: 0; border-radius: 12px; padding: 8px 12px;
+  background: #2456a6; color: #fff; font-weight: 800;
+}
+#scanner-busca { min-height: 52px; border-radius: 14px; font-size: 16px; }
+.scanner-item { min-height: 76px; border-radius: 14px; padding: 14px; }
+@media (max-width: 520px) {
+  #btn-explorar { left: 12px; right: 12px; width: calc(100% - 24px); top: max(58px, env(safe-area-inset-top)); }
+  #dica-inicial { top: max(122px, calc(env(safe-area-inset-top) + 122px)); font-size: 12px; }
+  #modal-planta { padding-left: 9px; padding-right: 9px; }
+  .modal-header { align-items: flex-start; }
+  .modal-header-actions { max-width: 62%; }
+  #canvas-expandido-container { min-height: 44vh; }
+  #canvas-expandido { max-height: 44vh; }
+  #navegacao-controles { font-size: 12px; }
+  .acoes-navegacao { grid-template-columns: 1fr; }
+  .acoes-navegacao button { min-height: 48px; }
+  #ferramentas-avancadas .modal-controls > * { flex: 1 1 100%; }
+  .scanner-painel { padding: 15px; }
+}
