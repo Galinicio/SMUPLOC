@@ -143,3 +143,7 @@ a-scene video {
     min-height: 40px;
   }
 }
+
+/* O HUD ocupa a tela, mas sua área vazia deve deixar os toques passarem ao mapa. */
+#mapear-hud { pointer-events: none !important; }
+#mapear-tutorial, #mapear-controls { pointer-events: auto !important; }
