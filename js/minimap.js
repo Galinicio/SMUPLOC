@@ -109,6 +109,17 @@ const MinimapModule = {
     }
   },
 
+  desenharMarcoZero(ctx, escala, cx, cy, expandido) {
+    const marco = State.marcoZero || { x: 0, z: 0 };
+    const x = cx + Number(marco.x || 0) * escala;
+    const y = cy + Number(marco.z || 0) * escala;
+    ctx.save();
+    ctx.strokeStyle = '#ffc107'; ctx.lineWidth = expandido ? 3 : 2;
+    ctx.beginPath(); ctx.arc(x, y, expandido ? 12 : 5, 0, Math.PI * 2); ctx.stroke();
+    if (expandido) { ctx.fillStyle = '#ffc107'; ctx.font = 'bold 10px sans-serif'; ctx.fillText('QR / MARCO ZERO', x + 14, y - 8); }
+    ctx.restore();
+  },
+
   desenharNavegacao(ctx, escala, cx, cy, expandido) {
     const destino = State.equipamentos.find(eq => String(eq.id) === String(State.destinoId) && eq.posicionado !== false);
     const usuario = State.posicaoUsuario;
@@ -182,6 +193,7 @@ const MinimapModule = {
     ctx.fill();
 
     this.desenharEquipamentos(ctx, escala, cx, cy, false);
+    this.desenharMarcoZero(ctx, escala, cx, cy, false);
     this.desenharNavegacao(ctx, escala, cx, cy, false);
   },
 
@@ -210,6 +222,7 @@ const MinimapModule = {
     ctx.fillText('ÂNCORA (0,0)', cx - 25, cy + 18);
 
     this.desenharEquipamentos(ctx, escala, cx, cy, true);
+    this.desenharMarcoZero(ctx, escala, cx, cy, true);
     this.desenharNavegacao(ctx, escala, cx, cy, true);
   },
 
