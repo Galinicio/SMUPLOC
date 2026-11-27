@@ -193,9 +193,9 @@ const MinimapModule = {
       return;
     }
 
-    const limiteBytes = 5 * 1024 * 1024;
+    const limiteBytes = 3 * 1024 * 1024;
     if (file.size > limiteBytes) {
-      alert('A imagem deve ter no máximo 5 MB.');
+      alert('A imagem deve ter no máximo 3 MB.');
       event.target.value = '';
       return;
     }
