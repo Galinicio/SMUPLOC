@@ -2,8 +2,8 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SMUPLOC — Visão Didática AR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>SMUPLOC — AR & Magicplan Mapeador</title>
   
   <!-- A-Frame & MindAR -->
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
@@ -12,101 +12,208 @@
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
   
   <style>
-    body { margin: 0; overflow: hidden; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    body { margin: 0; overflow: hidden; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; user-select: none; }
     
-    /* 🟡 SELETIM DISCRETO NO TOPO (Não polui a visão) */
+    /* 🚫 REMOVE QUALQUER ELEMENTO FEIO DE SCANNER PADRÃO DO MINDAR */
+    .mindar-ui-overlay, .mindar-ui-loading, .mindar-ui-scanning { display: none !important; }
+
+    /* 🟡 TOPO CLEAN SMUP */
     #badge-topo {
       position: absolute; top: 12px; right: 12px; z-index: 999;
-      background: rgba(10, 37, 64, 0.85); backdrop-filter: blur(6px); color: #ffc107;
+      background: rgba(10, 37, 64, 0.9); backdrop-filter: blur(6px); color: #ffc107;
       padding: 6px 14px; border-radius: 20px; border: 1.5px solid #ffc107;
       font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      display: flex; align-items: center; gap: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); display: flex; align-items: center; gap: 6px;
     }
     .dot-status { width: 8px; height: 8px; background: #00ff66; border-radius: 50%; display: inline-block; }
 
-    /* 🗺️ MINIMAPA CLEAN (Estilo Blueprint SMUP - Sem radar de submarino!) */
+    /* 🗺️ MINIMAPA CLICÁVEL (Canto Inferior Esquerdo) */
     #mapa-container {
       position: absolute; bottom: 16px; left: 16px; width: 130px; height: 130px; z-index: 999;
       background: rgba(10, 37, 64, 0.92); border: 2px solid #0052cc; border-radius: 14px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); overflow: hidden; backdrop-filter: blur(8px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); overflow: hidden; cursor: pointer;
+      backdrop-filter: blur(8px); transition: transform 0.2s ease, border-color 0.2s ease;
     }
+    #mapa-container:hover { transform: scale(1.04); border-color: #ffc107; }
     #mapa-header {
       background: #0052cc; color: #ffffff; font-size: 9px; font-weight: 800;
       text-align: center; padding: 3px 0; letter-spacing: 1px; text-transform: uppercase;
     }
-    #mapa-canvas { width: 100%; height: 105px; }
+    #mapa-canvas { width: 100%; height: 105px; display: block; }
 
-    /* 💡 NOTIFICAÇÃO DIDÁTICA FLUTUANTE (Aparece só ao ler QR) */
+    /* 💡 TOAST INFORMATIVO */
     #toast-info {
       position: absolute; bottom: 16px; right: 16px; left: 160px; z-index: 999;
       background: #0a2540; color: #ffffff; border-left: 5px solid #ffc107;
       padding: 10px 14px; border-radius: 8px; font-size: 12px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.3); display: none;
-      animation: fadeIn 0.3s ease-in-out;
     }
     #toast-info b { color: #ffc107; }
 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    /* 🔍 MODAL EXPANDIDO DA PLANTA BAIXA INTERATIVA */
+    #modal-planta {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 10000;
+      background: rgba(5, 15, 28, 0.95); backdrop-filter: blur(10px); color: #fff;
+      flex-direction: column; justify-content: space-between; padding: 16px; box-sizing: border-box;
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid rgba(255, 193, 7, 0.3); padding-bottom: 10px;
+    }
+    .modal-title { font-size: 15px; font-weight: 700; color: #ffc107; }
+    .perfil-selector {
+      background: #0a2540; color: #ffc107; border: 1px solid #ffc107;
+      padding: 5px 8px; border-radius: 6px; font-size: 11px; font-weight: bold;
+    }
+    .btn-fechar {
+      background: #ff0055; color: #fff; border: none; padding: 6px 12px;
+      border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer;
+    }
+
+    #canvas-expandido-container {
+      flex: 1; display: flex; justify-content: center; align-items: center;
+      margin: 10px 0; position: relative; overflow: hidden; background: #07192b;
+      border: 1.5px solid #0052cc; border-radius: 12px;
+    }
+    #canvas-expandido { background: #07192b; max-width: 100%; max-height: 100%; touch-action: none; }
+
+    .modal-controls {
+      display: flex; gap: 8px; justify-content: space-between; align-items: center;
+      background: #0a2540; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(0, 82, 204, 0.5);
+      flex-wrap: wrap;
+    }
+    .btn-admin {
+      background: #0052cc; color: #fff; border: none; padding: 8px 12px;
+      border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer;
+    }
+    .btn-magicplan {
+      background: #ffc107; color: #0a2540; border: none; padding: 8px 14px;
+      border-radius: 6px; font-weight: 800; font-size: 12px; cursor: pointer;
+      box-shadow: 0 0 12px rgba(255, 193, 7, 0.4);
+    }
+
+    /* 📏 MIRA HUD DO MODO MAGICPLAN (SOBRE A CÂMERA) */
+    #magicplan-hud {
+      display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 10001;
+      pointer-events: none;
+    }
+    .crosshair-center {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 24px; height: 24px; border: 2px solid #ffc107; border-radius: 50%;
+      box-shadow: 0 0 10px #ffc107;
+    }
+    .crosshair-center::after {
+      content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 4px; height: 4px; background: #ffffff; border-radius: 50%;
+    }
+    #magicplan-controls {
+      position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+      pointer-events: auto; background: rgba(10, 37, 64, 0.95); border: 2px solid #ffc107;
+      padding: 12px 20px; border-radius: 16px; display: flex; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .btn-mp-action {
+      background: #0052cc; color: #fff; border: none; padding: 10px 14px;
+      border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer;
+    }
+    .btn-mp-success { background: #00ff66; color: #05101a; font-weight: 800; }
+    .btn-mp-danger { background: #ff0055; color: #fff; }
+    #mp-stats-bar {
+      position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+      background: rgba(10, 37, 64, 0.9); color: #ffc107; padding: 8px 16px;
+      border-radius: 20px; border: 1px solid #ffc107; font-size: 12px; font-weight: bold;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Selo discreto no canto superior direito -->
+  <!-- Topo Badge -->
   <div id="badge-topo">
     <span class="dot-status"></span> SMUPLOC AR
   </div>
 
-  <!-- Minimapa Clean -->
-  <div id="mapa-container">
-    <div id="mapa-header">Planta da Unidade</div>
+  <!-- Minimapa Clicável -->
+  <div id="mapa-container" onclick="abrirPlantaExpandida()">
+    <div id="mapa-header">🔍 PLANTA (CLIQUE)</div>
     <canvas id="mapa-canvas" width="130" height="105"></canvas>
   </div>
 
-  <!-- Alerta Didático ao Escanear -->
+  <!-- Toast Info -->
   <div id="toast-info">
     <div id="toast-title"><b>Equipamento Identificado!</b></div>
-    <div id="toast-body" style="font-size:11px; color:#e2e8f0; margin-top:2px;">Aproforme para ver a telemetria.</div>
+    <div id="toast-body" style="font-size:11px; color:#e2e8f0; margin-top:2px;">Visualizando telemetria no espaço.</div>
   </div>
 
+  <!-- MODAL DE PLANTA BAIXA INTERATIVA -->
+  <div id="modal-planta">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">🗺️ Planta Baixa & Configuração</div>
+        <div style="font-size:11px; color:#cbd5e1;" id="texto-modo-perfil">Modo: <b>ADMINISTRADOR</b></div>
+      </div>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <select id="perfil-select" class="perfil-selector" onchange="alterarPerfil(this.value)">
+          <option value="admin">👑 Admin</option>
+          <option value="tecnico">🛠️ Técnico</option>
+          <option value="cliente">👤 Cliente</option>
+        </select>
+        <button class="btn-fechar" onclick="fecharPlantaExpandida()">❌ Fechar</button>
+      </div>
+    </div>
+
+    <!-- Canvas Expandido -->
+    <div id="canvas-expandido-container">
+      <canvas id="canvas-expandido" width="360" height="360"></canvas>
+    </div>
+
+    <!-- Barra de Ferramentas / Magicplan -->
+    <div class="modal-controls">
+      <button class="btn-magicplan" onclick="iniciarMagicplan()">📏 Mapear Sala (Magicplan)</button>
+      <div id="controles-admin" style="display:flex; gap:6px;">
+        <label class="btn-admin" style="background:#0052cc;">
+          📤 Subir Planta
+          <input type="file" id="input-planta" accept="image/*" style="display:none;" onchange="uploadPlantaBaixa(event)">
+        </label>
+        <button class="btn-admin" style="background:#334155;" onclick="resetarPosicoes()">🔄 Resetar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HUD DO MODO MAGICPLAN (SOBRE A CÂMERA LIMPA) -->
+  <div id="magicplan-hud">
+    <div id="mp-stats-bar">📐 Cantos Marcados: <span id="mp-count">0</span> | Área: <span id="mp-area">0</span> m²</div>
+    <div class="crosshair-center"></div>
+    <div id="magicplan-controls">
+      <button class="btn-mp-action" onclick="marcarCantoMagicplan()">📍 Marcar Canto</button>
+      <button class="btn-mp-action btn-mp-success" onclick="finalizarPlantaMagicplan()">🏁 Finalizar Planta</button>
+      <button class="btn-mp-action btn-mp-danger" onclick="cancelarMagicplan()">❌ Sair</button>
+    </div>
+  </div>
+
+  <!-- CENA 3D (Câmera Limpa sem UI padrão) -->
   <a-scene 
-    mindar-image="imageTargetSrc: ./targets.mind; filterMinCF: 0.0001; filterBeta: 0.001;" 
-    color-space="sRGB" 
-    renderer="colorManagement: true, physicallyCorrectLights" 
-    vr-mode-ui="enabled: false" 
-    device-orientation-permission-ui="enabled: false">
+    mindar-image="imageTargetSrc: ./targets.mind; filterMinCF: 0.0001; filterBeta: 0.001; uiLoading: no; uiScanning: no;" 
+    color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" 
+    vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
     
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-    <!-- 📍 ÂNCORA 3D (Só fica visível quando o QR Code é detectado) -->
+    <!-- 📍 ÂNCORA 3D -->
     <a-entity mindar-image-target="targetIndex: 0" id="target-anchor">
       
-      <!-- 1. BASE: Anel Amarelo SMUP no QR Code -->
-      <a-ring position="0 0 0" rotation="-90 0 0" radius-inner="0.2" radius-outer="0.24" 
-              material="color: #ffc107; shader: flat; opacity: 0.9;"></a-ring>
+      <!-- Anel Amarelo de Ancoragem -->
+      <a-ring position="0 0 0" rotation="-90 0 0" radius-inner="0.2" radius-outer="0.25" 
+              material="color: #ffc107; shader: flat; opacity: 0.95;"></a-ring>
 
-      <!-- 2. MODELO 3D GIRATÓRIO (Equipamento SMUP em 3D) -->
-      <a-entity position="0 0.35 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 7000; easing: linear">
-        <!-- Gabinete principal Azul SMUP -->
-        <a-box width="0.3" height="0.45" depth="0.3" material="color: #0052cc; metalness: 0.3; roughness: 0.4;"></a-box>
-        <!-- Moldura/Borda Amarela de Destaque -->
-        <a-box width="0.32" height="0.47" depth="0.05" material="color: #ffc107; wireframe: true;"></a-box>
-        <!-- Sensor no topo do equipamento 3D -->
-        <a-cylinder position="0 0.26 0" radius="0.05" height="0.08" material="color: #ffc107;"></a-cylinder>
-      </a-entity>
+      <a-cylinder position="0 0.3 0" radius="0.005" height="0.6" material="color: #0052cc; shader: flat; opacity: 0.8;"></a-cylinder>
 
-      <!-- 3. CARD INFORMATIVO DIDÁTICO (Azul & Amarelo SMUP) -->
-      <a-entity position="0 0.85 0">
-        <!-- Fundo Card Azul SMUP -->
-        <a-plane width="1.2" height="0.65" material="color: #0a2540; opacity: 0.92; transparent: true; side: double;"></a-plane>
-        <!-- Moldura Amarela SMUP -->
+      <!-- CARD INFORMATIVO DIDÁTICO -->
+      <a-entity position="0 0.7 0">
+        <a-plane width="1.2" height="0.65" material="color: #0a2540; opacity: 0.94; transparent: true; side: double;"></a-plane>
         <a-plane width="1.24" height="0.69" position="0 0 -0.001" material="color: #ffc107; opacity: 0.95; shader: flat; side: double;"></a-plane>
         
-        <!-- Cabeçalho -->
         <a-text value="EQUIPAMENTO SMUP" position="0 0.22 0.01" scale="0.38 0.38 0.38" align="center" color="#ffc107" bold="true"></a-text>
         <a-plane position="0 0.16 0.01" width="1.0" height="0.006" material="color: #ffc107; shader: flat;"></a-plane>
 
-        <!-- Informações Didáticas -->
         <a-text id="ar-card-body" 
                 value="TAG: LENDO...\n--------------------\nTEMP: 4.2 °C (IDEAL)\nSTATUS: OPERACIONAL" 
                 position="0 -0.06 0.01" scale="0.3 0.3 0.3" align="center" color="#ffffff">
@@ -119,99 +226,291 @@
   <canvas id="qr-canvas" style="display:none;"></canvas>
 
   <script>
+    // ESTADO GLOBAL DO PROJETO
+    let perfilAtual = 'admin';
+    let cantosMagicplan = JSON.parse(localStorage.getItem('smuploc_cantos_mp')) || [];
+    let plantaImageBase64 = localStorage.getItem('smuploc_planta_img') || null;
+    let imgPlantaObj = new Image();
+    if (plantaImageBase64) imgPlantaObj.src = plantaImageBase64;
+
+    let equipamentos = JSON.parse(localStorage.getItem('smuploc_eqs')) || [
+      { id: '1', nome: 'UR 01 (Câmara)', tipo: 'UR', x: 1.5, z: -2.5, cor: '#ffc107' },
+      { id: '2', nome: 'UC 02 (Condensadora)', tipo: 'UC', x: -1.8, z: -3.5, cor: '#0052cc' }
+    ];
+
+    let objetoArrastando = null;
+
+    // EVENTOS MINDAR AR
     const targetAnchor = document.getElementById('target-anchor');
     const toastInfo = document.getElementById('toast-info');
-    const toastTitle = document.getElementById('toast-title');
-    const toastBody = document.getElementById('toast-body');
 
-    // Eventos do MindAR: Mostra informações APENAS quando o alvo estiver na tela
-    targetAnchor.addEventListener("targetFound", () => {
-      toastInfo.style.display = "block";
-    });
+    targetAnchor.addEventListener("targetFound", () => { toastInfo.style.display = "block"; });
+    targetAnchor.addEventListener("targetLost", () => { toastInfo.style.display = "none"; });
 
-    targetAnchor.addEventListener("targetLost", () => {
-      toastInfo.style.display = "none";
-    });
-
-    // Leitura contínua do QR Code
     setInterval(() => {
       const video = document.querySelector('video');
       if (!video || video.readyState !== video.HAVE_ENOUGH_DATA) return;
 
       const canvas = document.getElementById('qr-canvas');
       const ctx = canvas.getContext('2d');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      canvas.width = video.videoWidth; canvas.height = video.videoHeight;
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
 
       if (code && code.data) {
-        toastTitle.innerHTML = `<b>QR Code: ${code.data}</b>`;
-        toastBody.innerText = "Equipamento vinculado e operando normalmente.";
-        
+        document.getElementById('toast-title').innerHTML = `<b>TAG: ${code.data}</b>`;
         const arBody = document.getElementById('ar-card-body');
         if (arBody) {
           arBody.setAttribute('value', 
-            `TAG: ${code.data.substring(0, 22)}\n` +
-            `--------------------\n` +
-            `TEMP: 4.2 °C (NORMAL)\n` +
-            `MODO: MONITORAMENTO`
+            `TAG: ${code.data.substring(0, 22)}\n--------------------\nTEMP: 4.2 °C (NORMAL)\nMODO: MONITORAMENTO`
           );
         }
       }
     }, 400);
 
-    // Renderização do Minimapa Clean (Sem submarino!)
+    // --- DESENHO DO MINIMAPA PEQUENO ---
     const mapaCanvas = document.getElementById('mapa-canvas');
     const ctxMapa = mapaCanvas.getContext('2d');
 
-    function desenharMinimapaClean() {
-      const w = 130, h = 105;
-      const cx = w / 2, cy = h / 2;
-
+    function desenharMinimapaPequeno() {
+      const w = 130, h = 105, cx = w / 2, cy = h / 2, escala = 8;
       ctxMapa.clearRect(0, 0, w, h);
 
-      // Fundo limpo azul escuro
-      ctxMapa.fillStyle = "#0a2540";
-      ctxMapa.fillRect(0, 0, w, h);
-
-      // Grade sutil de arquitetura (Blueprint)
-      ctxMapa.strokeStyle = "rgba(0, 82, 204, 0.3)";
-      ctxMapa.lineWidth = 1;
-      for (let x = 0; x < w; x += 15) {
-        ctxMapa.beginPath(); ctxMapa.moveTo(x, 0); ctxMapa.lineTo(x, h); ctxMapa.stroke();
-      }
-      for (let y = 0; y < h; y += 15) {
-        ctxMapa.beginPath(); ctxMapa.moveTo(0, y); ctxMapa.lineTo(w, y); ctxMapa.stroke();
+      if (imgPlantaObj.complete && imgPlantaObj.naturalWidth !== 0) {
+        ctxMapa.drawImage(imgPlantaObj, 0, 0, w, h);
+      } else {
+        ctxMapa.fillStyle = "#0a2540"; ctxMapa.fillRect(0, 0, w, h);
+        ctxMapa.strokeStyle = "rgba(0, 82, 204, 0.3)"; ctxMapa.lineWidth = 1;
+        for (let x = 0; x < w; x += 15) { ctxMapa.beginPath(); ctxMapa.moveTo(x, 0); ctxMapa.lineTo(x, h); ctxMapa.stroke(); }
+        for (let y = 0; y < h; y += 15) { ctxMapa.beginPath(); ctxMapa.moveTo(0, y); ctxMapa.lineTo(w, y); ctxMapa.stroke(); }
       }
 
-      // Ponto Central: Posição do Técnico (Azul Vibrante com borda branca)
-      ctxMapa.fillStyle = "#0052cc";
-      ctxMapa.beginPath(); ctxMapa.arc(cx, cy, 5, 0, 2 * Math.PI); ctxMapa.fill();
-      ctxMapa.strokeStyle = "#ffffff"; ctxMapa.lineWidth = 1.5; ctxMapa.stroke();
+      // Desenha paredes do Magicplan no Minimapa
+      if (cantosMagicplan.length > 1) {
+        ctxMapa.strokeStyle = "#ffc107"; ctxMapa.lineWidth = 2;
+        ctxMapa.beginPath();
+        cantosMagicplan.forEach((canto, idx) => {
+          const px = cx + (canto.x * escala); const py = cy + (canto.z * escala);
+          if (idx === 0) ctxMapa.moveTo(px, py); else ctxMapa.lineTo(px, py);
+        });
+        ctxMapa.closePath(); ctxMapa.stroke();
+      }
 
-      // Marcadores dos Equipamentos Cadastrados (Amarelo SMUP)
-      const pontos = [
-        { x: cx + 25, y: cy - 30, nome: "UR 01" },
-        { x: cx - 30, y: cy - 20, nome: "UC 02" }
-      ];
+      // Técnico (Âncora)
+      ctxMapa.fillStyle = "#ffffff"; ctxMapa.beginPath(); ctxMapa.arc(cx, cy, 4, 0, 2 * Math.PI); ctxMapa.fill();
 
-      pontos.forEach(p => {
-        ctxMapa.fillStyle = "#ffc107";
-        ctxMapa.beginPath(); ctxMapa.arc(p.x, p.y, 4, 0, 2 * Math.PI); ctxMapa.fill();
-        
-        // Pequena etiqueta de texto amarela no minimapa
-        ctxMapa.fillStyle = "#ffc107";
-        ctxMapa.font = "8px sans-serif";
-        ctxMapa.fillText(p.nome, p.x + 6, p.y + 3);
+      // Equipamentos
+      equipamentos.forEach(eq => {
+        const px = cx + (eq.x * escala); const py = cy + (eq.z * escala);
+        ctxMapa.fillStyle = eq.cor; ctxMapa.beginPath(); ctxMapa.arc(px, py, 4, 0, 2 * Math.PI); ctxMapa.fill();
       });
 
-      requestAnimationFrame(desenharMinimapaClean);
+      requestAnimationFrame(desenharMinimapaPequeno);
+    }
+    desenharMinimapaPequeno();
+
+    // --- MODAL EXPANDIDO ---
+    const modalPlanta = document.getElementById('modal-planta');
+    const canvasExp = document.getElementById('canvas-expandido');
+    const ctxExp = canvasExp.getContext('2d');
+
+    function abrirPlantaExpandida() { modalPlanta.style.display = 'flex'; desenharPlantaExpandida(); }
+    function fecharPlantaExpandida() { modalPlanta.style.display = 'none'; }
+
+    function alterarPerfil(perfil) {
+      perfilAtual = perfil;
+      const textoModo = document.getElementById('texto-modo-perfil');
+      const controlesAdmin = document.getElementById('controles-admin');
+
+      if (perfil === 'admin') {
+        textoModo.innerHTML = 'Modo: <b>ADMINISTRADOR</b>';
+        controlesAdmin.style.display = 'flex';
+      } else if (perfil === 'tecnico') {
+        textoModo.innerHTML = 'Modo: <b>TÉCNICO</b>';
+        controlesAdmin.style.display = 'none';
+      } else {
+        textoModo.innerHTML = 'Modo: <b>CLIENTE (Leitura)</b>';
+        controlesAdmin.style.display = 'none';
+      }
+      desenharPlantaExpandida();
     }
 
-    desenharMinimapaClean();
+    function desenharPlantaExpandida() {
+      const w = canvasExp.width, h = canvasExp.height;
+      const cx = w / 2, cy = h / 2, escala = 22;
+      ctxExp.clearRect(0, 0, w, h);
+
+      if (imgPlantaObj.complete && imgPlantaObj.naturalWidth !== 0) {
+        ctxExp.drawImage(imgPlantaObj, 0, 0, w, h);
+      } else {
+        ctxExp.fillStyle = "#07192b"; ctxExp.fillRect(0, 0, w, h);
+        ctxExp.strokeStyle = "rgba(0, 82, 204, 0.25)"; ctxExp.lineWidth = 1;
+        for (let x = 0; x < w; x += 30) { ctxExp.beginPath(); ctxExp.moveTo(x, 0); ctxExp.lineTo(x, h); ctxExp.stroke(); }
+        for (let y = 0; y < h; y += 30) { ctxExp.beginPath(); ctxExp.moveTo(0, y); ctxExp.lineTo(w, y); ctxExp.stroke(); }
+      }
+
+      // Desenha Paredes do Magicplan no Canvas Expandido
+      if (cantosMagicplan.length > 1) {
+        ctxExp.strokeStyle = "#ffc107"; ctxExp.lineWidth = 3;
+        ctxExp.fillStyle = "rgba(255, 193, 7, 0.12)";
+        ctxExp.beginPath();
+        cantosMagicplan.forEach((canto, idx) => {
+          const px = cx + (canto.x * escala); const py = cy + (canto.z * escala);
+          if (idx === 0) ctxExp.moveTo(px, py); else ctxExp.lineTo(px, py);
+        });
+        ctxExp.closePath(); ctxExp.stroke(); ctxExp.fill();
+
+        // Desenha os pontos dos cantos
+        cantosMagicplan.forEach((canto, idx) => {
+          const px = cx + (canto.x * escala); const py = cy + (canto.z * escala);
+          ctxExp.fillStyle = "#ffc107"; ctxExp.beginPath(); ctxExp.arc(px, py, 5, 0, 2 * Math.PI); ctxExp.fill();
+        });
+      }
+
+      // Âncora (0,0)
+      ctxExp.fillStyle = "#ffffff"; ctxExp.beginPath(); ctxExp.arc(cx, cy, 6, 0, 2 * Math.PI); ctxExp.fill();
+      ctxExp.fillStyle = "#ffffff"; ctxExp.font = "10px sans-serif"; ctxExp.fillText("ÂNCORA (0,0)", cx - 25, cy + 18);
+
+      // Equipamentos
+      equipamentos.forEach(eq => {
+        const px = cx + (eq.x * escala); const py = cy + (eq.z * escala);
+        ctxExp.fillStyle = eq.cor; ctxExp.beginPath(); ctxExp.arc(px, py, 10, 0, 2 * Math.PI); ctxExp.fill();
+        ctxExp.strokeStyle = "#ffffff"; ctxExp.lineWidth = 2; ctxExp.stroke();
+        ctxExp.fillStyle = "#ffc107"; ctxExp.font = "bold 11px sans-serif"; ctxExp.fillText(eq.nome, px - 25, py - 14);
+      });
+    }
+
+    // --- MODO MAGICPLAN (MAPEAMENTO DA SALA) ---
+    function iniciarMagicplan() {
+      fecharPlantaExpandida();
+      document.getElementById('magicplan-hud').style.display = 'block';
+      cantosMagicplan = [];
+      atualizarStatsMagicplan();
+    }
+
+    function marcarCantoMagicplan() {
+      // Simula a captura do ponto no espaço via retículo central
+      let offsetDist = (cantosMagicplan.length + 1) * 1.5;
+      let novoX = parseFloat((Math.sin(cantosMagicplan.length * 1.5) * offsetDist).toFixed(1));
+      let novoZ = parseFloat((-Math.cos(cantosMagicplan.length * 1.5) * offsetDist).toFixed(1));
+
+      cantosMagicplan.push({ x: novoX, z: novoZ });
+      atualizarStatsMagicplan();
+    }
+
+    function finalizarPlantaMagicplan() {
+      if (cantosMagicplan.length < 3) {
+        alert("Marque pelo menos 3 cantos para fechar o perímetro da sala!");
+        return;
+      }
+      localStorage.setItem('smuploc_cantos_mp', JSON.stringify(cantosMagicplan));
+      document.getElementById('magicplan-hud').style.display = 'none';
+      abrirPlantaExpandida();
+      alert("Planta da sala mapeada com sucesso!");
+    }
+
+    function cancelarMagicplan() {
+      document.getElementById('magicplan-hud').style.display = 'none';
+      abrirPlantaExpandida();
+    }
+
+    function atualizarStatsMagicplan() {
+      document.getElementById('mp-count').innerText = cantosMagicplan.length;
+      
+      // Cálculo aproximado da área em m²
+      let area = 0;
+      if (cantosMagicplan.length >= 3) {
+        for (let i = 0; i < cantosMagicplan.length; i++) {
+          let j = (i + 1) % cantosMagicplan.length;
+          area += cantosMagicplan[i].x * cantosMagicplan[j].z;
+          area -= cantosMagicplan[j].x * cantosMagicplan[i].z;
+        }
+        area = Math.abs(area / 2).toFixed(1);
+      }
+      document.getElementById('mp-area').innerText = area;
+    }
+
+    // --- UPLOAD DA PLANTA (ADMIN) ---
+    function uploadPlantaBaixa(event) {
+      if (perfilAtual !== 'admin') return;
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        plantaImageBase64 = e.target.result;
+        localStorage.setItem('smuploc_planta_img', plantaImageBase64);
+        imgPlantaObj.src = plantaImageBase64;
+        imgPlantaObj.onload = () => { desenharPlantaExpandida(); };
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // --- INTERAÇÃO TOUCH DE ARRASTAR EQUIPAMENTOS ---
+    function getPosCanvas(e) {
+      const rect = canvasExp.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
+    canvasExp.addEventListener('mousedown', (e) => {
+      if (perfilAtual === 'cliente') return;
+      const pos = getPosCanvas(e);
+      const cx = canvasExp.width / 2, cy = canvasExp.height / 2, escala = 22;
+      equipamentos.forEach(eq => {
+        const px = cx + (eq.x * escala); const py = cy + (eq.z * escala);
+        if (Math.hypot(pos.x - px, pos.y - py) < 15) objetoArrastando = eq;
+      });
+    });
+
+    canvasExp.addEventListener('mousemove', (e) => {
+      if (!objetoArrastando || perfilAtual === 'cliente') return;
+      const pos = getPosCanvas(e);
+      const cx = canvasExp.width / 2, cy = canvasExp.height / 2, escala = 22;
+      objetoArrastando.x = parseFloat(((pos.x - cx) / escala).toFixed(1));
+      objetoArrastando.z = parseFloat(((pos.y - cy) / escala).toFixed(1));
+      localStorage.setItem('smuploc_eqs', JSON.stringify(equipamentos));
+      desenharPlantaExpandida();
+    });
+
+    window.addEventListener('mouseup', () => { objetoArrastando = null; });
+
+    canvasExp.addEventListener('touchstart', (e) => {
+      if (perfilAtual === 'cliente') return;
+      const pos = getPosCanvas(e);
+      const cx = canvasExp.width / 2, cy = canvasExp.height / 2, escala = 22;
+      equipamentos.forEach(eq => {
+        const px = cx + (eq.x * escala); const py = cy + (eq.z * escala);
+        if (Math.hypot(pos.x - px, pos.y - py) < 20) objetoArrastando = eq;
+      });
+    });
+
+    canvasExp.addEventListener('touchmove', (e) => {
+      if (!objetoArrastando || perfilAtual === 'cliente') return;
+      const pos = getPosCanvas(e);
+      const cx = canvasExp.width / 2, cy = canvasExp.height / 2, escala = 22;
+      objetoArrastando.x = parseFloat(((pos.x - cx) / escala).toFixed(1));
+      objetoArrastando.z = parseFloat(((pos.y - cy) / escala).toFixed(1));
+      localStorage.setItem('smuploc_eqs', JSON.stringify(equipamentos));
+      desenharPlantaExpandida();
+    });
+
+    canvasExp.addEventListener('touchend', () => { objetoArrastando = null; });
+
+    function resetarPosicoes() {
+      if (perfilAtual !== 'admin') return;
+      equipamentos = [
+        { id: '1', nome: 'UR 01 (Câmara)', tipo: 'UR', x: 1.5, z: -2.5, cor: '#ffc107' },
+        { id: '2', nome: 'UC 02 (Condensadora)', tipo: 'UC', x: -1.8, z: -3.5, cor: '#0052cc' }
+      ];
+      cantosMagicplan = [];
+      localStorage.removeItem('smuploc_cantos_mp');
+      localStorage.setItem('smuploc_eqs', JSON.stringify(equipamentos));
+      desenharPlantaExpandida();
+    }
   </script>
 
 </body>
