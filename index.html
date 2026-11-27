@@ -10,6 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   
   <!-- CSS Modular -->
   <link rel="stylesheet" href="css/styles.css">
@@ -95,7 +96,7 @@
         <button class="btn-admin btn-dark" type="button" onclick="EquipmentModule.abrir()">📋 Equipamentos</button>
         <label class="btn-admin btn-blue">
           📤 Subir Planta
-          <input type="file" id="input-planta" accept="image/*" style="display:none;" onchange="MinimapModule.uploadPlanta(event)">
+          <input type="file" id="input-planta" accept="image/*,application/pdf,.pdf" style="display:none;" onchange="MinimapModule.uploadPlanta(event)">
         </label>
         <button class="btn-admin btn-dark" onclick="State.limparTudo()">🔄 Limpar Tudo</button>
       </div>
