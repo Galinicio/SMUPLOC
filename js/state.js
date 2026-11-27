@@ -17,6 +17,8 @@ const State = {
   ambientes: [],
   ambienteAtualId: null,
   equipamentos: [],
+  posicaoUsuario: null,
+  destinoId: null,
   cantosMapear: [],
   plantaImageBase64: null,
   imgPlantaObj: new Image(),
