@@ -5,6 +5,7 @@
  */
 const MapearModule = {
   ativo: false,
+  pontosAnteriores: [],
   escalaPxPorMetro: (() => {
     try {
       const valor = Number(localStorage.getItem('smuploc_escala_mapa'));
@@ -27,6 +28,7 @@ const MapearModule = {
     if (modal) modal.style.display = 'flex';
     if (hud) hud.style.display = 'block';
 
+    this.pontosAnteriores = State.cantosMapear.map(ponto => ({ ...ponto }));
     this.ativo = true;
     State.cantosMapear = [];
     this.atualizarStats();
@@ -155,6 +157,7 @@ const MapearModule = {
       return;
     }
 
+    this.pontosAnteriores = [];
     this.encerrar();
     MinimapModule.abrirModal();
     alert('Contorno salvo. Área estimada: ' + area.toFixed(2) + ' m².');
@@ -166,7 +169,10 @@ const MapearModule = {
       if (!confirmar) return;
     }
 
+    State.cantosMapear = this.pontosAnteriores.map(ponto => ({ ...ponto }));
+    this.pontosAnteriores = [];
     this.encerrar();
+    MinimapModule.renderExpandido();
     MinimapModule.abrirModal();
   },
 
