@@ -53,6 +53,12 @@ const MinimapModule = {
       ctx.fillStyle = pequeno ? '#0a2540' : '#07192b';
       ctx.fillRect(0, 0, w, h);
       ctx.drawImage(State.imgPlantaObj, (w - drawW) / 2, (h - drawH) / 2, drawW, drawH);
+      if (typeof PlanAnalysis !== 'undefined' && PlanAnalysis.ativo && PlanAnalysis.canvas) {
+        ctx.save();
+        ctx.globalAlpha = 0.78;
+        ctx.drawImage(PlanAnalysis.canvas, (w - drawW) / 2, (h - drawH) / 2, drawW, drawH);
+        ctx.restore();
+      }
       return;
     }
 
