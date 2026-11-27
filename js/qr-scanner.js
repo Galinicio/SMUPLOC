@@ -100,7 +100,7 @@ const QRScannerModule = {
       if (jsonParsed && typeof jsonParsed === 'object' && !Array.isArray(jsonParsed)) {
         tituloQr = texto(jsonParsed.nome || jsonParsed.tag, 100) || 'EQUIPAMENTO SMUP';
         idLido = texto(jsonParsed.id || jsonParsed.tag || payloadSeguro, 180);
-        detalheQr = `ID: ${idLido}\nSTATUS: OPERACIONAL`;
+        detalheQr = `ID: ${idLido}\nIDENTIFICAÇÃO: RECONHECIDA\nCOMUNICAÇÃO: NÃO VERIFICADA`;
       } else {
         tituloQr = `TAG: ${payloadSeguro.slice(0, 100)}`;
       }
@@ -151,7 +151,7 @@ const QRScannerModule = {
     if (arBody) {
       arBody.setAttribute(
         'value',
-        `TAG REAL: ${payloadSeguro}\n--------------------\nCONEXAO: OK\nMODO: NAVEGACAO AR`
+        `TAG: ${payloadSeguro}\n--------------------\nIDENTIFICAÇÃO: LIDA\nCOMUNICAÇÃO: NÃO VERIFICADA`
       );
     }
   },
