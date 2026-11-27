@@ -123,9 +123,20 @@ const QRScannerModule = {
       );
 
     if (toastActionDiv) {
-      toastActionDiv.textContent = jaCadastrado
-        ? 'Cadastrado no mapa'
-        : 'Etiqueta identificada — equipamento ainda não cadastrado';
+      toastActionDiv.replaceChildren();
+
+      if (jaCadastrado) {
+        toastActionDiv.textContent = 'Cadastrado no mapa';
+      } else if (State.perfilAtual === 'cliente') {
+        toastActionDiv.textContent = 'Etiqueta identificada — cadastro restrito';
+      } else {
+        const botaoCadastro = document.createElement('button');
+        botaoCadastro.type = 'button';
+        botaoCadastro.className = 'btn-cadastrar-qr';
+        botaoCadastro.textContent = 'Cadastrar equipamento';
+        botaoCadastro.addEventListener('click', () => this.cadastrarPrompt(payloadSeguro), { once: true });
+        toastActionDiv.appendChild(botaoCadastro);
+      }
     }
 
     if (toastInfo) {
@@ -146,10 +157,24 @@ const QRScannerModule = {
   },
 
   cadastrarPrompt(payload) {
-    const id = String(payload || '').trim().slice(0, 180);
+    if (State.perfilAtual === 'cliente') {
+      alert('O modo cliente não pode cadastrar equipamentos.');
+      return;
+    }
+
+    let dados = {};
+    try {
+      const parsed = JSON.parse(payload);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) dados = parsed;
+    } catch (erro) {
+      // QR Code simples: o próprio texto é o identificador.
+    }
+
+    const id = String(dados.id || dados.tag || payload || '').trim().slice(0, 180);
     if (!id) return;
 
-    const nomeCurto = (prompt('Digite o nome deste equipamento:', id) || '').trim();
+    const nomePadrao = String(dados.nome || dados.tag || id).slice(0, 100);
+    const nomeCurto = (prompt('Digite o nome deste equipamento:', nomePadrao) || '').trim();
     if (!nomeCurto) return;
 
     const tipoInformado = (prompt('Tipo de Equipamento (UR, UC, US, PT100):', 'UR') || 'UR')
@@ -173,8 +198,10 @@ const QRScannerModule = {
       return;
     }
 
-    alert('Equipamento cadastrado. Posicione-o manualmente na planta.');
+    MinimapModule.equipamentoAguardandoPosicao = novoEq;
+    MinimapModule.abrirModal();
+    alert('Equipamento cadastrado. Toque no local correto da planta para posicioná-lo.');
     const toastActionDiv = document.getElementById('toast-action');
-    if (toastActionDiv) toastActionDiv.textContent = 'Cadastrado — aguardando posicionamento na planta';
+    if (toastActionDiv) toastActionDiv.textContent = 'Cadastrado — toque na planta para posicionar';
   }
 };
