@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const rect = canvasExp.getBoundingClientRect();
     const ponto = e.touches ? e.touches[0] : e;
     return {
-      x: ponto.clientX - rect.left,
-      y: ponto.clientY - rect.top
+      x: (ponto.clientX - rect.left) * (canvasExp.width / rect.width),
+      y: (ponto.clientY - rect.top) * (canvasExp.height / rect.height)
     };
   }
 
@@ -53,12 +53,16 @@ document.addEventListener('DOMContentLoaded', () => {
     eq.z = parseFloat(((pos.y - cy) / escala).toFixed(1));
     eq.posicionado = true;
 
-    State.salvarEquipamentos();
     MinimapModule.renderExpandido();
     MinimapModule.renderPequeno();
   };
 
   const pararArraste = () => {
+    if (MinimapModule.objetoArrastando) {
+      State.salvarEquipamentos();
+      MinimapModule.renderExpandido();
+      MinimapModule.renderPequeno();
+    }
     MinimapModule.objetoArrastando = null;
   };
 
