@@ -4,6 +4,31 @@
  */
 const MinimapModule = {
   objetoArrastando: null,
+  equipamentoAguardandoPosicao: null,
+
+  posicionarEquipamento(evento) {
+    const equipamento = this.equipamentoAguardandoPosicao;
+    const canvas = document.getElementById('canvas-expandido');
+    if (!equipamento || !canvas || evento.target !== canvas) return false;
+
+    const rect = canvas.getBoundingClientRect();
+    const escalaX = canvas.width / rect.width;
+    const escalaY = canvas.height / rect.height;
+    const px = (evento.clientX - rect.left) * escalaX;
+    const py = (evento.clientY - rect.top) * escalaY;
+    const escala = (typeof MapearModule !== 'undefined' && MapearModule.escalaPxPorMetro) || 22;
+
+    equipamento.x = Number(((px - canvas.width / 2) / escala).toFixed(3));
+    equipamento.z = Number(((py - canvas.height / 2) / escala).toFixed(3));
+    equipamento.posicionado = true;
+    this.equipamentoAguardandoPosicao = null;
+
+    State.salvarEquipamentos();
+    this.renderExpandido();
+    this.renderPequeno();
+    alert('Equipamento posicionado na planta.');
+    return true;
+  },
 
   abrirModal() {
     const modal = document.getElementById('modal-planta');
