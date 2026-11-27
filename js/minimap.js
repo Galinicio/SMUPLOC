@@ -109,6 +109,33 @@ const MinimapModule = {
     }
   },
 
+  desenharNavegacao(ctx, escala, cx, cy, expandido) {
+    const destino = State.equipamentos.find(eq => String(eq.id) === String(State.destinoId) && eq.posicionado !== false);
+    const usuario = State.posicaoUsuario;
+    if (destino && usuario) {
+      const ux = cx + Number(usuario.x) * escala;
+      const uy = cy + Number(usuario.z) * escala;
+      const dx = cx + Number(destino.x) * escala;
+      const dy = cy + Number(destino.z) * escala;
+      ctx.save();
+      ctx.strokeStyle = '#00e5ff';
+      ctx.lineWidth = expandido ? 4 : 2;
+      ctx.setLineDash(expandido ? [8, 5] : [4, 3]);
+      ctx.beginPath(); ctx.moveTo(ux, uy); ctx.lineTo(dx, dy); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#00e5ff'; ctx.beginPath(); ctx.arc(ux, uy, expandido ? 8 : 4, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.restore();
+    }
+    if (destino) {
+      const dx = cx + Number(destino.x) * escala;
+      const dy = cy + Number(destino.z) * escala;
+      ctx.save(); ctx.strokeStyle = '#ff3b5c'; ctx.lineWidth = expandido ? 3 : 2;
+      ctx.beginPath(); ctx.arc(dx, dy, expandido ? 15 : 7, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+    }
+  },
+
   desenharEquipamentos(ctx, escala, cx, cy, expandido) {
     State.equipamentos.forEach(eq => {
       // Equipamentos recém-cadastrados não aparecem até serem posicionados.
@@ -155,6 +182,7 @@ const MinimapModule = {
     ctx.fill();
 
     this.desenharEquipamentos(ctx, escala, cx, cy, false);
+    this.desenharNavegacao(ctx, escala, cx, cy, false);
   },
 
   renderExpandido() {
@@ -182,6 +210,7 @@ const MinimapModule = {
     ctx.fillText('ÂNCORA (0,0)', cx - 25, cy + 18);
 
     this.desenharEquipamentos(ctx, escala, cx, cy, true);
+    this.desenharNavegacao(ctx, escala, cx, cy, true);
   },
 
   uploadPlanta(event) {

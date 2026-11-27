@@ -17,6 +17,8 @@ const State = {
   ambientes: [],
   ambienteAtualId: null,
   equipamentos: [],
+  posicaoUsuario: null,
+  destinoId: null,
   cantosMapear: [],
   plantaImageBase64: null,
   imgPlantaObj: new Image(),
@@ -59,6 +61,8 @@ const State = {
       setor: String(dados.setor || '').slice(0, 100),
       codigoQr: String(dados.codigoQr || this.gerarId('smuploc')).slice(0, 160),
       equipamentos: Array.isArray(dados.equipamentos) ? dados.equipamentos : [],
+      posicaoUsuario: dados.posicaoUsuario && Number.isFinite(Number(dados.posicaoUsuario.x)) && Number.isFinite(Number(dados.posicaoUsuario.z)) ? { x: Number(dados.posicaoUsuario.x), z: Number(dados.posicaoUsuario.z) } : null,
+      destinoId: dados.destinoId ? String(dados.destinoId).slice(0, 180) : null,
       cantos: Array.isArray(dados.cantos) ? dados.cantos : [],
       planta: typeof dados.planta === 'string' && dados.planta.startsWith('data:image/') ? dados.planta : null,
       escala: Number.isFinite(Number(dados.escala)) && Number(dados.escala) >= 4 && Number(dados.escala) <= 100
@@ -114,6 +118,8 @@ const State = {
     const ambiente = this.obterAmbienteAtual();
     if (!ambiente) return false;
     ambiente.equipamentos = this.equipamentos;
+    ambiente.posicaoUsuario = this.posicaoUsuario || null;
+    ambiente.destinoId = this.destinoId || null;
     ambiente.cantos = this.cantosMapear;
     ambiente.planta = this.plantaImageBase64;
     ambiente.escala = (typeof MapearModule !== 'undefined' && MapearModule.escalaPxPorMetro) || ambiente.escala || 22;
@@ -126,6 +132,8 @@ const State = {
     if (!ambiente) return false;
     this.ambienteAtualId = ambiente.id;
     this.equipamentos = ambiente.equipamentos.filter(eq => eq && typeof eq === 'object');
+    this.posicaoUsuario = ambiente.posicaoUsuario || null;
+    this.destinoId = ambiente.destinoId || null;
     this.cantosMapear = ambiente.cantos.filter(p => p && Number.isFinite(Number(p.x)) && Number.isFinite(Number(p.z)));
     this.plantaImageBase64 = ambiente.planta || null;
 
@@ -272,6 +280,8 @@ const State = {
 
     this.ambientes = [];
     this.equipamentos = [];
+  posicaoUsuario: null,
+  destinoId: null,
     this.cantosMapear = [];
     this.plantaImageBase64 = null;
     this.ambienteAtualId = null;
