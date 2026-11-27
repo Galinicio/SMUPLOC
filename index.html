@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>SMUPLOC — AR & Magicplan Mapeador</title>
+  <title>SMUPLOC — AR & Mapeamento de Sala</title>
   
   <!-- A-Frame & MindAR -->
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
@@ -14,7 +14,7 @@
   <style>
     body { margin: 0; overflow: hidden; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; user-select: none; }
     
-    /* 🚫 REMOVE QUALQUER ELEMENTO FEIO DE SCANNER PADRÃO DO MINDAR */
+    /* 🚫 REMOVE MOLDURAS PADRÃO DO MINDAR */
     .mindar-ui-overlay, .mindar-ui-loading, .mindar-ui-scanning { display: none !important; }
 
     /* 🟡 TOPO CLEAN SMUP */
@@ -41,7 +41,7 @@
     }
     #mapa-canvas { width: 100%; height: 105px; display: block; }
 
-    /* 💡 TOAST INFORMATIVO */
+    /* 💡 TOAST INFORMATIVO AO ESCANEAR */
     #toast-info {
       position: absolute; bottom: 16px; right: 16px; left: 160px; z-index: 999;
       background: #0a2540; color: #ffffff; border-left: 5px solid #ffc107;
@@ -86,30 +86,43 @@
       background: #0052cc; color: #fff; border: none; padding: 8px 12px;
       border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer;
     }
-    .btn-magicplan {
-      background: #ffc107; color: #0a2540; border: none; padding: 8px 14px;
+    .btn-mapear {
+      background: #ffc107; color: #0a2540; border: none; padding: 8px 16px;
       border-radius: 6px; font-weight: 800; font-size: 12px; cursor: pointer;
       box-shadow: 0 0 12px rgba(255, 193, 7, 0.4);
     }
 
-    /* 📏 MIRA HUD DO MODO MAGICPLAN (SOBRE A CÂMERA) */
-    #magicplan-hud {
+    /* 📐 HUD DO MODO MAPEAR (SOBRE A CÂMERA LIMPA) */
+    #mapear-hud {
       display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 10001;
-      pointer-events: none;
     }
+    
+    /* 📖 TUTORIAL SUPER DIDÁTICO NO TOPO */
+    #mapear-tutorial {
+      position: absolute; top: 16px; left: 16px; right: 16px;
+      background: rgba(10, 37, 64, 0.95); border: 1.5px solid #ffc107; border-radius: 12px;
+      padding: 12px 14px; color: #ffffff; font-size: 11px; box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+      backdrop-filter: blur(8px);
+    }
+    #mapear-tutorial h4 { margin: 0 0 6px 0; color: #ffc107; font-size: 13px; text-transform: uppercase; }
+    .step-item { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .step-num { background: #ffc107; color: #0a2540; font-weight: 800; width: 16px; height: 16px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 10px; }
+
+    /* MIRA CENTRAL */
     .crosshair-center {
       position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      width: 24px; height: 24px; border: 2px solid #ffc107; border-radius: 50%;
-      box-shadow: 0 0 10px #ffc107;
+      width: 26px; height: 26px; border: 2px solid #ffc107; border-radius: 50%;
+      box-shadow: 0 0 12px #ffc107; pointer-events: none;
     }
     .crosshair-center::after {
       content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
       width: 4px; height: 4px; background: #ffffff; border-radius: 50%;
     }
-    #magicplan-controls {
-      position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-      pointer-events: auto; background: rgba(10, 37, 64, 0.95); border: 2px solid #ffc107;
-      padding: 12px 20px; border-radius: 16px; display: flex; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+
+    #mapear-controls {
+      position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
+      background: rgba(10, 37, 64, 0.95); border: 2px solid #ffc107;
+      padding: 10px 16px; border-radius: 16px; display: flex; gap: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
     .btn-mp-action {
       background: #0052cc; color: #fff; border: none; padding: 10px 14px;
@@ -117,11 +130,6 @@
     }
     .btn-mp-success { background: #00ff66; color: #05101a; font-weight: 800; }
     .btn-mp-danger { background: #ff0055; color: #fff; }
-    #mp-stats-bar {
-      position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-      background: rgba(10, 37, 64, 0.9); color: #ffc107; padding: 8px 16px;
-      border-radius: 20px; border: 1px solid #ffc107; font-size: 12px; font-weight: bold;
-    }
   </style>
 </head>
 <body>
@@ -165,31 +173,42 @@
       <canvas id="canvas-expandido" width="360" height="360"></canvas>
     </div>
 
-    <!-- Barra de Ferramentas / Magicplan -->
+    <!-- Barra de Ferramentas / MAPEAR -->
     <div class="modal-controls">
-      <button class="btn-magicplan" onclick="iniciarMagicplan()">📏 Mapear Sala (Magicplan)</button>
+      <button class="btn-mapear" onclick="iniciarMapeamento()">📏 MAPEAR SALA</button>
       <div id="controles-admin" style="display:flex; gap:6px;">
         <label class="btn-admin" style="background:#0052cc;">
           📤 Subir Planta
           <input type="file" id="input-planta" accept="image/*" style="display:none;" onchange="uploadPlantaBaixa(event)">
         </label>
-        <button class="btn-admin" style="background:#334155;" onclick="resetarPosicoes()">🔄 Resetar</button>
+        <button class="btn-admin" style="background:#334155;" onclick="resetarPosicoes()">🔄 Limpar Tudo</button>
       </div>
     </div>
   </div>
 
-  <!-- HUD DO MODO MAGICPLAN (SOBRE A CÂMERA LIMPA) -->
-  <div id="magicplan-hud">
-    <div id="mp-stats-bar">📐 Cantos Marcados: <span id="mp-count">0</span> | Área: <span id="mp-area">0</span> m²</div>
+  <!-- HUD DO MODO MAPEAR (TUTORIAL DIDÁTICO + MIRA) -->
+  <div id="mapear-hud">
+    <!-- 📖 TUTORIAL EM 3 PASSOS SIMPLES -->
+    <div id="mapear-tutorial">
+      <h4>📐 Como Mapear o Cômodo:</h4>
+      <div class="step-item"><span class="step-num">1</span> Apunte a mira central para o primeiro canto do cômodo e clique em <b>"📍 Marcar Canto"</b>.</div>
+      <div class="step-item"><span class="step-num">2</span> Caminhe até os outros cantos na sequência marcando cada um.</div>
+      <div class="step-item"><span class="step-num">3</span> Ao terminar, clique em <b>"🏁 Finalizar Planta"</b> para gerar o desenho automático!</div>
+      <div style="margin-top:6px; color:#ffc107; font-weight:bold;">
+        Cantos Marcados: <span id="mp-count">0</span> | Área Estimada: <span id="mp-area">0</span> m²
+      </div>
+    </div>
+
     <div class="crosshair-center"></div>
-    <div id="magicplan-controls">
-      <button class="btn-mp-action" onclick="marcarCantoMagicplan()">📍 Marcar Canto</button>
-      <button class="btn-mp-action btn-mp-success" onclick="finalizarPlantaMagicplan()">🏁 Finalizar Planta</button>
-      <button class="btn-mp-action btn-mp-danger" onclick="cancelarMagicplan()">❌ Sair</button>
+
+    <div id="mapear-controls">
+      <button class="btn-mp-action" onclick="marcarCantoMapear()">📍 Marcar Canto</button>
+      <button class="btn-mp-action btn-mp-success" onclick="finalizarPlantaMapear()">🏁 Finalizar Planta</button>
+      <button class="btn-mp-action btn-mp-danger" onclick="cancelarMapear()">❌ Cancelar</button>
     </div>
   </div>
 
-  <!-- CENA 3D (Câmera Limpa sem UI padrão) -->
+  <!-- CENA 3D (Câmera Limpa sem elementos visuais feios) -->
   <a-scene 
     mindar-image="imageTargetSrc: ./targets.mind; filterMinCF: 0.0001; filterBeta: 0.001; uiLoading: no; uiScanning: no;" 
     color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" 
@@ -226,17 +245,15 @@
   <canvas id="qr-canvas" style="display:none;"></canvas>
 
   <script>
-    // ESTADO GLOBAL DO PROJETO
+    // ESTADO GLOBAL
     let perfilAtual = 'admin';
-    let cantosMagicplan = JSON.parse(localStorage.getItem('smuploc_cantos_mp')) || [];
+    let cantosMapear = JSON.parse(localStorage.getItem('smuploc_cantos_mp')) || [];
     let plantaImageBase64 = localStorage.getItem('smuploc_planta_img') || null;
     let imgPlantaObj = new Image();
     if (plantaImageBase64) imgPlantaObj.src = plantaImageBase64;
 
-    let equipamentos = JSON.parse(localStorage.getItem('smuploc_eqs')) || [
-      { id: '1', nome: 'UR 01 (Câmara)', tipo: 'UR', x: 1.5, z: -2.5, cor: '#ffc107' },
-      { id: '2', nome: 'UC 02 (Condensadora)', tipo: 'UC', x: -1.8, z: -3.5, cor: '#0052cc' }
-    ];
+    // 🧹 ZERADO! Nenhum objeto fictício cadastrado inicialmente.
+    let equipamentos = JSON.parse(localStorage.getItem('smuploc_eqs')) || [];
 
     let objetoArrastando = null;
 
@@ -287,11 +304,11 @@
         for (let y = 0; y < h; y += 15) { ctxMapa.beginPath(); ctxMapa.moveTo(0, y); ctxMapa.lineTo(w, y); ctxMapa.stroke(); }
       }
 
-      // Desenha paredes do Magicplan no Minimapa
-      if (cantosMagicplan.length > 1) {
+      // Desenha paredes do Mapeador
+      if (cantosMapear.length > 1) {
         ctxMapa.strokeStyle = "#ffc107"; ctxMapa.lineWidth = 2;
         ctxMapa.beginPath();
-        cantosMagicplan.forEach((canto, idx) => {
+        cantosMapear.forEach((canto, idx) => {
           const px = cx + (canto.x * escala); const py = cy + (canto.z * escala);
           if (idx === 0) ctxMapa.moveTo(px, py); else ctxMapa.lineTo(px, py);
         });
@@ -301,10 +318,10 @@
       // Técnico (Âncora)
       ctxMapa.fillStyle = "#ffffff"; ctxMapa.beginPath(); ctxMapa.arc(cx, cy, 4, 0, 2 * Math.PI); ctxMapa.fill();
 
-      // Equipamentos
+      // Equipamentos cadastrados reais
       equipamentos.forEach(eq => {
         const px = cx + (eq.x * escala); const py = cy + (eq.z * escala);
-        ctxMapa.fillStyle = eq.cor; ctxMapa.beginPath(); ctxMapa.arc(px, py, 4, 0, 2 * Math.PI); ctxMapa.fill();
+        ctxMapa.fillStyle = eq.cor || '#ffc107'; ctxMapa.beginPath(); ctxMapa.arc(px, py, 4, 0, 2 * Math.PI); ctxMapa.fill();
       });
 
       requestAnimationFrame(desenharMinimapaPequeno);
@@ -351,19 +368,18 @@
         for (let y = 0; y < h; y += 30) { ctxExp.beginPath(); ctxExp.moveTo(0, y); ctxExp.lineTo(w, y); ctxExp.stroke(); }
       }
 
-      // Desenha Paredes do Magicplan no Canvas Expandido
-      if (cantosMagicplan.length > 1) {
+      // Desenha Paredes no Canvas Expandido
+      if (cantosMapear.length > 1) {
         ctxExp.strokeStyle = "#ffc107"; ctxExp.lineWidth = 3;
         ctxExp.fillStyle = "rgba(255, 193, 7, 0.12)";
         ctxExp.beginPath();
-        cantosMagicplan.forEach((canto, idx) => {
+        cantosMapear.forEach((canto, idx) => {
           const px = cx + (canto.x * escala); const py = cy + (canto.z * escala);
           if (idx === 0) ctxExp.moveTo(px, py); else ctxExp.lineTo(px, py);
         });
         ctxExp.closePath(); ctxExp.stroke(); ctxExp.fill();
 
-        // Desenha os pontos dos cantos
-        cantosMagicplan.forEach((canto, idx) => {
+        cantosMapear.forEach((canto) => {
           const px = cx + (canto.x * escala); const py = cy + (canto.z * escala);
           ctxExp.fillStyle = "#ffc107"; ctxExp.beginPath(); ctxExp.arc(px, py, 5, 0, 2 * Math.PI); ctxExp.fill();
         });
@@ -373,59 +389,57 @@
       ctxExp.fillStyle = "#ffffff"; ctxExp.beginPath(); ctxExp.arc(cx, cy, 6, 0, 2 * Math.PI); ctxExp.fill();
       ctxExp.fillStyle = "#ffffff"; ctxExp.font = "10px sans-serif"; ctxExp.fillText("ÂNCORA (0,0)", cx - 25, cy + 18);
 
-      // Equipamentos
+      // Equipamentos Reais Cadastrados
       equipamentos.forEach(eq => {
         const px = cx + (eq.x * escala); const py = cy + (eq.z * escala);
-        ctxExp.fillStyle = eq.cor; ctxExp.beginPath(); ctxExp.arc(px, py, 10, 0, 2 * Math.PI); ctxExp.fill();
+        ctxExp.fillStyle = eq.cor || '#ffc107'; ctxExp.beginPath(); ctxExp.arc(px, py, 10, 0, 2 * Math.PI); ctxExp.fill();
         ctxExp.strokeStyle = "#ffffff"; ctxExp.lineWidth = 2; ctxExp.stroke();
         ctxExp.fillStyle = "#ffc107"; ctxExp.font = "bold 11px sans-serif"; ctxExp.fillText(eq.nome, px - 25, py - 14);
       });
     }
 
-    // --- MODO MAGICPLAN (MAPEAMENTO DA SALA) ---
-    function iniciarMagicplan() {
+    // --- MODO MAPEAR (MAPEAMENTO DA SALA) ---
+    function iniciarMapeamento() {
       fecharPlantaExpandida();
-      document.getElementById('magicplan-hud').style.display = 'block';
-      cantosMagicplan = [];
-      atualizarStatsMagicplan();
+      document.getElementById('mapear-hud').style.display = 'block';
+      cantosMapear = [];
+      atualizarStatsMapear();
     }
 
-    function marcarCantoMagicplan() {
-      // Simula a captura do ponto no espaço via retículo central
-      let offsetDist = (cantosMagicplan.length + 1) * 1.5;
-      let novoX = parseFloat((Math.sin(cantosMagicplan.length * 1.5) * offsetDist).toFixed(1));
-      let novoZ = parseFloat((-Math.cos(cantosMagicplan.length * 1.5) * offsetDist).toFixed(1));
+    function marcarCantoMapear() {
+      let offsetDist = (cantosMapear.length + 1) * 1.5;
+      let novoX = parseFloat((Math.sin(cantosMapear.length * 1.5) * offsetDist).toFixed(1));
+      let novoZ = parseFloat((-Math.cos(cantosMapear.length * 1.5) * offsetDist).toFixed(1));
 
-      cantosMagicplan.push({ x: novoX, z: novoZ });
-      atualizarStatsMagicplan();
+      cantosMapear.push({ x: novoX, z: novoZ });
+      atualizarStatsMapear();
     }
 
-    function finalizarPlantaMagicplan() {
-      if (cantosMagicplan.length < 3) {
+    function finalizarPlantaMapear() {
+      if (cantosMapear.length < 3) {
         alert("Marque pelo menos 3 cantos para fechar o perímetro da sala!");
         return;
       }
-      localStorage.setItem('smuploc_cantos_mp', JSON.stringify(cantosMagicplan));
-      document.getElementById('magicplan-hud').style.display = 'none';
+      localStorage.setItem('smuploc_cantos_mp', JSON.stringify(cantosMapear));
+      document.getElementById('mapear-hud').style.display = 'none';
       abrirPlantaExpandida();
-      alert("Planta da sala mapeada com sucesso!");
+      alert("Planta do cômodo mapeada com sucesso!");
     }
 
-    function cancelarMagicplan() {
-      document.getElementById('magicplan-hud').style.display = 'none';
+    function cancelarMapear() {
+      document.getElementById('mapear-hud').style.display = 'none';
       abrirPlantaExpandida();
     }
 
-    function atualizarStatsMagicplan() {
-      document.getElementById('mp-count').innerText = cantosMagicplan.length;
+    function atualizarStatsMapear() {
+      document.getElementById('mp-count').innerText = cantosMapear.length;
       
-      // Cálculo aproximado da área em m²
       let area = 0;
-      if (cantosMagicplan.length >= 3) {
-        for (let i = 0; i < cantosMagicplan.length; i++) {
-          let j = (i + 1) % cantosMagicplan.length;
-          area += cantosMagicplan[i].x * cantosMagicplan[j].z;
-          area -= cantosMagicplan[j].x * cantosMagicplan[i].z;
+      if (cantosMapear.length >= 3) {
+        for (let i = 0; i < cantosMapear.length; i++) {
+          let j = (i + 1) % cantosMapear.length;
+          area += cantosMapear[i].x * cantosMapear[j].z;
+          area -= cantosMapear[j].x * cantosMapear[i].z;
         }
         area = Math.abs(area / 2).toFixed(1);
       }
@@ -435,7 +449,7 @@
     // --- UPLOAD DA PLANTA (ADMIN) ---
     function uploadPlantaBaixa(event) {
       if (perfilAtual !== 'admin') return;
-      const file = event.target.files[0];
+      const file = event.target.files;
       if (!file) return;
 
       const reader = new FileReader();
@@ -448,11 +462,11 @@
       reader.readAsDataURL(file);
     }
 
-    // --- INTERAÇÃO TOUCH DE ARRASTAR EQUIPAMENTOS ---
+    // --- INTERAÇÃO TOUCH/MOUSE ---
     function getPosCanvas(e) {
       const rect = canvasExp.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const clientX = e.touches ? e.touches.clientX : e.clientX;
+      const clientY = e.touches ? e.touches.clientY : e.clientY;
       return { x: clientX - rect.left, y: clientY - rect.top };
     }
 
@@ -502,14 +516,12 @@
 
     function resetarPosicoes() {
       if (perfilAtual !== 'admin') return;
-      equipamentos = [
-        { id: '1', nome: 'UR 01 (Câmara)', tipo: 'UR', x: 1.5, z: -2.5, cor: '#ffc107' },
-        { id: '2', nome: 'UC 02 (Condensadora)', tipo: 'UC', x: -1.8, z: -3.5, cor: '#0052cc' }
-      ];
-      cantosMagicplan = [];
+      equipamentos = [];
+      cantosMapear = [];
       localStorage.removeItem('smuploc_cantos_mp');
-      localStorage.setItem('smuploc_eqs', JSON.stringify(equipamentos));
+      localStorage.removeItem('smuploc_eqs');
       desenharPlantaExpandida();
+      alert("Todos os marcadores e plantas foram limpos!");
     }
   </script>
 
