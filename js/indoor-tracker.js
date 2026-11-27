@@ -37,6 +37,9 @@ const IndoorTracker = {
       this.parar(false);
       this.ativo = true;
       this.passos = 0;
+      this.heading = null;
+      this.suporteMovimento = false;
+      this.suporteOrientacao = false;
       this.precisaoM = 0.8;
       this.historicoMagnitude = [];
       this.ultimaAmostraPasso = 0;
@@ -60,6 +63,10 @@ const IndoorTracker = {
   },
 
   iniciarNoMarcoZero(anchor) {
+    this.parar(false);
+    this.heading = null;
+    this.passos = 0;
+    this.precisaoM = 0.8;
     State.posicaoUsuario = { x: Number(anchor.x) || 0, z: Number(anchor.z) || 0 };
     State.sincronizarAmbienteAtual();
     MinimapModule.renderExpandido();
@@ -72,7 +79,7 @@ const IndoorTracker = {
     let heading = null;
     if (Number.isFinite(evento.webkitCompassHeading)) {
       heading = Number(evento.webkitCompassHeading);
-    } else if (Number.isFinite(evento.alpha)) {
+    } else if (evento.absolute === true && Number.isFinite(evento.alpha)) {
       heading = (360 - Number(evento.alpha)) % 360;
     }
     if (heading !== null) {
