@@ -44,7 +44,15 @@ const MinimapModule = {
 
   desenharFundo(ctx, w, h, pequeno) {
     if (State.imgPlantaObj.complete && State.imgPlantaObj.naturalWidth > 0) {
-      ctx.drawImage(State.imgPlantaObj, 0, 0, w, h);
+      // Mantém a proporção original da planta; não distorce salas ou medidas visuais.
+      const imgW = State.imgPlantaObj.naturalWidth;
+      const imgH = State.imgPlantaObj.naturalHeight;
+      const fator = Math.min(w / imgW, h / imgH);
+      const drawW = imgW * fator;
+      const drawH = imgH * fator;
+      ctx.fillStyle = pequeno ? '#0a2540' : '#07192b';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(State.imgPlantaObj, (w - drawW) / 2, (h - drawH) / 2, drawW, drawH);
       return;
     }
 
