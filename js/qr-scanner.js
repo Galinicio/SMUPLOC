@@ -8,10 +8,53 @@ const QRScannerModule = {
   processando: false,
   ultimoPayload: '',
   ultimaLeituraEm: 0,
+  trilhaFocoConfigurada: null,
+
+  configurarCamera() {
+    const video = document.querySelector('a-scene video') || document.querySelector('video');
+    if (!video) return false;
+    video.setAttribute('autoplay', '');
+    video.setAttribute('muted', '');
+    video.setAttribute('playsinline', '');
+    video.muted = true;
+    video.playsInline = true;
+    const track = video.srcObject && video.srcObject.getVideoTracks ? video.srcObject.getVideoTracks()[0] : null;
+    if (track && this.trilhaFocoConfigurada !== track) {
+      this.trilhaFocoConfigurada = track;
+      track.applyConstraints({
+        advanced: [
+          { focusMode: 'continuous' },
+          { exposureMode: 'continuous' },
+          { whiteBalanceMode: 'continuous' }
+        ]
+      }).catch(() => {});
+    }
+    return !!track;
+  },
+
+  async tentarFoco() {
+    const video = document.querySelector('a-scene video') || document.querySelector('video');
+    const track = video && video.srcObject && video.srcObject.getVideoTracks ? video.srcObject.getVideoTracks()[0] : null;
+    if (!track) {
+      alert('A câmera ainda está iniciando. Aguarde um instante e tente novamente.');
+      return;
+    }
+    try {
+      await track.applyConstraints({ advanced: [{ focusMode: 'single-shot' }] });
+      setTimeout(() => {
+        track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
+      }, 900);
+      const body = document.getElementById('toast-body');
+      if (body) body.textContent = 'Ajuste de foco solicitado à câmera.';
+    } catch (erro) {
+      alert('Este celular não permite controlar o foco pelo navegador. Tente aproximar ou afastar um pouco o QR Code.');
+    }
+  },
 
   iniciarLoop() {
     if (this.executando) return;
     this.executando = true;
+    this.configurarCamera();
     this.agendarLeitura();
   },
 
@@ -29,7 +72,7 @@ const QRScannerModule = {
     this.timerLoop = setTimeout(() => {
       this.lerFrame();
       this.agendarLeitura();
-    }, 300);
+    }, 160);
   },
 
   lerFrame() {
@@ -54,7 +97,8 @@ const QRScannerModule = {
 
     try {
       // Reduz a resolução de análise para diminuir o custo por quadro.
-      const limite = 640;
+      this.configurarCamera();
+      const limite = 960;
       const proporcao = Math.min(1, limite / Math.max(video.videoWidth, video.videoHeight));
       canvas.width = Math.max(1, Math.round(video.videoWidth * proporcao));
       canvas.height = Math.max(1, Math.round(video.videoHeight * proporcao));
@@ -62,7 +106,7 @@ const QRScannerModule = {
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const code = jsQR(imageData.data, imageData.width, imageData.height, {
-        inversionAttempts: 'dontInvert'
+        inversionAttempts: 'attemptBoth'
       });
 
       if (code && code.data) {
