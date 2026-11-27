@@ -15,6 +15,8 @@ const IndoorTracker = {
   ultimaAtualizacao: null,
   suporteMovimento: false,
   suporteOrientacao: false,
+  motionHandler: null,
+  orientationHandler: null,
 
   async iniciar() {
     if (!window.isSecureContext) {
@@ -44,9 +46,11 @@ const IndoorTracker = {
       this.historicoMagnitude = [];
       this.ultimaAmostraPasso = 0;
       this.picoDetectado = false;
-      window.addEventListener('devicemotion', this.onMotion, true);
-      window.addEventListener('deviceorientationabsolute', this.onOrientation, true);
-      window.addEventListener('deviceorientation', this.onOrientation, true);
+      this.motionHandler = evento => this.onMotion(evento);
+      this.orientationHandler = evento => this.onOrientation(evento);
+      window.addEventListener('devicemotion', this.motionHandler, true);
+      window.addEventListener('deviceorientationabsolute', this.orientationHandler, true);
+      window.addEventListener('deviceorientation', this.orientationHandler, true);
       this.atualizarInterface('Rastreamento assistido ativo · mantenha o celular apontado para a direção em que caminha.');
     } catch (erro) {
       console.error('SMUPLOC: não foi possível iniciar sensores.', erro);
@@ -55,9 +59,13 @@ const IndoorTracker = {
   },
 
   parar(atualizar = true) {
-    window.removeEventListener('devicemotion', this.onMotion, true);
-    window.removeEventListener('deviceorientationabsolute', this.onOrientation, true);
-    window.removeEventListener('deviceorientation', this.onOrientation, true);
+    if (this.motionHandler) window.removeEventListener('devicemotion', this.motionHandler, true);
+    if (this.orientationHandler) {
+      window.removeEventListener('deviceorientationabsolute', this.orientationHandler, true);
+      window.removeEventListener('deviceorientation', this.orientationHandler, true);
+    }
+    this.motionHandler = null;
+    this.orientationHandler = null;
     this.ativo = false;
     if (atualizar) this.atualizarInterface('Rastreamento pausado. Leia o QR novamente para reposicionar no marco zero.');
   },
