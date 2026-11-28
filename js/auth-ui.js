@@ -69,7 +69,6 @@ const AuthUI = {
     const api = String((window.SMUPLOC_CONFIG || {}).apiBaseUrl || '').trim().replace(/\/+$/, '');
     const email = document.getElementById('auth-admin-email').value.trim().toLowerCase();
     if (!api) return this.mensagem('A API segura ainda não está conectada. Nenhum código foi enviado.', true);
-    if (email !== 'alandesouzalobox@gmail.com') return this.mensagem('Este e-mail não está autorizado para ativar o administrador inicial.', true);
     try {
       const response = await fetch(api + '/api/auth/bootstrap/send-code', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -87,7 +86,6 @@ const AuthUI = {
     const username = document.getElementById('auth-new-username').value.trim();
     const password = document.getElementById('auth-new-password').value;
     const confirmacao = document.getElementById('auth-confirm-password').value;
-    if (email !== 'alandesouzalobox@gmail.com') return this.mensagem('E-mail não autorizado para o primeiro administrador.', true);
     if (!/^\\d{6}$/.test(code)) return this.mensagem('Informe o código de verificação de 6 dígitos.', true);
     if (!/^[a-zA-Z0-9._-]{4,40}$/.test(username)) return this.mensagem('O usuário deve ter de 4 a 40 caracteres: letras, números, ponto, hífen ou underline.', true);
     if (password.length < 12) return this.mensagem('Crie uma senha com pelo menos 12 caracteres.', true);
