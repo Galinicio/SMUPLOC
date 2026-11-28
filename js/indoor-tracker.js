@@ -75,6 +75,16 @@ const IndoorTracker = {
     if (atualizar) this.atualizarInterface('Rastreamento pausado. Leia o QR novamente para reposicionar no marco zero.');
   },
 
+  reiniciarNaReferencia(anchor) {
+    this.passos = 0;
+    this.precisaoM = 0.8;
+    this.ultimaAtualizacao = null;
+    this.ultimaAmostraPasso = 0;
+    State.posicaoUsuario = { x: Number(anchor.x), z: Number(anchor.z) };
+    State.sincronizarAmbienteAtual();
+    this.atualizarInterface('Referência espacial reconhecida · posição reajustada. ' + (this.ativo ? 'Rastreamento continua ativo.' : 'Inicie o rastreamento para continuar.'));
+  },
+
   iniciarNoMarcoZero(anchor) {
     this.parar(false);
     this.heading = null;
