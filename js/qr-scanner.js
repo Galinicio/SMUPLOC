@@ -158,21 +158,60 @@ const QRScannerModule = {
       // QR legado ou texto simples: segue o fluxo de identificação de equipamento.
     }
 
-    let tituloQr = 'TAG SMUP DETECTADA';
-    let detalheQr = `DADO LIDO: ${payloadSeguro}\nSISTEMA: SMUP TELEMETRIA`;
+    let tituloQr = 'DISPOSITIVO IDENTIFICADO';
+    let detalheQr = 'QR Code reconhecido. Consultando cadastro local.';
     let idLido = payloadSeguro;
+    let dadosQr = null;
 
     try {
-      const jsonParsed = JSON.parse(payloadSeguro);
-      if (jsonParsed && typeof jsonParsed === 'object' && !Array.isArray(jsonParsed)) {
-        tituloQr = texto(jsonParsed.nome || jsonParsed.tag, 100) || 'EQUIPAMENTO SMUP';
-        idLido = texto(jsonParsed.id || jsonParsed.tag || payloadSeguro, 180);
-        detalheQr = `ID: ${idLido}\nIDENTIFICAÇÃO: RECONHECIDA\nCOMUNICAÇÃO: NÃO VERIFICADA`;
+      const parsed = JSON.parse(payloadSeguro);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        dadosQr = parsed;
+        const dispositivo = parsed.dispositivo || parsed.device || parsed.objeto || parsed.object || parsed;
+        idLido = texto(
+          dispositivo.id || dispositivo.uuid || dispositivo.codigo || dispositivo.codigoUnico ||
+          dispositivo.serial || dispositivo.numeroSerie || dispositivo.tag || dispositivo.deviceId ||
+          dispositivo.objectId || parsed.id || parsed.tag || payloadSeguro, 180
+        );
+        tituloQr = texto(dispositivo.nome || dispositivo.name || dispositivo.tag || dispositivo.codigo, 100) || 'DISPOSITIVO SMUP';
+        detalheQr = 'Identificador: ' + idLido;
       } else {
-        tituloQr = `TAG: ${payloadSeguro.slice(0, 100)}`;
+        tituloQr = payloadSeguro.slice(0, 100) || 'DISPOSITIVO SMUP';
       }
     } catch (erro) {
-      tituloQr = `TAG: ${payloadSeguro.slice(0, 100)}`;
+      // QR simples: o próprio conteúdo é usado como identificador.
+      try {
+        const url = new URL(payloadSeguro);
+        const partes = url.pathname.split('/').filter(Boolean);
+        if (partes.length) idLido = decodeURIComponent(partes[partes.length - 1]).slice(0, 180);
+      } catch (_) {}
+      tituloQr = idLido.slice(0, 100) || 'DISPOSITIVO SMUP';
+      detalheQr = 'Identificador lido: ' + idLido;
+    }
+
+    const normalizar = valor => String(valor || '').trim().toLocaleLowerCase('pt-BR').replace(/[^a-z0-9]/g, '');
+    const equipamentoEncontrado = Array.isArray(State.equipamentos) &&
+      State.equipamentos.find(eq => {
+        const candidatos = [eq.id, eq.nome, eq.codigo, eq.tag, eq.serial, eq.uuid];
+        const alvo = normalizar(idLido);
+        return candidatos.some(valor => normalizar(valor) === alvo);
+      });
+
+    // Todo QR de dispositivo abre a ficha principal. Se ainda não houver vínculo
+    // com o inventário local, a ficha deixa isso explícito em vez de cair no toast.
+    if (typeof DevicePanelModule !== 'undefined') {
+      const equipamentoFicha = equipamentoEncontrado || {
+        id: idLido,
+        nome: tituloQr,
+        tipo: 'Dispositivo identificado por QR',
+        qrPayload: payloadSeguro,
+        qrIdentificado: true,
+        dadosVinculados: false
+      };
+      equipamentoFicha.qrPayload = equipamentoFicha.qrPayload || payloadSeguro;
+      equipamentoFicha.dadosVinculados = !!equipamentoEncontrado;
+      DevicePanelModule.abrir(equipamentoFicha);
+      return;
     }
 
     const toastInfo = document.getElementById('toast-info');
