@@ -44,6 +44,7 @@ O bootstrap cria a organização e o administrador somente quando ainda não há
 - `GET /api/health`: saúde da API e conexão com banco.
 - `POST /api/auth/login`: autenticação.
 - `GET /api/me`: identidade do usuário autenticado.
+- `GET /api/users`: lista usuários da organização (somente administrador).
 - `POST /api/users`: cria usuário da organização (somente administrador; senha inicial forte definida pelo administrador).
 - `GET /api/environments`: lista ambientes da organização.
 - `POST /api/environments`: cria/atualiza ambiente (admin/técnico).
