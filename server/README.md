@@ -23,13 +23,13 @@ Obrigatórias:
 - `CORS_ORIGINS`: origens do frontend separadas por vírgula (obrigatório em produção).
 - `PORT`: fornecida pela plataforma (padrão local 10000).
 
-Bootstrap opcional da primeira conta:
+Conta administrativa inicial (obrigatória em produção na primeira implantação):
 - `BOOTSTRAP_ADMIN_EMAIL`
 - `BOOTSTRAP_ADMIN_PASSWORD`
 - `BOOTSTRAP_ADMIN_NAME`
 - `BOOTSTRAP_ORG_NAME`
 
-O bootstrap cria a organização e o administrador somente quando ainda não há usuários. Não coloque segredos no Git. Configure-os no painel de hospedagem.
+O bootstrap cria a organização e o administrador somente quando ainda não há usuários; em produção, email e senha precisam estar configurados juntos. Não coloque segredos no Git. Configure-os no painel de hospedagem.
 
 ## Executar localmente
 
@@ -58,7 +58,7 @@ O bootstrap cria a organização e o administrador somente quando ainda não há
 2. Implementar cliente frontend autenticado, com sincronização incremental e fila offline.
 3. Migrar cadastros locais para a API sem apagar dados existentes; manter exportação JSON como backup.
 4. Adicionar testes de integração com PostgreSQL e autorização multi-organização.
-5. Provisionar PostgreSQL e serviço web no Render após revisar plano/custos e configurar segredos.
+5. Provisionar PostgreSQL e serviço web no Render após revisar plano/custos e configurar segredos. A infraestrutura ainda não foi criada.
 6. Só depois habilitar a sincronização remota por configuração, mantendo fallback local.
 
 ## Limitações deliberadas
