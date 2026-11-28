@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const iniciarArraste = e => {
-    if (State.perfilAtual === 'cliente' || MapearModule.ativo || MinimapModule.bloquearArraste) return;
+    if (State.perfilAtual === 'cliente' || MapearModule.ativo || MinimapModule.bloquearArraste || (typeof IndoorRouting !== 'undefined' && IndoorRouting.ativo)) return;
 
     const pos = getPosCanvas(e);
     const cx = canvasExp.width / 2;
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const moverArraste = e => {
     const eq = MinimapModule.objetoArrastando;
-    if (!eq || State.perfilAtual === 'cliente' || MapearModule.ativo) return;
+    if (!eq || State.perfilAtual === 'cliente' || MapearModule.ativo || (typeof IndoorRouting !== 'undefined' && IndoorRouting.ativo)) return;
 
     if (e.cancelable) e.preventDefault();
 
