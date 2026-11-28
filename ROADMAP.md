@@ -88,11 +88,11 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 
 Estes itens não são pequenas correções. Precisam de arquitetura, testes e/ou dependências externas; devem ser analisados em etapas antes de começar a codificação:
 
-- [~] **Backend compartilhado e sincronização:** banco PostgreSQL, API inicial, autenticação, perfis e isolamento por organização implementados em código; faltam frontend, gestão de usuários, testes reais, infraestrutura e migração com backup.
+- [~] **Backend compartilhado e sincronização:** esquema PostgreSQL, API Express, login JWT, perfis, isolamento por organização, auditoria, listagem/criação de usuários e cliente API opcional implementados em código; faltam interface de login, sincronização real, testes com banco, infraestrutura e migração com backup.
 - [!] **Integração com a API oficial SMUP:** deliberadamente adiada; não iniciar nesta fase.
-- [!] **Cadastro automático seguro:** definir identificador individual estável por dispositivo, regras contra duplicidade, revisão humana e recuperação quando o QR só informa uma categoria ou senha compartilhada.
-- [!] **Navegação indoor confiável:** estruturar plantas por cliente/unidade/andar, escala real, obstáculos, marcos QR, posição inicial e cálculo de rotas; medir erro em ambientes reais.
-- [!] **AR ancorada no ambiente:** avaliar WebXR/ARCore/ARKit, rastreamento persistente, planos, profundidade, compatibilidade e alternativa para aparelhos sem suporte.
+- [~] **Cadastro automático seguro:** reconhecimento de categoria e cadastro provisório com confirmação humana implementados; vínculo definitivo ainda depende de identificador individual e regras para QR compartilhado.
+- [~] **Navegação indoor confiável:** A* e cadastro manual de obstáculos implementados em código; falta estrutura completa por pavimento, portas/áreas restritas, escala real e validação de campo.
+- [~] **AR ancorada no ambiente:** diagnóstico de compatibilidade implementado; sessão AR, hit-test, ancoragem persistente e reconhecimento de planos/profundidade continuam pendentes.
 - [~] **Experiência mobile:** reforçar alvos de toque, rolagem, foco acessível e comportamento do painel em telas pequenas; testes em aparelhos/navegadores reais ainda pendentes.
 - [~] **Testes automatizados de regressão:** CI e primeiros testes de QR, sintaxe e integridade HTML adicionados; falta execução verde e cobertura de cadastro, ficha, planta, navegação, API e persistência.
 
