@@ -86,30 +86,33 @@ const ScannerModule = {
   atualizarPainelDestino() {
     const eq = State.equipamentos.find(item => String(item.id) === String(State.destinoId));
     const painel = document.getElementById('navegacao-destino');
-    const botao = document.querySelector('#navegacao-controles button');
+    const botao = document.querySelector('#navegacao-controles .acao-principal');
     if (painel) {
-      if (!eq) painel.textContent = 'Nenhum destino selecionado';
-      else if (!State.posicaoUsuario) painel.textContent = 'Destino: ' + (eq.nome || eq.id) + ' · marque sua posição no mapa';
+      if (!eq) painel.textContent = 'Escolha um equipamento para definir o destino.';
+      else if (!State.posicaoUsuario) painel.textContent = 'Destino: ' + (eq.nome || eq.id) + ' · falta marcar sua posição.';
       else {
         const distancia = Math.hypot(Number(eq.x) - Number(State.posicaoUsuario.x), Number(eq.z) - Number(State.posicaoUsuario.z));
-        painel.textContent = 'Destino: ' + (eq.nome || eq.id) + ' · distância em linha reta no mapa: ' + distancia.toFixed(1) + ' m';
+        painel.textContent = 'Destino: ' + (eq.nome || eq.id) + ' · distância no mapa: ' + distancia.toFixed(1) + ' m';
       }
     }
-    if (botao) botao.textContent = this.aguardandoPosicao ? 'Toque na planta para marcar sua posição…' : 'Marcar minha posição no mapa';
+    if (botao) {
+      botao.textContent = this.aguardandoPosicao ? 'Agora toque no ponto da planta onde você está' : (State.posicaoUsuario ? 'Atualizar minha posição' : 'Marcar minha posição');
+      botao.classList.toggle('aguardando-posicao', this.aguardandoPosicao);
+    }
 
     const status = document.getElementById('tracking-status');
     if (status && !this.aguardandoMarcoZero && !(typeof IndoorTracker !== 'undefined' && IndoorTracker.ativo)) {
       if (this.aguardandoPosicao) {
-        status.textContent = 'Toque na planta para marcar sua posição.';
+        status.textContent = 'Toque em qualquer ponto da planta para registrar sua posição.';
         status.dataset.active = 'false';
       } else if (!State.posicaoUsuario) {
-        status.textContent = 'Marque sua posição na planta.';
+        status.textContent = 'Sua posição ainda não foi definida.';
         status.dataset.active = 'false';
       } else if (!eq) {
-        status.textContent = 'Posição definida · selecione um equipamento.';
+        status.textContent = 'Posição registrada. Agora escolha um equipamento.';
         status.dataset.active = 'false';
       } else {
-        status.textContent = 'Tudo pronto · inicie a orientação.';
+        status.textContent = 'Destino e posição definidos. Você já pode iniciar a orientação.';
         status.dataset.active = 'false';
       }
     }
@@ -118,6 +121,7 @@ const ScannerModule = {
   marcarMinhaPosicao() {
     if (!State.obterAmbienteAtual()) return;
     this.aguardandoPosicao = true;
+    if (typeof MapaExternoModule !== 'undefined') MapaExternoModule.mostrarInterno();
     MinimapModule.abrirModal();
     this.atualizarPainelDestino();
   },
