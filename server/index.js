@@ -118,6 +118,34 @@ app.post('/api/auth/login', loginLimiter, async (req, res, next) => {
 
 app.get('/api/me', auth(), (req, res) => res.json({ user: req.user }));
 
+app.post('/api/users', auth(['admin']), async (req, res, next) => {
+  const parsed = z.object({
+    email: z.string().email().max(200),
+    password: z.string().min(12).max(200),
+    displayName: z.string().trim().min(1).max(100),
+    role: z.enum(['admin', 'technician', 'client'])
+  }).safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: 'Dados de usuário inválidos. A senha inicial deve ter ao menos 12 caracteres.', details: parsed.error.flatten() });
+  const v = parsed.data;
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const id = randomUUID();
+    const passwordHash = await bcrypt.hash(v.password, 12);
+    await client.query(
+      'INSERT INTO users (id, organization_id, email, password_hash, display_name, role) VALUES ($1,$2,lower($3),$4,$5,$6)',
+      [id, req.user.organizationId, v.email, passwordHash, v.displayName, v.role]
+    );
+    await audit(client, req.user, 'user.created', 'user', id, { role: v.role });
+    await client.query('COMMIT');
+    res.status(201).json({ user: { id, email: v.email.toLowerCase(), name: v.displayName, role: v.role } });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    if (error.code === '23505') return res.status(409).json({ error: 'Este e-mail já está cadastrado nesta organização.' });
+    next(error);
+  } finally { client.release(); }
+});
+
 app.get('/api/environments', auth(), async (req, res, next) => {
   try {
     const result = await pool.query(
@@ -248,6 +276,8 @@ async function bootstrap() {
   await pool.query(schema);
   const email = process.env.BOOTSTRAP_ADMIN_EMAIL;
   const password = process.env.BOOTSTRAP_ADMIN_PASSWORD;
+  if (Boolean(email) !== Boolean(password)) throw new Error('Configure BOOTSTRAP_ADMIN_EMAIL e BOOTSTRAP_ADMIN_PASSWORD juntos.');
+  if (process.env.NODE_ENV === 'production' && !email) throw new Error('Configure a conta administrativa inicial antes de iniciar em produção.');
   if (email && password) {
     const exists = await pool.query('SELECT id FROM users LIMIT 1');
     if (!exists.rowCount) {
