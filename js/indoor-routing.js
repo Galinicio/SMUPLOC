@@ -1,0 +1,206 @@
+/**
+ * IndoorRouting — planejamento 2D por grade A* com obstáculos desenhados pelo técnico.
+ * A rota só é confiável na medida em que a planta, escala e obstáculos foram cadastrados.
+ */
+const IndoorRouting = {
+  ativo: false,
+  primeiroPonto: null,
+  rota: null,
+  chaveRota: '',
+  passoGrade: 0.25,
+
+  distanciaSegmento(px, pz, o) {
+    const ax = Number(o.x1), az = Number(o.z1);
+    const bx = Number(o.x2), bz = Number(o.z2);
+    const dx = bx - ax, dz = bz - az;
+    const denom = dx * dx + dz * dz;
+    const t = denom ? Math.max(0, Math.min(1, ((px - ax) * dx + (pz - az) * dz) / denom)) : 0;
+    return Math.hypot(px - (ax + t * dx), pz - (az + t * dz));
+  },
+
+  bloqueado(x, z, obstaculos, passo = this.passoGrade) {
+    return obstaculos.some(o => this.distanciaSegmento(x, z, o) <= Math.max(0.05, Number(o.largura) || 0.12) / 2 + passo * 0.55);
+  },
+
+  calcular(origem, destino, obstaculos = []) {
+    const start = { x: Number(origem.x), z: Number(origem.z) };
+    const goal = { x: Number(destino.x), z: Number(destino.z) };
+    if (![start.x, start.z, goal.x, goal.z].every(Number.isFinite)) return null;
+    if (!obstaculos.length) return [start, goal];
+
+    const passo = this.passoGrade;
+    const margem = 1.5;
+    const minX = Math.min(start.x, goal.x) - margem;
+    const maxX = Math.max(start.x, goal.x) + margem;
+    const minZ = Math.min(start.z, goal.z) - margem;
+    const maxZ = Math.max(start.z, goal.z) + margem;
+    const largura = Math.min(240, Math.ceil((maxX - minX) / passo) + 1);
+    const altura = Math.min(240, Math.ceil((maxZ - minZ) / passo) + 1);
+    const toCell = p => ({
+      x: Math.max(0, Math.min(largura - 1, Math.round((p.x - minX) / passo))),
+      z: Math.max(0, Math.min(altura - 1, Math.round((p.z - minZ) / passo)))
+    });
+    const toWorld = p => ({ x: minX + p.x * passo, z: minZ + p.z * passo });
+    const s = toCell(start), g = toCell(goal);
+    const key = p => p.x + ',' + p.z;
+    const blocked = new Set();
+    for (let z = 0; z < altura; z++) {
+      for (let x = 0; x < largura; x++) {
+        if ((x === s.x && z === s.z) || (x === g.x && z === g.z)) continue;
+        const world = toWorld({ x, z });
+        if (this.bloqueado(world.x, world.z, obstaculos, passo)) blocked.add(key({ x, z }));
+      }
+    }
+
+    const heuristica = p => Math.hypot(g.x - p.x, g.z - p.z);
+    const abertos = [{ ...s, g: 0, f: heuristica(s) }];
+    const custos = new Map([[key(s), 0]]);
+    const pais = new Map();
+    const direcoes = [
+      [1,0,1],[-1,0,1],[0,1,1],[0,-1,1],
+      [1,1,Math.SQRT2],[1,-1,Math.SQRT2],[-1,1,Math.SQRT2],[-1,-1,Math.SQRT2]
+    ];
+    let encontrado = false;
+    let iteracoes = 0;
+    while (abertos.length && iteracoes++ < 50000) {
+      abertos.sort((a,b) => a.f - b.f);
+      const atual = abertos.shift();
+      if (atual.x === g.x && atual.z === g.z) { encontrado = true; break; }
+      for (const [dx,dz,custo] of direcoes) {
+        const proximo = { x: atual.x + dx, z: atual.z + dz };
+        if (proximo.x < 0 || proximo.z < 0 || proximo.x >= largura || proximo.z >= altura) continue;
+        if (blocked.has(key(proximo))) continue;
+        if (dx && dz && (blocked.has(key({x:atual.x+dx,z:atual.z})) || blocked.has(key({x:atual.x,z:atual.z+dz})))) continue;
+        const k = key(proximo);
+        const novoG = atual.g + custo;
+        if (novoG >= (custos.get(k) ?? Infinity)) continue;
+        custos.set(k, novoG);
+        pais.set(k, key(atual));
+        const existente = abertos.find(item => key(item) === k);
+        if (existente) {
+          existente.g = novoG;
+          existente.f = novoG + heuristica(proximo);
+        } else abertos.push({ ...proximo, g: novoG, f: novoG + heuristica(proximo) });
+      }
+    }
+    if (!encontrado) return null;
+
+    const caminho = [];
+    let cursor = key(g);
+    while (cursor) {
+      const [x,z] = cursor.split(',').map(Number);
+      caminho.push(toWorld({x,z}));
+      cursor = pais.get(cursor);
+    }
+    caminho.reverse();
+    caminho[0] = start;
+    caminho[caminho.length - 1] = goal;
+
+    // Remove pontos colineares para produzir uma rota visual mais limpa.
+    const simples = [];
+    caminho.forEach(p => {
+      if (simples.length >= 2) {
+        const a = simples[simples.length - 2], b = simples[simples.length - 1];
+        const cross = (b.x-a.x)*(p.z-b.z) - (b.z-a.z)*(p.x-b.x);
+        if (Math.abs(cross) < 0.0001) simples.pop();
+      }
+      simples.push(p);
+    });
+    return simples;
+  },
+
+  calcularRota() {
+    const destino = State.equipamentos.find(eq => String(eq.id) === String(State.destinoId) && eq.posicionado !== false);
+    if (!destino || !State.posicaoUsuario) { this.rota = null; this.chaveRota = ''; return null; }
+    const origem = State.posicaoUsuario;
+    const obstaculos = Array.isArray(State.obstaculos) ? State.obstaculos : [];
+    const chave = JSON.stringify([origem.x, origem.z, destino.x, destino.z, obstaculos]);
+    if (chave !== this.chaveRota) {
+      this.chaveRota = chave;
+      this.rota = this.calcular(origem, destino, obstaculos);
+    }
+    return this.rota;
+  },
+
+  iniciarCadastro() {
+    if (!['admin','tecnico'].includes(State.perfilAtual)) {
+      alert('Somente administrador ou técnico pode cadastrar paredes e obstáculos.');
+      return;
+    }
+    this.ativo = true;
+    this.primeiroPonto = null;
+    const status = document.getElementById('tracking-status');
+    if (status) status.textContent = 'Marque o primeiro ponto da parede na planta.';
+    alert('Toque em dois pontos da planta para desenhar uma parede ou obstáculo. Depois informe a largura aproximada em metros.');
+  },
+
+  cancelarCadastro() {
+    this.ativo = false;
+    this.primeiroPonto = null;
+    const status = document.getElementById('tracking-status');
+    if (status) status.textContent = 'Marcação de obstáculo cancelada.';
+  },
+
+  registrarToque(evento) {
+    if (!this.ativo || !evento || evento.target !== document.getElementById('canvas-expandido')) return false;
+    const canvas = evento.target;
+    const rect = canvas.getBoundingClientRect();
+    const xPx = (evento.clientX - rect.left) * (canvas.width / rect.width);
+    const zPx = (evento.clientY - rect.top) * (canvas.height / rect.height);
+    const escala = (typeof MapearModule !== 'undefined' && MapearModule.escalaPxPorMetro) || 22;
+    const ponto = { x: Number(((xPx - canvas.width / 2) / escala).toFixed(3)), z: Number(((zPx - canvas.height / 2) / escala).toFixed(3)) };
+    if (!this.primeiroPonto) {
+      this.primeiroPonto = ponto;
+      const status = document.getElementById('tracking-status');
+      if (status) status.textContent = 'Agora marque o segundo ponto da parede.';
+      return true;
+    }
+    const primeiro = this.primeiroPonto;
+    this.primeiroPonto = null;
+    const larguraInformada = Number(prompt('Largura da parede/obstáculo em metros:', '0.15'));
+    const largura = Number.isFinite(larguraInformada) ? Math.max(0.05, Math.min(2, larguraInformada)) : 0.15;
+    if (Math.hypot(ponto.x - primeiro.x, ponto.z - primeiro.z) < 0.15) {
+      alert('A parede ficou muito curta. Tente marcar dois pontos mais distantes.');
+      return true;
+    }
+    State.obstaculos = Array.isArray(State.obstaculos) ? State.obstaculos : [];
+    State.obstaculos.push({ id: State.gerarId('obs'), x1: primeiro.x, z1: primeiro.z, x2: ponto.x, z2: ponto.z, largura });
+    State.sincronizarAmbienteAtual();
+    this.chaveRota = '';
+    if (typeof MinimapModule !== 'undefined') {
+      MinimapModule.renderExpandido();
+      MinimapModule.renderPequeno();
+    }
+    const status = document.getElementById('tracking-status');
+    if (status) status.textContent = 'Obstáculo cadastrado. A próxima rota considerará esta parede.';
+    return true;
+  },
+
+  desenhar(ctx, escala, cx, cy, expandido) {
+    const obstaculos = Array.isArray(State.obstaculos) ? State.obstaculos : [];
+    ctx.save();
+    obstaculos.forEach(o => {
+      ctx.strokeStyle = 'rgba(255, 152, 0, .9)';
+      ctx.lineWidth = Math.max(expandido ? 5 : 2, (Number(o.largura) || 0.15) * escala);
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx + Number(o.x1) * escala, cy + Number(o.z1) * escala);
+      ctx.lineTo(cx + Number(o.x2) * escala, cy + Number(o.z2) * escala);
+      ctx.stroke();
+    });
+    const rota = this.calcularRota();
+    if (rota && rota.length > 1) {
+      ctx.strokeStyle = '#00e5ff';
+      ctx.lineWidth = expandido ? 4 : 2;
+      ctx.setLineDash(expandido ? [8,5] : [4,3]);
+      ctx.beginPath();
+      rota.forEach((p,i) => {
+        const x = cx + p.x * escala, y = cy + p.z * escala;
+        if (i === 0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      });
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    ctx.restore();
+  }
+};
