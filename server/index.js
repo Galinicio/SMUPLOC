@@ -119,6 +119,16 @@ app.post('/api/auth/login', loginLimiter, async (req, res, next) => {
 
 app.get('/api/me', auth(), (req, res) => res.json({ user: req.user }));
 
+app.get('/api/users', auth(['admin']), async (req, res, next) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, email, display_name AS "displayName", role, active, created_at AS "createdAt" FROM users WHERE organization_id=$1 ORDER BY display_name, email',
+      [req.user.organizationId]
+    );
+    res.json({ items: result.rows });
+  } catch (error) { next(error); }
+});
+
 app.post('/api/users', auth(['admin']), async (req, res, next) => {
   const parsed = z.object({
     email: z.string().email().max(200),
