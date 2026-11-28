@@ -45,6 +45,7 @@ const UIShell = {
     const analisar=ferramentas?.querySelector('[onclick*="PlanAnalysis.analisar"]');
     const controles=document.getElementById('controles-admin');
     const limpar=controles?.querySelector('[onclick*="limparTudo"]');
+    const btnEquipamentos=controles?.querySelector('[onclick*="EquipmentModule.abrir"]');
 
     if (ambientes) config.body.appendChild(ambientes);
     if (perfil) config.body.appendChild(perfil);
@@ -56,6 +57,7 @@ const UIShell = {
     if (upload) planta.body.appendChild(upload);
     if (canvas) mapa.body.appendChild(canvas);
     if (equipamentos) mapa.body.appendChild(equipamentos);
+    if (btnEquipamentos) mapa.body.appendChild(btnEquipamentos);
 
     const zoom=document.createElement('div');
     zoom.className='mapa-zoom-controles';
