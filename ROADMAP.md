@@ -21,15 +21,16 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 - [ ] Adicionar MFA administrativo, revogação de sessão, recuperação segura e testes de isolamento multi-organização.
 
 
-### Autenticação pelo bot Telegram
-- [x] Definir arquitetura de identidade externa para suportar Telegram sem acoplar a autorização do SMUPLOC ao bot.
-- [!] Confirmar qual bot Telegram será usado, seu proprietário/acesso ao BotFather e se ele poderá representar oficialmente o SMUPLOC.
-- [ ] Registrar domínio e URLs permitidas no BotFather e obter credenciais de Telegram Login/OIDC.
-- [ ] Implementar login Telegram no backend com Authorization Code + PKCE, validação de state/nonce, assinatura JWKS e claims.
-- [ ] Criar vinculação segura entre identidade Telegram (iss + sub) e conta SMUPLOC já existente.
-- [ ] Permitir login por Telegram somente para contas vinculadas e ativas; manter e-mail/senha como alternativa durante a transição.
-- [ ] Separar autenticação web de notificações do bot; solicitar consentimento para mensagens e não usar chat_id/username como prova de identidade.
-- [ ] Testar replay, callback adulterado, conta não vinculada, usuário desativado, desvinculação e preservação de papéis/organizações.
+### Autenticação SMUP e acesso administrativo do SMUPLOC
+- [x] Definir a separação: usuários comuns autenticados integralmente pelo fluxo oficial da SMUP (e-mail, telefone e token SMS); conta administrativa local exclusiva para manutenção do SMUPLOC.
+- [x] Definir que o SMUPLOC não envia SMS, não valida token SMS e não cria senha local para usuários comuns.
+- [x] Definir que a autenticação confirmada pela SMUP será consumida pelo backend SMUPLOC por integração oficial e verificável; papéis e organizações continuam controlados pelo SMUPLOC.
+- [~] Preparar a arquitetura com adaptador de identidade SMUP independente do protocolo, sem presumir OIDC/OAuth/API/webhook ainda não documentado.
+- [!] Obter da SMUP a documentação, autorização e contrato técnico oficial para integrar o fluxo de autenticação existente.
+- [ ] Implementar o adaptador e a troca segura de identidade conforme o contrato real disponibilizado pela SMUP.
+- [ ] Vincular/provisionar contas SMUP às contas e organizações locais com regras aprovadas, sem conceder privilégios automaticamente.
+- [ ] Testar assinatura/origem, expiração, replay, sessão, conta não vinculada, usuário desativado e isolamento entre organizações.
+- [ ] Manter e testar o login local administrativo separado, com MFA, auditoria e permissões restritas à manutenção.
 
 ### Leitura de QR Code e ficha digital
 - [x] Leitura de QR Code validada pelo usuário no dispositivo testado; falta repetir no outro tipo de aparelho (computador/celular).
