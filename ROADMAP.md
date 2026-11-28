@@ -12,7 +12,7 @@
 
 Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcionalidades.
 
-### Leitura de QR Code e ficha digital
+### Autenticação, primeiro acesso e hierarquia\n- [x] Criar tela de login e primeiro acesso, com validação local dos dígitos verificadores do CPF e contrato de API documentado.\n- [x] Remover seletor de perfil livre da interface; perfil passa a derivar da sessão autenticada.\n- [!] Login real, bootstrap de uso único, verificação de identidade do CPF, sessão segura e autorização server-side dependem da API HTTPS/PostgreSQL.\n- [!] Modo demonstração local é explicitamente não autenticado e somente perfil cliente; não usar com dados reais.\n- [ ] Implementar backend de bootstrap único, CPF com proteção de dados, nome de usuário e troca obrigatória da credencial temporária.\n- [ ] Adicionar MFA administrativo, revogação de sessão, recuperação segura e testes de isolamento multi-organização.\n\n### Leitura de QR Code e ficha digital
 - [x] Leitura de QR Code validada pelo usuário no dispositivo testado; falta repetir no outro tipo de aparelho (computador/celular).
 - [x] Confirmar que a leitura de QR Code abre a ficha digital sobre a câmera (validado pelo usuário).
 - [x] Testar as seis páginas da ficha em navegador real: Resumo, Monitoramento, Gráficos, Notificações, Calibração e Localização (validado pelo usuário).
