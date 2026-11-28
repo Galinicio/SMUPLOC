@@ -30,7 +30,7 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 - [ ] Fazer uma revisão dos módulos JavaScript, ordem de carregamento, eventos e referências ao HTML.
 - [ ] Verificar erros no console do navegador durante os principais fluxos.
 - [x] Conferir a ordem de carregamento dos scripts e confirmar que todos os IDs HTML usados pelo leitor QR, ficha digital e inicialização principal existem no HTML.
-- [ ] Criar uma rotina de testes de regressão para não quebrar recursos já existentes ao adicionar novos.
+- [~] Criar rotina de testes de regressão: CI e testes iniciais de QR, HTML e sintaxe adicionados; falta execução verde e ampliar cobertura.
 - [x] Verificar sintaxe de todos os 14 módulos JavaScript atuais (validação estática; não substitui teste no navegador).
 - [ ] Documentar como cadastrar equipamentos de teste e como reproduzir os principais cenários.
 
@@ -65,13 +65,14 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 - [ ] Planejar histórico de certificados e calibrações, quando houver dados disponíveis.
 
 ### Dados, persistência e integração SMUP
-- [ ] Definir uma fonte central de dados para os cadastros, em vez de depender somente do armazenamento local do navegador.
-- [ ] Planejar backend, autenticação, permissões e sincronização entre dispositivos.
-- [ ] Obter documentação, credenciais e autorização da API oficial da SMUP.
+- [~] Fonte central de dados: esquema PostgreSQL e API própria inicial criados; frontend e migração sem perda ainda pendentes.
+- [~] Backend inicial com Express, JWT, papéis, isolamento por organização, validação e auditoria implementado; gestão de usuários, testes de integração e publicação pendentes.
+- [ ] Sincronização autenticada entre dispositivos, mantendo modo local até validar a migração.
+- [!] Integração com API oficial SMUP adiada conforme decisão do projeto.
 - [ ] Integrar dados de monitoramento da SMUP: leituras, temperatura, umidade, sinal, histórico e atualização mais recente, conforme disponibilidade da API.
 - [ ] Integrar alarmes, notificações e ocorrências, respeitando permissões.
 - [ ] Evitar duplicar no SMUPLOC funções já oferecidas pelo smuPweb: o SMUPLOC deve acrescentar localização, orientação e contexto espacial.
-- [ ] Planejar funcionamento com conexão instável e sincronização posterior.
+- [ ] Planejar funcionamento com conexão instável, fila offline e resolução de conflitos.
 
 ### Plantas e navegação indoor
 - [ ] Padronizar cadastro de clientes, locais, prédios, andares, plantas, setores e ambientes.
@@ -86,13 +87,13 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 
 Estes itens não são pequenas correções. Precisam de arquitetura, testes e/ou dependências externas; devem ser analisados em etapas antes de começar a codificação:
 
-- [!] **Backend compartilhado e sincronização:** sair do `localStorage`, definir banco de dados, API própria, autenticação, perfis, permissões, backup e sincronização entre celulares e computadores.
-- [!] **Integração com a API oficial SMUP:** obter documentação, credenciais e autorização; mapear dispositivos, leituras, histórico, alarmes e certificados; tratar limites, falhas e permissões. Não duplicar o smuPweb.
+- [~] **Backend compartilhado e sincronização:** banco PostgreSQL, API inicial, autenticação, perfis e isolamento por organização implementados em código; faltam frontend, gestão de usuários, testes reais, infraestrutura e migração com backup.
+- [!] **Integração com a API oficial SMUP:** deliberadamente adiada; não iniciar nesta fase.
 - [!] **Cadastro automático seguro:** definir identificador individual estável por dispositivo, regras contra duplicidade, revisão humana e recuperação quando o QR só informa uma categoria ou senha compartilhada.
 - [!] **Navegação indoor confiável:** estruturar plantas por cliente/unidade/andar, escala real, obstáculos, marcos QR, posição inicial e cálculo de rotas; medir erro em ambientes reais.
 - [!] **AR ancorada no ambiente:** avaliar WebXR/ARCore/ARKit, rastreamento persistente, planos, profundidade, compatibilidade e alternativa para aparelhos sem suporte.
 - [!] **Experiência mobile de produção:** testar câmera, permissões, foco, desempenho, rolagem e controles em diferentes navegadores e aparelhos; corrigir diferenças específicas de plataforma.
-- [!] **Testes automatizados de regressão:** criar cenários reproduzíveis para leitura QR, cadastro, ficha, planta, navegação e persistência, executados a cada alteração relevante.
+- [~] **Testes automatizados de regressão:** CI e primeiros testes de QR, sintaxe e integridade HTML adicionados; falta execução verde e cobertura de cadastro, ficha, planta, navegação, API e persistência.
 
 ## 3. Futuro — recursos avançados
 
