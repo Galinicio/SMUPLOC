@@ -5,6 +5,7 @@
 const UIShell = {
   abrirPainel() {
     if (typeof ScannerModule !== 'undefined') ScannerModule.fechar();
+    if (typeof EquipmentModule !== 'undefined') EquipmentModule.fechar();
     const camera = document.getElementById('camera-mapeamento');
     if (camera) camera.hidden = true;
     const modal = document.getElementById('modal-planta');
@@ -20,6 +21,8 @@ const UIShell = {
       const confirmar = confirm('Sair do mapeamento atual? Os pontos ainda não salvos serão descartados.');
       if (!confirmar) return;
       MapearModule.cancelar();
+      const modalAposCancelar = document.getElementById('modal-planta');
+      if (modalAposCancelar) modalAposCancelar.style.display = 'none';
       return;
     }
     const modal = document.getElementById('modal-planta');
