@@ -30,9 +30,9 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 - [ ] Fazer uma revisão dos módulos JavaScript, ordem de carregamento, eventos e referências ao HTML.
 - [ ] Verificar erros no console do navegador durante os principais fluxos.
 - [x] Conferir a ordem de carregamento dos scripts e confirmar que todos os IDs HTML usados pelo leitor QR, ficha digital e inicialização principal existem no HTML.
-- [~] Criar rotina de testes de regressão: CI e testes iniciais de QR, HTML e sintaxe adicionados; falta execução verde e ampliar cobertura.
+- [~] Criar rotina de testes de regressão: CI e testes iniciais de QR, HTML, sintaxe, API e navegação adicionados; execução verde confirmada no commit atual da branch; ampliar cobertura.
 - [x] Verificar sintaxe de todos os 14 módulos JavaScript atuais (validação estática; não substitui teste no navegador).
-- [ ] Documentar como cadastrar equipamentos de teste e como reproduzir os principais cenários.
+- [x] Documentar como a API deve ser ativada com segurança e como a AR será evoluída; ainda falta um guia operacional de cadastro de equipamentos de teste.
 
 ### Situação conhecida
 - [x] Corrigida a redeclaração de variável que impedia o módulo do leitor QR de carregar (PR #18).
@@ -94,7 +94,7 @@ Estes itens não são pequenas correções. Precisam de arquitetura, testes e/ou
 - [~] **Navegação indoor confiável:** A* e cadastro manual de obstáculos implementados em código; falta estrutura completa por pavimento, portas/áreas restritas, escala real e validação de campo.
 - [~] **AR ancorada no ambiente:** diagnóstico de compatibilidade e documento técnico `docs/AR-ROADMAP.md` implementados; sessão AR, hit-test, ancoragem persistente e reconhecimento de planos/profundidade continuam pendentes.
 - [~] **Experiência mobile:** reforçar alvos de toque, rolagem, foco acessível e comportamento do painel em telas pequenas; controles de obstáculos simplificados; testes em aparelhos/navegadores reais ainda pendentes.
-- [~] **Testes automatizados de regressão:** CI e primeiros testes de QR, sintaxe e integridade HTML adicionados; falta execução verde e cobertura de cadastro, ficha, planta, navegação, API e persistência.
+- [~] **Testes automatizados de regressão:** CI verde confirmado no commit atual; testes iniciais de QR, sintaxe, integridade HTML, cliente API e A* adicionados; ampliar cobertura de cadastro, ficha, planta, API real e persistência.
 
 ## 3. Futuro — recursos avançados
 
