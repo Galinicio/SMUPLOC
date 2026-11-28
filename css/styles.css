@@ -1089,3 +1089,55 @@ body.scanner-ativo > #btn-explorar {
   .smuploc-navegacao-painel .acoes-navegacao button { min-height:42px; }
   .smuploc-navegacao-painel .acoes-navegacao .acao-principal { grid-column:1 / -1; }
 }
+
+/* Ficha digital do dispositivo: painel flutuante 3D, paginado e operável por toque. */
+.device-detail-overlay[hidden] { display:none !important; }
+.device-detail-overlay {
+  position:fixed; inset:0; z-index:13000; display:flex; align-items:center; justify-content:center;
+  padding:max(16px,env(safe-area-inset-top)) 12px max(16px,env(safe-area-inset-bottom));
+  box-sizing:border-box; pointer-events:auto;
+  background:rgba(1,10,19,.34);
+}
+.device-detail-card {
+  width:min(100%,520px); max-height:min(88dvh,780px); overflow:hidden; display:flex; flex-direction:column;
+  padding:15px; box-sizing:border-box; color:#effaff;
+  border:1px solid rgba(75,220,255,.72); border-radius:20px;
+  background:linear-gradient(145deg,rgba(7,39,61,.97),rgba(3,18,32,.97));
+  box-shadow:0 24px 70px rgba(0,0,0,.58),inset 0 1px 0 rgba(255,255,255,.14),0 0 30px rgba(0,190,230,.18);
+  backdrop-filter:blur(18px) saturate(1.25); -webkit-backdrop-filter:blur(18px) saturate(1.25);
+  transform:perspective(1200px) rotateX(1deg); animation:device-panel-in .24s ease-out;
+}
+@keyframes device-panel-in { from { opacity:0; transform:perspective(1200px) translateY(18px) rotateX(4deg) scale(.97); } to { opacity:1; transform:perspective(1200px) translateY(0) rotateX(1deg) scale(1); } }
+.device-detail-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding-bottom:10px; border-bottom:1px solid rgba(85,215,245,.24); }
+.device-detail-eyebrow { color:#5bd9f4; font-size:9px; font-weight:900; letter-spacing:.14em; }
+.device-detail-heading h2 { margin:5px 0 3px; color:#fff; font-size:21px; overflow-wrap:anywhere; }
+.device-detail-heading p { margin:0; color:#a9c9d8; font-size:10px; overflow-wrap:anywhere; }
+.device-detail-close { flex:0 0 42px; width:42px; height:42px; border:1px solid rgba(255,255,255,.2); border-radius:12px; background:#123d59; color:#fff; font-size:20px; }
+.device-detail-live { display:flex; align-items:center; gap:7px; padding:10px 2px; color:#b9e8f5; font-size:10px; }
+.device-detail-live-dot { width:8px; height:8px; border-radius:50%; background:#f5bd4f; box-shadow:0 0 10px currentColor; }
+.device-detail-tabs { display:flex; gap:6px; overflow-x:auto; padding:2px 0 10px; scrollbar-width:thin; }
+.device-detail-tabs button { flex:0 0 auto; min-height:36px; padding:7px 10px; border:1px solid rgba(113,207,233,.24); border-radius:10px; background:rgba(255,255,255,.06); color:#c9e6f0; font-size:10px; font-weight:800; }
+.device-detail-tabs button.ativa { background:#087ca4; border-color:#52d7f2; color:#fff; }
+.device-detail-content { min-height:170px; overflow-y:auto; overscroll-behavior:contain; padding:4px 2px 12px; }
+.device-detail-content h3 { margin:4px 0 12px; color:#65d9f2; font-size:15px; }
+.device-detail-row { display:flex; justify-content:space-between; gap:14px; padding:10px 8px; border-bottom:1px solid rgba(255,255,255,.08); font-size:11px; }
+.device-detail-row span { color:#9dbbc9; }
+.device-detail-row strong { max-width:60%; color:#f4fbff; text-align:right; overflow-wrap:anywhere; }
+.device-detail-empty { padding:13px; border:1px dashed rgba(104,207,233,.3); border-radius:12px; background:rgba(0,116,153,.12); color:#c0dce7; font-size:11px; line-height:1.55; }
+.device-detail-alert { padding:10px; margin:6px 0; border-left:3px solid #f5bd4f; border-radius:8px; background:rgba(255,193,7,.08); color:#fff0c3; font-size:11px; }
+.device-detail-document,.device-detail-primary { display:flex; align-items:center; justify-content:center; width:100%; min-height:44px; margin-top:12px; padding:10px; box-sizing:border-box; border:1px solid #46cde9; border-radius:11px; background:#087ca4; color:#fff; text-align:center; text-decoration:none; font-size:11px; font-weight:900; }
+.device-detail-footer { display:flex; align-items:center; justify-content:space-between; gap:10px; padding-top:10px; border-top:1px solid rgba(85,215,245,.2); }
+.device-detail-footer button { min-height:40px; min-width:94px; border:1px solid rgba(85,215,245,.4); border-radius:10px; background:#0b5577; color:#fff; font-size:11px; font-weight:800; }
+.device-detail-footer button:disabled { opacity:.35; }
+.device-detail-footer span { color:#9ec9d8; font-size:10px; font-weight:800; }
+.device-detail-disclaimer { margin:9px 0 0; color:#789aaa; font-size:9px; line-height:1.4; }
+body.device-detail-open #btn-explorar,body.device-detail-open #mapa-container,body.device-detail-open #toast-info { filter:blur(3px); }
+@media(max-width:520px) {
+ .device-detail-overlay { padding: max(10px,env(safe-area-inset-top)) 8px max(10px,env(safe-area-inset-bottom)); }
+ .device-detail-card { max-height:90dvh; padding:12px; border-radius:16px; }
+ .device-detail-heading h2 { font-size:18px; }
+ .device-detail-content { min-height:145px; }
+ .device-detail-row { padding:9px 5px; font-size:10px; }
+ .device-detail-footer button { min-width:82px; }
+}
+@media(prefers-reduced-motion:reduce) { .device-detail-card { animation:none; } }
