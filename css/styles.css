@@ -869,3 +869,65 @@ body.scanner-ativo > #btn-explorar {
   #mapa-interno-painel #canvas-expandido-container { min-height:125px; }
   #mapa-interno-painel { overflow-y:auto; }
 }
+
+
+/* Avisos compactos da navegação interna: informativos, sem competir com o mapa. */
+#navegacao-controles {
+  gap:6px;
+}
+#navegacao-controles #navegacao-destino,
+#navegacao-controles #tracking-status {
+  display:inline-flex;
+  align-items:center;
+  align-self:flex-start;
+  gap:6px;
+  width:fit-content;
+  max-width:100%;
+  min-height:26px;
+  box-sizing:border-box;
+  margin:0;
+  padding:5px 9px;
+  border:1px solid rgba(76,201,240,.28);
+  border-radius:999px;
+  background:rgba(0,94,147,.16);
+  color:#bceeff;
+  font-size:10px;
+  font-weight:700;
+  line-height:1.25;
+  overflow-wrap:anywhere;
+}
+#navegacao-controles #navegacao-destino::before {
+  content:"◎";
+  flex:0 0 auto;
+  color:#55d9f2;
+  font-size:13px;
+  line-height:1;
+}
+#navegacao-controles #tracking-status {
+  border-color:rgba(255,193,7,.28);
+  background:rgba(255,193,7,.09);
+  color:#ffe29a;
+}
+#navegacao-controles #tracking-status::before {
+  content:"●";
+  flex:0 0 auto;
+  color:#ffc857;
+  font-size:8px;
+  line-height:1;
+}
+#navegacao-controles #tracking-status[data-active="true"] {
+  border-color:rgba(0,220,130,.35);
+  background:rgba(0,220,130,.09);
+  color:#baf8d7;
+}
+#navegacao-controles #tracking-status[data-active="true"]::before {
+  color:#4be39a;
+}
+@media(max-width:650px) {
+  #navegacao-controles #navegacao-destino,
+  #navegacao-controles #tracking-status {
+    min-height:24px;
+    padding:4px 8px;
+    font-size:9px;
+  }
+}

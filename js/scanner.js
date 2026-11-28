@@ -96,6 +96,23 @@ const ScannerModule = {
       }
     }
     if (botao) botao.textContent = this.aguardandoPosicao ? 'Toque na planta para marcar sua posição…' : 'Marcar minha posição no mapa';
+
+    const status = document.getElementById('tracking-status');
+    if (status && !this.aguardandoMarcoZero && !(typeof IndoorTracker !== 'undefined' && IndoorTracker.ativo)) {
+      if (this.aguardandoPosicao) {
+        status.textContent = 'Toque na planta para marcar sua posição.';
+        status.dataset.active = 'false';
+      } else if (!State.posicaoUsuario) {
+        status.textContent = 'Marque sua posição na planta.';
+        status.dataset.active = 'false';
+      } else if (!eq) {
+        status.textContent = 'Posição definida · selecione um equipamento.';
+        status.dataset.active = 'false';
+      } else {
+        status.textContent = 'Tudo pronto · inicie a orientação.';
+        status.dataset.active = 'false';
+      }
+    }
   },
 
   marcarMinhaPosicao() {
