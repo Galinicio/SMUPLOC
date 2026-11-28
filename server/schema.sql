@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS users (
   UNIQUE (organization_id, email)
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS users_email_global_unique ON users (lower(email));
+
 CREATE TABLE IF NOT EXISTS environments (
   id TEXT NOT NULL,
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
