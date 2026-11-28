@@ -23,6 +23,10 @@ const UIShell = {
     mapaTitulo.className = 'smuploc-bloco-titulo';
     mapaTitulo.innerHTML = '<strong>Mapa do ambiente</strong><span>Visualização e orientação do técnico</span>';
 
+    const navegacaoPainel = document.createElement('section');
+    navegacaoPainel.className = 'smuploc-navegacao-painel';
+    navegacaoPainel.setAttribute('aria-label', 'Orientação e destino');
+
     const configPainel = document.createElement('section');
     configPainel.className = 'smuploc-config-painel';
     configPainel.setAttribute('aria-label', 'Configurações');
@@ -71,7 +75,7 @@ const UIShell = {
       interno.id = 'mapa-interno-painel';
       const navegacao = document.getElementById('navegacao-controles');
       interno.appendChild(canvas);
-      if (navegacao) interno.appendChild(navegacao);
+      if (navegacao) navegacaoPainel.appendChild(navegacao);
       mapaPainel.append(mapaTitulo, abasMapa, externo, interno);
       this.vincularGestosMapa(canvas);
       MapaExternoModule.iniciar();
@@ -111,7 +115,7 @@ const UIShell = {
     configConteudo.appendChild(grupoAvancado);
     configPainel.append(configToggle, configConteudo);
 
-    layout.append(mapaPainel, configPainel);
+    layout.append(mapaPainel, navegacaoPainel, configPainel);
     if (cabecalho) {
       cabecalho.after(layout);
       const titulo = cabecalho.querySelector('.modal-title');
@@ -122,6 +126,7 @@ const UIShell = {
       modal.appendChild(layout);
     }
     if (ferramentas) ferramentas.remove();
+    navegacaoPainel.hidden = true;
     this.mostrarSecao('minimapa');
   },
 
@@ -134,6 +139,11 @@ const UIShell = {
     conteudo.hidden = !abrir;
     painel.classList.toggle('aberta', abrir);
     botao.setAttribute('aria-expanded', String(abrir));
+  },
+
+  atualizarPainelNavegacao(ativo) {
+    const painel = document.querySelector('.smuploc-navegacao-painel');
+    if (painel) painel.hidden = !ativo;
   },
 
   mostrarSecao(id) {
