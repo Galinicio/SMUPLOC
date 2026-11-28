@@ -236,9 +236,9 @@ const MapearModule = {
     alert('Contorno salvo. Área estimada: ' + area.toFixed(2) + ' m².');
   },
 
-  cancelar() {
+  cancelar(silencioso = false) {
     if (this.calibracaoAtiva) { this.calibracaoAtiva = false; this.pontosCalibracao = []; }
-    if (this.ativo) {
+    if (this.ativo && !silencioso) {
       const confirmar = confirm('Descartar os pontos deste mapeamento?');
       if (!confirmar) return;
     }
