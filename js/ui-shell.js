@@ -62,20 +62,21 @@ const UIShell = {
       const mapaExternoCanvas = document.createElement('div');
       mapaExternoCanvas.id = 'mapa-externo-leaflet';
       mapaExternoCanvas.setAttribute('aria-label','Mapa geográfico OpenStreetMap');
-      externo.append(acoesExternas, statusExterno, mapaExternoCanvas);
+      externo.append(mapaExternoCanvas, acoesExternas, statusExterno);
       const interno = document.createElement('div');
       interno.id = 'mapa-interno-painel';
+      const navegacao = document.getElementById('navegacao-controles');
       interno.appendChild(canvas);
+      if (navegacao) interno.appendChild(navegacao);
       mapaPainel.append(mapaTitulo, abasMapa, externo, interno);
       this.vincularGestosMapa(canvas);
       MapaExternoModule.iniciar();
     } else {
       mapaPainel.append(mapaTitulo);
     }
-    if (equipamentos) mapaPainel.appendChild(equipamentos);
-    if (btnEquipamentos) mapaPainel.appendChild(btnEquipamentos);
-
     configPainel.appendChild(configTitulo);
+    if (equipamentos) configPainel.appendChild(equipamentos);
+    if (btnEquipamentos) configPainel.appendChild(btnEquipamentos);
     if (perfil) configPainel.appendChild(perfil);
     if (ambientes) configPainel.appendChild(ambientes);
 
