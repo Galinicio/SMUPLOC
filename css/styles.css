@@ -521,7 +521,7 @@ body.scanner-ativo > #btn-explorar {
 #mapear-hud .crosshair-center { display:none; }
 #modal-planta.mapeamento-ativo { width:min(460px,96vw); }
 @media(max-width:520px) {
-  #modal-planta { width:min(390px,96vw); padding-left:9px; padding-right:9px; }
+  #modal-planta { width:min(390px,88vw); padding-left:9px; padding-right:9px; }
   #canvas-expandido-container { height:34vh; min-height:220px; }
   #navegacao-controles .acoes-navegacao { grid-template-columns:1fr; }
 }
