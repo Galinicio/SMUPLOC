@@ -10,6 +10,38 @@ const QRScannerModule = {
   ultimaLeituraEm: 0,
   trilhaFocoConfigurada: null,
 
+  detectarAssinaturaSmup(payload) {
+    const original = String(payload || '').trim();
+    const normalizado = original.toLocaleLowerCase('pt-BR').replace(/\\s+/g, '');
+    // UC HYB: o QR contém somente a senha do Access Point.
+    // É uma assinatura de categoria, não um identificador individual.
+    if (normalizado === 'wifismup') {
+      return {
+        tipo: 'UC HYB',
+        assinatura: 'smup-hyb-access-point',
+        identificacaoIndividual: false,
+        conteudoSensivel: true
+      };
+    }
+
+    // UC: combinação observada no QR informado pelo usuário.
+    if (
+      normalizado.includes('www.smupweb.com.br') &&
+      normalizado.includes('el5200.05vusb') &&
+      normalizado.includes('correntout2000ma')
+    ) {
+      return {
+        tipo: 'UC',
+        modelo: 'EL5200.05VUSB',
+        informacaoEletrica: 'correntout2000mA',
+        assinatura: 'smup-uc-el5200-05vusb',
+        identificacaoIndividual: false,
+        conteudoSensivel: false
+      };
+    }
+    return null;
+  },
+
   configurarCamera() {
     const video = document.querySelector('a-scene video') || document.querySelector('video');
     if (!video) return false;
@@ -189,6 +221,14 @@ const QRScannerModule = {
       detalheQr = 'Identificador lido: ' + idLido;
     }
 
+    const assinaturaSmup = this.detectarAssinaturaSmup(payloadSeguro);
+    if (assinaturaSmup) {
+      tituloQr = assinaturaSmup.tipo + ' IDENTIFICADA';
+      detalheQr = assinaturaSmup.identificacaoIndividual
+        ? 'Tipo reconhecido automaticamente pela assinatura do QR Code.'
+        : 'Tipo reconhecido; falta um identificador individual para vincular esta unidade.';
+    }
+
     const normalizar = valor => String(valor || '').trim().toLocaleLowerCase('pt-BR').replace(/[^a-z0-9]/g, '');
     const equipamentoEncontrado = Array.isArray(State.equipamentos) &&
       State.equipamentos.find(eq => {
@@ -201,14 +241,23 @@ const QRScannerModule = {
     // com o inventário local, a ficha deixa isso explícito em vez de cair no toast.
     if (typeof DevicePanelModule !== 'undefined') {
       const equipamentoFicha = equipamentoEncontrado || {
-        id: idLido,
-        nome: tituloQr,
-        tipo: 'Dispositivo identificado por QR',
-        qrPayload: payloadSeguro,
+        id: assinaturaSmup && assinaturaSmup.conteudoSensivel ? '' : idLido,
+        nome: assinaturaSmup ? assinaturaSmup.tipo + ' identificada' : tituloQr,
+        tipo: assinaturaSmup ? assinaturaSmup.tipo : 'Dispositivo identificado por QR',
+        modelo: assinaturaSmup && assinaturaSmup.modelo ? assinaturaSmup.modelo : undefined,
+        informacaoEletrica: assinaturaSmup && assinaturaSmup.informacaoEletrica ? assinaturaSmup.informacaoEletrica : undefined,
+        assinaturaQr: assinaturaSmup ? assinaturaSmup.assinatura : undefined,
+        tipoIdentificadoAutomaticamente: !!assinaturaSmup,
+        identificacaoIndividualDisponivel: !!(assinaturaSmup && assinaturaSmup.identificacaoIndividual),
+        // Não guardar a senha do Access Point como ID nem exibi-la na ficha.
+        qrPayload: assinaturaSmup && assinaturaSmup.conteudoSensivel ? '' : payloadSeguro,
+        qrPayloadSensivel: !!(assinaturaSmup && assinaturaSmup.conteudoSensivel),
         qrIdentificado: true,
         dadosVinculados: false
       };
-      equipamentoFicha.qrPayload = equipamentoFicha.qrPayload || payloadSeguro;
+      if (!equipamentoFicha.qrPayload && !(assinaturaSmup && assinaturaSmup.conteudoSensivel)) {
+        equipamentoFicha.qrPayload = payloadSeguro;
+      }
       equipamentoFicha.dadosVinculados = !!equipamentoEncontrado;
       DevicePanelModule.abrir(equipamentoFicha);
       return;
