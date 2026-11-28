@@ -43,8 +43,10 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 ## 2. Próximas etapas — evolução planejada
 
 ### Reconhecimento de dispositivos por assinatura do QR Code
-- [~] Implementar reconhecimento automático do tipo UC a partir da combinação observada: `www.smupweb.com.br`, `EL5200.05VUSB` e `correntout2000mA` (código na branch; significado técnico dos campos ainda precisa ser confirmado).
-- [~] Implementar reconhecimento automático do tipo UC HYB quando o conteúdo lido for exatamente `wifismup` (código na branch).
+- [x] Implementar reconhecimento automático da categoria UC pela combinação observada: `www.smupweb.com.br`, `EL5200.05VUSB` e `correntout2000mA` (regra implementada na branch; significado técnico dos campos ainda precisa ser confirmado).
+- [x] Implementar reconhecimento automático da categoria UC HYB quando o conteúdo lido for exatamente `wifismup` (regra implementada na branch; o conteúdo é tratado como senha do Access Point, não como ID individual).
+- [ ] Validar no navegador, com etiquetas reais, as regras de reconhecimento da UC e da UC HYB.
+- [!] Não confundir reconhecimento da categoria com cadastro automático de uma unidade: a criação individual ainda exige ID único e fluxo de confirmação.
 - [ ] Descobrir e documentar a assinatura QR dos dispositivos US.
 - [!] Cadastro automático de uma unidade individual ainda depende de identificador único: os dados conhecidos da UC não incluem número de série confirmado e o QR da UC HYB contém somente a senha do Access Point. A senha é tratada como informação sensível e não é usada como ID nem exibida na ficha.
 - [ ] Após obter identificadores individuais confiáveis, automatizar criação do ativo, evitar duplicidades e solicitar apenas os dados espaciais ausentes.
@@ -79,6 +81,18 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 - [ ] Permitir que o usuário defina ou corrija manualmente sua posição.
 - [ ] Melhorar a orientação até um ativo, exibindo destino, direção e distância estimada.
 - [ ] Testar a navegação em locais reais e medir o erro de posicionamento.
+
+### Itens de maior esforço — precisam de projeto técnico e decisões antes de implementar
+
+Estes itens não são pequenas correções. Precisam de arquitetura, testes e/ou dependências externas; devem ser analisados em etapas antes de começar a codificação:
+
+- [!] **Backend compartilhado e sincronização:** sair do `localStorage`, definir banco de dados, API própria, autenticação, perfis, permissões, backup e sincronização entre celulares e computadores.
+- [!] **Integração com a API oficial SMUP:** obter documentação, credenciais e autorização; mapear dispositivos, leituras, histórico, alarmes e certificados; tratar limites, falhas e permissões. Não duplicar o smuPweb.
+- [!] **Cadastro automático seguro:** definir identificador individual estável por dispositivo, regras contra duplicidade, revisão humana e recuperação quando o QR só informa uma categoria ou senha compartilhada.
+- [!] **Navegação indoor confiável:** estruturar plantas por cliente/unidade/andar, escala real, obstáculos, marcos QR, posição inicial e cálculo de rotas; medir erro em ambientes reais.
+- [!] **AR ancorada no ambiente:** avaliar WebXR/ARCore/ARKit, rastreamento persistente, planos, profundidade, compatibilidade e alternativa para aparelhos sem suporte.
+- [!] **Experiência mobile de produção:** testar câmera, permissões, foco, desempenho, rolagem e controles em diferentes navegadores e aparelhos; corrigir diferenças específicas de plataforma.
+- [!] **Testes automatizados de regressão:** criar cenários reproduzíveis para leitura QR, cadastro, ficha, planta, navegação e persistência, executados a cada alteração relevante.
 
 ## 3. Futuro — recursos avançados
 
