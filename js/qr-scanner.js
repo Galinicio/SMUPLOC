@@ -10,6 +10,12 @@ const QRScannerModule = {
   ultimaLeituraEm: 0,
   trilhaFocoConfigurada: null,
 
+  detectarAssinaturaSmup(payload) {
+    return typeof DeviceSignatures !== 'undefined'
+      ? DeviceSignatures.detectar(payload)
+      : null;
+  },
+
   configurarCamera() {
     const video = document.querySelector('a-scene video') || document.querySelector('video');
     if (!video) return false;
@@ -189,10 +195,18 @@ const QRScannerModule = {
       detalheQr = 'Identificador lido: ' + idLido;
     }
 
+    const assinaturaSmup = this.detectarAssinaturaSmup(payloadSeguro);
+    if (assinaturaSmup) {
+      tituloQr = assinaturaSmup.tipo + ' IDENTIFICADA';
+      detalheQr = assinaturaSmup.identificacaoIndividual
+        ? 'Tipo reconhecido automaticamente pela assinatura do QR Code.'
+        : 'Tipo reconhecido; falta um identificador individual para vincular esta unidade.';
+    }
+
     const normalizar = valor => String(valor || '').trim().toLocaleLowerCase('pt-BR').replace(/[^a-z0-9]/g, '');
     const equipamentoEncontrado = Array.isArray(State.equipamentos) &&
       State.equipamentos.find(eq => {
-        const candidatos = [eq.id, eq.nome, eq.codigo, eq.tag, eq.serial, eq.uuid];
+        const candidatos = [eq.id, eq.uuid, eq.codigo, eq.codigoUnico, eq.serial, eq.numeroSerie, eq.tag, eq.deviceId, eq.objectId, eq.nome, eq.name];
         const alvo = normalizar(idLido);
         return candidatos.some(valor => normalizar(valor) === alvo);
       });
@@ -201,14 +215,23 @@ const QRScannerModule = {
     // com o inventário local, a ficha deixa isso explícito em vez de cair no toast.
     if (typeof DevicePanelModule !== 'undefined') {
       const equipamentoFicha = equipamentoEncontrado || {
-        id: idLido,
-        nome: tituloQr,
-        tipo: 'Dispositivo identificado por QR',
-        qrPayload: payloadSeguro,
+        id: assinaturaSmup && assinaturaSmup.conteudoSensivel ? '' : idLido,
+        nome: assinaturaSmup ? assinaturaSmup.tipo + ' identificada' : tituloQr,
+        tipo: assinaturaSmup ? assinaturaSmup.tipo : 'Dispositivo identificado por QR',
+        modelo: assinaturaSmup && assinaturaSmup.modelo ? assinaturaSmup.modelo : undefined,
+        informacaoEletrica: assinaturaSmup && assinaturaSmup.informacaoEletrica ? assinaturaSmup.informacaoEletrica : undefined,
+        assinaturaQr: assinaturaSmup ? assinaturaSmup.assinatura : undefined,
+        tipoIdentificadoAutomaticamente: !!assinaturaSmup,
+        identificacaoIndividualDisponivel: !!(assinaturaSmup && assinaturaSmup.identificacaoIndividual),
+        // Não guardar a senha do Access Point como ID nem exibi-la na ficha.
+        qrPayload: assinaturaSmup && assinaturaSmup.conteudoSensivel ? '' : payloadSeguro,
+        qrPayloadSensivel: !!(assinaturaSmup && assinaturaSmup.conteudoSensivel),
         qrIdentificado: true,
         dadosVinculados: false
       };
-      equipamentoFicha.qrPayload = equipamentoFicha.qrPayload || payloadSeguro;
+      if (!equipamentoFicha.qrPayload && !(assinaturaSmup && assinaturaSmup.conteudoSensivel)) {
+        equipamentoFicha.qrPayload = payloadSeguro;
+      }
       equipamentoFicha.dadosVinculados = !!equipamentoEncontrado;
       DevicePanelModule.abrir(equipamentoFicha);
       return;
@@ -269,6 +292,67 @@ const QRScannerModule = {
         `TAG: ${payloadSeguro}\n--------------------\nIDENTIFICAÇÃO: LIDA\nCOMUNICAÇÃO: NÃO VERIFICADA`
       );
     }
+  },
+
+  cadastrarAssinatura(equipamento) {
+    if (State.perfilAtual === 'cliente') {
+      alert('O modo cliente pode apenas visualizar. Peça a um administrador ou técnico para cadastrar este ativo.');
+      return false;
+    }
+    if (!equipamento || !equipamento.assinaturaQr || !equipamento.tipoIdentificadoAutomaticamente) return false;
+
+    const existentes = State.equipamentos.filter(eq => eq.assinaturaQr === equipamento.assinaturaQr);
+    if (existentes.length) {
+      const nomes = existentes.slice(0, 4).map(eq => eq.nome || eq.id).join(', ');
+      const mesma = confirm(
+        'Já existe(m) ' + existentes.length + ' cadastro(s) provisório(s) desta categoria neste ambiente: ' +
+        nomes + '.\n\nÉ uma unidade já cadastrada? OK para abrir o cadastro existente; Cancelar para cadastrar outra unidade.'
+      );
+      if (mesma) {
+        if (existentes.length === 1) {
+          DevicePanelModule.abrir({ ...existentes[0], dadosVinculados: true });
+        } else {
+          const escolha = prompt('Informe o ID da unidade que deseja abrir:\n' + existentes.map(eq => eq.id + ' — ' + (eq.nome || eq.tipo)).join('\n'));
+          const encontrada = existentes.find(eq => eq.id === escolha);
+          if (encontrada) DevicePanelModule.abrir({ ...encontrada, dadosVinculados: true });
+        }
+        return true;
+      }
+    }
+
+    const nomePadrao = equipamento.tipo + (equipamento.modelo ? ' ' + equipamento.modelo : '') + ' (identificação pendente)';
+    const nome = (prompt('Nome para identificar esta unidade provisoriamente:', nomePadrao) || '').trim();
+    if (!nome) return false;
+
+    const novo = {
+      id: State.gerarId('ativo'),
+      nome: nome.slice(0, 100),
+      tipo: equipamento.tipo,
+      modelo: equipamento.modelo || '',
+      informacaoEletrica: equipamento.informacaoEletrica || '',
+      assinaturaQr: equipamento.assinaturaQr,
+      identificacaoPendente: true,
+      identificacaoIndividualDisponivel: false,
+      qrPayloadSensivel: !!equipamento.qrPayloadSensivel,
+      qrPayload: '',
+      setor: '',
+      ambienteId: State.ambienteAtualId,
+      x: 0,
+      z: 0,
+      posicionado: false,
+      cor: '#0052cc',
+      statusCadastro: 'provisorio'
+    };
+
+    if (!State.adicionarEquipamento(novo)) {
+      alert('Não foi possível salvar o cadastro provisório neste ambiente.');
+      return false;
+    }
+    MinimapModule.equipamentoAguardandoPosicao = novo;
+    MinimapModule.abrirModal();
+    DevicePanelModule.abrir({ ...novo, dadosVinculados: true });
+    alert('Cadastro provisório criado. Identifique a unidade e posicione-a na planta para concluir.');
+    return true;
   },
 
   cadastrarPrompt(payload) {

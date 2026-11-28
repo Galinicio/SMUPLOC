@@ -13,29 +13,44 @@
 Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcionalidades.
 
 ### Leitura de QR Code e ficha digital
-- [ ] Testar a leitura de QR Code em computador e celular, com permissões de câmera concedidas.
-- [ ] Confirmar que a leitura de um equipamento cadastrado abre a ficha digital centralizada sobre a câmera.
-- [ ] Testar as seis páginas da ficha: Resumo, Monitoramento, Gráficos, Notificações, Calibração e Localização.
-- [ ] Testar navegação entre páginas, botões anterior/próximo, abas e fechamento da ficha.
-- [ ] Confirmar que a câmera/leitor volta a funcionar depois de fechar a ficha.
+- [x] Leitura de QR Code validada pelo usuário no dispositivo testado; falta repetir no outro tipo de aparelho (computador/celular).
+- [x] Confirmar que a leitura de QR Code abre a ficha digital sobre a câmera (validado pelo usuário).
+- [x] Testar as seis páginas da ficha em navegador real: Resumo, Monitoramento, Gráficos, Notificações, Calibração e Localização (validado pelo usuário).
+- [x] Simular a abertura da ficha e a navegação pelas seis páginas, verificando abas, contador e limites dos botões anterior/próximo.
+- [x] Validar pelo usuário a navegação entre as seis páginas e o fechamento da ficha; botões/abas também passaram pela simulação estática.
+- [x] Confirmar que a câmera/leitor volta a funcionar depois de fechar a ficha (validado pelo usuário).
 - [ ] Testar QR Code desconhecido, inválido, repetido e equipamento sem dados opcionais.
-- [ ] Revisar a experiência em telas pequenas: painel, textos, botões, rolagem e toque.
+- [x] Alinhar a busca no inventário aos identificadores aceitos pelo leitor (ID, UUID, código, código único, serial, número de série, tag e IDs externos); validar a correspondência em simulação.
+- [x] Simular QR desconhecido e conteúdo textual que não é JSON, confirmando que a ficha informa que o cadastro ainda não está vinculado.
+- [~] Revisar a experiência em telas pequenas: controles de parede ficaram mais simples e responsivos; falta teste em aparelhos reais.
 - [ ] Melhorar mensagens de erro e estados vazios para que o usuário saiba o que aconteceu e como continuar.
 - [ ] Verificar se os elementos da ficha continuam funcionando quando faltam informações de certificado, localização ou monitoramento.
 
 ### Estabilidade geral
 - [ ] Fazer uma revisão dos módulos JavaScript, ordem de carregamento, eventos e referências ao HTML.
 - [ ] Verificar erros no console do navegador durante os principais fluxos.
-- [ ] Criar uma rotina de testes de regressão para não quebrar recursos já existentes ao adicionar novos.
-- [ ] Documentar como cadastrar equipamentos de teste e como reproduzir os principais cenários.
+- [x] Conferir a ordem de carregamento dos scripts e confirmar que todos os IDs HTML usados pelo leitor QR, ficha digital e inicialização principal existem no HTML.
+- [~] Criar rotina de testes de regressão: CI e testes iniciais de QR, HTML, sintaxe, API e navegação adicionados; execução verde confirmada no commit atual da branch; ampliar cobertura.
+- [x] Verificar sintaxe de todos os 14 módulos JavaScript atuais (validação estática; não substitui teste no navegador).
+- [x] Documentar como a API deve ser ativada com segurança e como a AR será evoluída; ainda falta um guia operacional de cadastro de equipamentos de teste.
 
 ### Situação conhecida
 - [x] Corrigida a redeclaração de variável que impedia o módulo do leitor QR de carregar (PR #18).
 - [x] Publicação do commit da correção confirmada como `live` no Render.
-- [ ] Validação prática da câmera, leitura e ficha após o deploy.
+- [x] Validação prática da câmera, leitura da etiqueta, abertura/navegação da ficha e retomada da câmera após fechar (confirmado pelo usuário na versão publicada anteriormente).
 - [!] O deploy publicado não equivale a um teste funcional em todos os navegadores e celulares.
 
 ## 2. Próximas etapas — evolução planejada
+
+### Reconhecimento de dispositivos por assinatura do QR Code
+- [x] Implementar reconhecimento automático da categoria UC pela combinação observada: `www.smupweb.com.br`, `EL5200.05VUSB` e `correntout2000mA` (regra implementada na branch; significado técnico dos campos ainda precisa ser confirmado).
+- [x] Implementar reconhecimento automático da categoria UC HYB quando o conteúdo lido for exatamente `wifismup` (regra implementada na branch; o conteúdo é tratado como senha do Access Point, não como ID individual).
+- [ ] Validar no navegador, com etiquetas reais, as regras de reconhecimento da UC e da UC HYB.
+- [!] Não confundir reconhecimento da categoria com cadastro automático de uma unidade: a criação individual ainda exige ID único e fluxo de confirmação.
+- [ ] Descobrir e documentar a assinatura QR dos dispositivos US.
+- [!] Cadastro automático de uma unidade individual ainda depende de identificador único: os dados conhecidos da UC não incluem número de série confirmado e o QR da UC HYB contém somente a senha do Access Point. A senha é tratada como informação sensível e não é usada como ID nem exibida na ficha.
+- [~] Criar fluxo de cadastro provisório a partir de assinatura reconhecida, com confirmação do técnico, ID local gerado e posicionamento pendente; QR compartilhado ainda exige confirmação humana.
+- [ ] Após obter identificadores individuais confiáveis, automatizar vínculo definitivo e evitar duplicidades.
 
 ### Cadastro e ficha dos ativos
 - [ ] Padronizar o cadastro de qualquer ativo físico: nome, categoria, fabricante, modelo, código, cliente, unidade, prédio, andar, setor e ambiente.
@@ -51,13 +66,14 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 - [ ] Planejar histórico de certificados e calibrações, quando houver dados disponíveis.
 
 ### Dados, persistência e integração SMUP
-- [ ] Definir uma fonte central de dados para os cadastros, em vez de depender somente do armazenamento local do navegador.
-- [ ] Planejar backend, autenticação, permissões e sincronização entre dispositivos.
-- [ ] Obter documentação, credenciais e autorização da API oficial da SMUP.
+- [~] Fonte central de dados: esquema PostgreSQL, API própria inicial e cliente frontend opcional criados; login e sincronização continuam bloqueados até publicar/testar API e banco. A interface não deve simular um login funcional antes disso.
+- [~] Backend inicial com Express, JWT, papéis, isolamento por organização, validação e auditoria implementado; criação administrativa de usuários adicionada; redefinição de acesso, testes de integração e publicação pendentes.
+- [ ] Sincronização autenticada entre dispositivos. Cliente API carregado, mas ainda sem sincronização automática; preservar modo local e exportação/importação até validar migração.
+- [!] Integração com API oficial SMUP adiada conforme decisão do projeto.
 - [ ] Integrar dados de monitoramento da SMUP: leituras, temperatura, umidade, sinal, histórico e atualização mais recente, conforme disponibilidade da API.
 - [ ] Integrar alarmes, notificações e ocorrências, respeitando permissões.
 - [ ] Evitar duplicar no SMUPLOC funções já oferecidas pelo smuPweb: o SMUPLOC deve acrescentar localização, orientação e contexto espacial.
-- [ ] Planejar funcionamento com conexão instável e sincronização posterior.
+- [ ] Planejar funcionamento com conexão instável, fila offline e resolução de conflitos.
 
 ### Plantas e navegação indoor
 - [ ] Padronizar cadastro de clientes, locais, prédios, andares, plantas, setores e ambientes.
@@ -65,13 +81,26 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 - [ ] Calibrar a escala da planta com medidas reais.
 - [ ] Cadastrar QR Codes como marcos espaciais com posição conhecida.
 - [ ] Permitir que o usuário defina ou corrija manualmente sua posição.
-- [ ] Melhorar a orientação até um ativo, exibindo destino, direção e distância estimada.
-- [ ] Testar a navegação em locais reais e medir o erro de posicionamento.
+- [~] Melhorar a orientação até um ativo: roteador A* em grade, desenho de obstáculos por dois pontos e rota visual evitando paredes cadastradas implementados; controles de largura no painel e bloqueio do arraste durante o desenho adicionados; falta validar em plantas reais e calibrar escala.
+- [ ] Testar a navegação em locais reais, medir o erro de posicionamento e verificar rotas com paredes/portas reais.
+
+### Itens de maior esforço — precisam de projeto técnico e decisões antes de implementar
+
+Estes itens não são pequenas correções. Precisam de arquitetura, testes e/ou dependências externas; devem ser analisados em etapas antes de começar a codificação:
+
+- [~] **Backend compartilhado e sincronização:** esquema PostgreSQL, API Express, login JWT, perfis, isolamento por organização, auditoria, listagem/criação de usuários e cliente API opcional implementados em código; faltam interface de login, sincronização real, testes com banco, infraestrutura e migração com backup.
+- [!] **Integração com a API oficial SMUP:** deliberadamente adiada; não iniciar nesta fase.
+- [~] **Cadastro automático seguro:** reconhecimento de categoria e cadastro provisório com confirmação humana implementados; vínculo definitivo ainda depende de identificador individual e regras para QR compartilhado.
+- [~] **Navegação indoor confiável:** A* e cadastro manual de obstáculos implementados em código; falta estrutura completa por pavimento, portas/áreas restritas, escala real e validação de campo.
+- [~] **AR ancorada no ambiente:** diagnóstico de compatibilidade e documento técnico `docs/AR-ROADMAP.md` implementados; sessão AR, hit-test, ancoragem persistente e reconhecimento de planos/profundidade continuam pendentes.
+- [~] **Experiência mobile:** reforçar alvos de toque, rolagem, foco acessível e comportamento do painel em telas pequenas; controles de obstáculos simplificados; testes em aparelhos/navegadores reais ainda pendentes.
+- [~] **Testes automatizados de regressão:** CI verde confirmado no commit atual; testes iniciais de QR, sintaxe, integridade HTML, cliente API e A* adicionados; ampliar cobertura de cadastro, ficha, planta, API real e persistência.
 
 ## 3. Futuro — recursos avançados
 
 ### Realidade aumentada (AR)
-- [ ] Investigar uso de WebXR e, quando necessário, soluções nativas com ARCore/ARKit.
+- [x] Documentar arquitetura, limites e matriz de testes em `docs/AR-ROADMAP.md`.
+- [~] Diagnóstico de compatibilidade WebXR/câmera/sensores/WebGL sem solicitar permissões; sessão AR ancorada e integração ARCore/ARKit continuam pendentes.
 - [ ] Ancorar marcadores e fichas de ativos em posições físicas reconhecidas pela câmera.
 - [ ] Avaliar reconhecimento de paredes, planos, profundidade e obstáculos em dispositivos compatíveis.
 - [ ] Criar uma experiência de orientação visual que indique o caminho até o ativo.

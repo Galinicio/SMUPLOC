@@ -21,6 +21,7 @@ const State = {
   destinoId: null,
   marcoZero: { x: 0, z: 0, headingOffset: 0 },
   cantosMapear: [],
+  obstaculos: [],
   plantaImageBase64: null,
   imgPlantaObj: new Image(),
 
@@ -66,6 +67,7 @@ const State = {
       destinoId: dados.destinoId ? String(dados.destinoId).slice(0, 180) : null,
       marcoZero: dados.marcoZero && Number.isFinite(Number(dados.marcoZero.x)) && Number.isFinite(Number(dados.marcoZero.z)) ? { x: Number(dados.marcoZero.x), z: Number(dados.marcoZero.z), headingOffset: Number.isFinite(Number(dados.marcoZero.headingOffset)) ? Number(dados.marcoZero.headingOffset) : 0 } : { x: 0, z: 0, headingOffset: 0 },
       cantos: Array.isArray(dados.cantos) ? dados.cantos : [],
+      obstaculos: Array.isArray(dados.obstaculos) ? dados.obstaculos.filter(o => o && [o.x1,o.z1,o.x2,o.z2].every(v => Number.isFinite(Number(v)))).slice(0, 300) : [],
       planta: typeof dados.planta === 'string' && dados.planta.startsWith('data:image/') ? dados.planta : null,
       escala: Number.isFinite(Number(dados.escala)) && Number(dados.escala) >= 4 && Number(dados.escala) <= 100
         ? Number(dados.escala) : 22,
@@ -124,6 +126,7 @@ const State = {
     ambiente.destinoId = this.destinoId || null;
     ambiente.marcoZero = this.marcoZero || { x: 0, z: 0 };
     ambiente.cantos = this.cantosMapear;
+    ambiente.obstaculos = this.obstaculos;
     ambiente.planta = this.plantaImageBase64;
     ambiente.escala = (typeof MapearModule !== 'undefined' && MapearModule.escalaPxPorMetro) || ambiente.escala || 22;
     ambiente.atualizadoEm = new Date().toISOString();
@@ -140,6 +143,7 @@ const State = {
     this.marcoZero = ambiente.marcoZero || { x: 0, z: 0, headingOffset: 0 };
     if (typeof IndoorTracker !== 'undefined') IndoorTracker.headingOffset = Number(this.marcoZero.headingOffset) || 0;
     this.cantosMapear = ambiente.cantos.filter(p => p && Number.isFinite(Number(p.x)) && Number.isFinite(Number(p.z)));
+    this.obstaculos = Array.isArray(ambiente.obstaculos) ? ambiente.obstaculos : [];
     this.plantaImageBase64 = ambiente.planta || null;
 
     if (typeof MapearModule !== 'undefined') MapearModule.escalaPxPorMetro = ambiente.escala || 22;
@@ -289,6 +293,7 @@ const State = {
     this.destinoId = null;
     this.marcoZero = { x: 0, z: 0, headingOffset: 0 };
     this.cantosMapear = [];
+    this.obstaculos = [];
     this.plantaImageBase64 = null;
     this.ambienteAtualId = null;
     this.imgPlantaObj.onload = null;

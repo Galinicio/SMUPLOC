@@ -77,7 +77,7 @@
       <label class="btn-importar-ambiente">Importar cadastro<input id="input-importar-ambiente" type="file" accept="application/json,.json" hidden></label>
       <div id="ambiente-atual-label" aria-live="polite"></div>
       <div id="ambiente-qr-area" hidden></div>
-      <p class="aviso-sincronizacao">Nesta etapa, cada dispositivo mantém seus dados localmente. Para compartilhar com outro técnico, exporte e importe o cadastro. A sincronização automática será feita pela futura API SMUP.</p>
+      <p class="aviso-sincronizacao">Modo local: os dados ficam neste dispositivo. Para compartilhar, exporte e importe o cadastro. A sincronização pela API própria do SMUPLOC só será ativada depois da publicação e dos testes do servidor. A API oficial SMUP não está integrada.</p>
     </section></details>
 
     <div id="canvas-expandido-container">
@@ -95,6 +95,14 @@
 <button type="button" onclick="IndoorTracker.recalibrarPasso()">Ajustar tamanho do passo</button>
 <button type="button" onclick="ScannerModule.limparDestino()">Limpar destino</button>
 <button type="button" onclick="ScannerModule.definirMarcoZero()">Definir marco zero (admin)</button>
+<div class="obstaculo-config">
+<label for="obstacle-width">Largura da parede (m)</label>
+<input id="obstacle-width" type="number" min="0.05" max="2" step="0.05" value="0.15" inputmode="decimal">
+</div>
+<button id="btn-obstaculo-iniciar" type="button" aria-pressed="false" onclick="IndoorRouting.iniciarCadastro()">＋ Adicionar parede</button>
+<button type="button" onclick="IndoorRouting.cancelarCadastro()">Cancelar marcação</button>
+<button type="button" onclick="IndoorRouting.desfazerObstaculo()">Desfazer última parede</button>
+<button type="button" onclick="ARCapabilityModule.verificar()">Verificar compatibilidade AR</button>
 </details></div>
     </div>
 
@@ -206,9 +214,11 @@
   <canvas id="qr-canvas" style="display:none;"></canvas>
 
   <!-- Scripts Modulares -->
+  <script src="js/api-client.js"></script>
   <script src="js/state.js"></script>
   <script src="js/environments.js"></script>
   <script src="js/equipments.js"></script>
+  <script src="js/device-signatures.js"></script>
   <script src="js/qr-scanner.js"></script>
   <script src="js/device-panel.js"></script>
   <script src="js/minimap.js"></script>
@@ -216,6 +226,8 @@
   <script src="js/scanner.js"></script>
   <script src="js/indoor-tracker.js"></script>
   <script src="js/spatial-anchors.js"></script>
+  <script src="js/indoor-routing.js"></script>
+  <script src="js/ar-capabilities.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="js/external-map.js"></script>
   <script src="js/mapear.js"></script>
