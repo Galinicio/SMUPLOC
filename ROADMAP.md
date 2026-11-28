@@ -49,7 +49,8 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 - [!] Não confundir reconhecimento da categoria com cadastro automático de uma unidade: a criação individual ainda exige ID único e fluxo de confirmação.
 - [ ] Descobrir e documentar a assinatura QR dos dispositivos US.
 - [!] Cadastro automático de uma unidade individual ainda depende de identificador único: os dados conhecidos da UC não incluem número de série confirmado e o QR da UC HYB contém somente a senha do Access Point. A senha é tratada como informação sensível e não é usada como ID nem exibida na ficha.
-- [ ] Após obter identificadores individuais confiáveis, automatizar criação do ativo, evitar duplicidades e solicitar apenas os dados espaciais ausentes.
+- [~] Criar fluxo de cadastro provisório a partir de assinatura reconhecida, com confirmação do técnico, ID local gerado e posicionamento pendente; QR compartilhado ainda exige confirmação humana.
+- [ ] Após obter identificadores individuais confiáveis, automatizar vínculo definitivo e evitar duplicidades.
 
 ### Cadastro e ficha dos ativos
 - [ ] Padronizar o cadastro de qualquer ativo físico: nome, categoria, fabricante, modelo, código, cliente, unidade, prédio, andar, setor e ambiente.
