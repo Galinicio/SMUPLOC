@@ -1,23 +1,11 @@
 /**
  * SMUPLOC Auth UI — interface preparada para API.
  * Sem API configurada, somente modo local de demonstração (perfil cliente).
- * Nunca autentica admin/admin no navegador nem persiste senha/CPF localmente.
+ * Verificação de e-mail e autenticação dependem exclusivamente da API; nenhum código é validado no navegador.
  */
 const AuthUI = {
   usuario: null,
   modoLocal: false,
-  cpfValido(valor) {
-    const cpf = String(valor || '').replace(/\D/g, '');
-    if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
-    const digito = (base, peso) => {
-      let soma = 0;
-      for (let i = 0; i < base.length; i++) soma += Number(base[i]) * (peso - i);
-      const resto = (soma * 10) % 11;
-      return (resto === 10 ? 0 : resto);
-    };
-    return digito(cpf.slice(0, 9), 10) === Number(cpf[9]) &&
-      digito(cpf.slice(0, 10), 11) === Number(cpf[10]);
-  },
   mensagem(texto, erro = false) {
     const el = document.getElementById('auth-message');
     if (!el) return;
@@ -41,10 +29,7 @@ const AuthUI = {
     document.getElementById('auth-back-login')?.addEventListener('click', () => this.alternar('login'));
     document.getElementById('auth-local-demo')?.addEventListener('click', () => this.entrarLocal());
     document.getElementById('auth-logout')?.addEventListener('click', () => this.sair());
-    document.getElementById('auth-cpf')?.addEventListener('input', e => {
-      const digits = e.target.value.replace(/\D/g, '').slice(0, 11);
-      e.target.value = digits.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-    });
+    document.getElementById('auth-send-code')?.addEventListener('click', () => this.enviarCodigo());
     this.alternar('login');
     gate.hidden = false;
     document.body.classList.add('auth-locked');
@@ -80,22 +65,39 @@ const AuthUI = {
       this.ativarSessao(data.user, false);
     } catch (error) { this.mensagem(error.message || 'Falha de conexão com a API.', true); }
   },
+  async enviarCodigo() {
+    const api = String((window.SMUPLOC_CONFIG || {}).apiBaseUrl || '').trim().replace(/\\/+$/, '');
+    const email = document.getElementById('auth-admin-email').value.trim().toLowerCase();
+    if (!api) return this.mensagem('A API segura ainda não está conectada. Nenhum código foi enviado.', true);
+    if (email !== 'alandesouzalobox@gmail.com') return this.mensagem('Este e-mail não está autorizado para ativar o administrador inicial.', true);
+    try {
+      const response = await fetch(api + '/api/auth/bootstrap/send-code', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Não foi possível enviar o código.');
+      this.mensagem('Se o endereço estiver autorizado, o código de verificação foi enviado. Confira sua caixa de entrada e o spam.');
+    } catch (error) { this.mensagem(error.message || 'Falha ao solicitar código.', true); }
+  },
   async primeiroAcesso(evento) {
     evento.preventDefault();
-    const cpf = document.getElementById('auth-cpf').value.replace(/\D/g, '');
+    const email = document.getElementById('auth-admin-email').value.trim().toLowerCase();
+    const code = document.getElementById('auth-email-code').value.trim();
     const username = document.getElementById('auth-new-username').value.trim();
     const password = document.getElementById('auth-new-password').value;
     const confirmacao = document.getElementById('auth-confirm-password').value;
-    if (!this.cpfValido(cpf)) return this.mensagem('CPF inválido. Confira os 11 dígitos verificadores.', true);
+    if (email !== 'alandesouzalobox@gmail.com') return this.mensagem('E-mail não autorizado para o primeiro administrador.', true);
+    if (!/^\\d{6}$/.test(code)) return this.mensagem('Informe o código de verificação de 6 dígitos.', true);
     if (!/^[a-zA-Z0-9._-]{4,40}$/.test(username)) return this.mensagem('O usuário deve ter de 4 a 40 caracteres: letras, números, ponto, hífen ou underline.', true);
     if (password.length < 12) return this.mensagem('Crie uma senha com pelo menos 12 caracteres.', true);
     if (password !== confirmacao) return this.mensagem('As senhas não coincidem.', true);
-    const api = String((window.SMUPLOC_CONFIG || {}).apiBaseUrl || '').trim().replace(/\/+$/, '');
+    const api = String((window.SMUPLOC_CONFIG || {}).apiBaseUrl || '').trim().replace(/\\/+$/, '');
     if (!api) return this.mensagem('Cadastro ainda indisponível: a API segura não foi conectada. Seus dados não foram enviados nem salvos.', true);
     try {
       const response = await fetch(api + '/api/auth/first-access', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bootstrapUsername: 'admin', bootstrapPassword: document.getElementById('auth-bootstrap-password').value, cpf, username, password })
+        body: JSON.stringify({ bootstrapUsername: 'admin', bootstrapPassword: document.getElementById('auth-bootstrap-password').value, email, emailCode: code, username, password })
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Não foi possível concluir o primeiro acesso.');
