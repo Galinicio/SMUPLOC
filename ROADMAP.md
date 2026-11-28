@@ -26,6 +26,7 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 ### Estabilidade geral
 - [ ] Fazer uma revisão dos módulos JavaScript, ordem de carregamento, eventos e referências ao HTML.
 - [ ] Verificar erros no console do navegador durante os principais fluxos.
+- [x] Conferir a ordem de carregamento dos scripts e confirmar que todos os IDs HTML usados pelo leitor QR, ficha digital e inicialização principal existem no HTML.
 - [ ] Criar uma rotina de testes de regressão para não quebrar recursos já existentes ao adicionar novos.
 - [x] Verificar sintaxe de todos os 14 módulos JavaScript atuais (validação estática; não substitui teste no navegador).
 - [ ] Documentar como cadastrar equipamentos de teste e como reproduzir os principais cenários.
