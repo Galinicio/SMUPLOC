@@ -7,8 +7,6 @@ import jwt from 'jsonwebtoken';
 import pg from 'pg';
 import { randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
 import { z } from 'zod';
 
 const { Pool } = pg;
@@ -256,16 +254,18 @@ async function bootstrap() {
       const orgId = randomUUID();
       const userId = randomUUID();
       const hash = await bcrypt.hash(password, 12);
-      await pool.query('BEGIN');
+      const client = await pool.connect();
       try {
-        await pool.query('INSERT INTO organizations (id,name) VALUES ($1,$2)', [orgId, process.env.BOOTSTRAP_ORG_NAME || 'Organização SMUPLOC']);
-        await pool.query(
+        await client.query('BEGIN');
+        await client.query('INSERT INTO organizations (id,name) VALUES ($1,$2)', [orgId, process.env.BOOTSTRAP_ORG_NAME || 'Organização SMUPLOC']);
+        await client.query(
           'INSERT INTO users (id,organization_id,email,password_hash,display_name,role) VALUES ($1,$2,lower($3),$4,$5,$6)',
           [userId, orgId, email, hash, process.env.BOOTSTRAP_ADMIN_NAME || 'Administrador', 'admin']
         );
-        await pool.query('COMMIT');
+        await client.query('COMMIT');
         console.log('Conta administrativa inicial criada.');
-      } catch (error) { await pool.query('ROLLBACK'); throw error; }
+      } catch (error) { await client.query('ROLLBACK'); throw error; }
+      finally { client.release(); }
     }
   }
   app.listen(port, '0.0.0.0', () => console.log(`SMUPLOC API ouvindo na porta ${port}`));
