@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   canvasExp.addEventListener('pointerdown', evento => {
+    if (typeof IndoorRouting !== 'undefined' && IndoorRouting.registrarToque(evento)) return;
     if (typeof ScannerModule !== 'undefined' && (ScannerModule.aguardandoPosicao || ScannerModule.aguardandoMarcoZero)) {
       if (ScannerModule.registrarPosicao(evento)) MinimapModule.bloquearArraste = true;
       return;
