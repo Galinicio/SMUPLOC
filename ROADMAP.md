@@ -27,6 +27,7 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 - [ ] Fazer uma revisão dos módulos JavaScript, ordem de carregamento, eventos e referências ao HTML.
 - [ ] Verificar erros no console do navegador durante os principais fluxos.
 - [ ] Criar uma rotina de testes de regressão para não quebrar recursos já existentes ao adicionar novos.
+- [x] Verificar sintaxe de todos os 14 módulos JavaScript atuais (validação estática; não substitui teste no navegador).
 - [ ] Documentar como cadastrar equipamentos de teste e como reproduzir os principais cenários.
 
 ### Situação conhecida
