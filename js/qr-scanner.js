@@ -294,6 +294,67 @@ const QRScannerModule = {
     }
   },
 
+  cadastrarAssinatura(equipamento) {
+    if (State.perfilAtual === 'cliente') {
+      alert('O modo cliente pode apenas visualizar. Peça a um administrador ou técnico para cadastrar este ativo.');
+      return false;
+    }
+    if (!equipamento || !equipamento.assinaturaQr || !equipamento.tipoIdentificadoAutomaticamente) return false;
+
+    const existentes = State.equipamentos.filter(eq => eq.assinaturaQr === equipamento.assinaturaQr);
+    if (existentes.length) {
+      const nomes = existentes.slice(0, 4).map(eq => eq.nome || eq.id).join(', ');
+      const mesma = confirm(
+        'Já existe(m) ' + existentes.length + ' cadastro(s) provisório(s) desta categoria neste ambiente: ' +
+        nomes + '.\\n\\nÉ uma unidade já cadastrada? OK para abrir o cadastro existente; Cancelar para cadastrar outra unidade.'
+      );
+      if (mesma) {
+        if (existentes.length === 1) {
+          DevicePanelModule.abrir({ ...existentes[0], dadosVinculados: true });
+        } else {
+          const escolha = prompt('Informe o ID da unidade que deseja abrir:\\n' + existentes.map(eq => eq.id + ' — ' + (eq.nome || eq.tipo)).join('\\n'));
+          const encontrada = existentes.find(eq => eq.id === escolha);
+          if (encontrada) DevicePanelModule.abrir({ ...encontrada, dadosVinculados: true });
+        }
+        return true;
+      }
+    }
+
+    const nomePadrao = equipamento.tipo + (equipamento.modelo ? ' ' + equipamento.modelo : '') + ' (identificação pendente)';
+    const nome = (prompt('Nome para identificar esta unidade provisoriamente:', nomePadrao) || '').trim();
+    if (!nome) return false;
+
+    const novo = {
+      id: State.gerarId('ativo'),
+      nome: nome.slice(0, 100),
+      tipo: equipamento.tipo,
+      modelo: equipamento.modelo || '',
+      informacaoEletrica: equipamento.informacaoEletrica || '',
+      assinaturaQr: equipamento.assinaturaQr,
+      identificacaoPendente: true,
+      identificacaoIndividualDisponivel: false,
+      qrPayloadSensivel: !!equipamento.qrPayloadSensivel,
+      qrPayload: '',
+      setor: '',
+      ambienteId: State.ambienteAtualId,
+      x: 0,
+      z: 0,
+      posicionado: false,
+      cor: '#0052cc',
+      statusCadastro: 'provisorio'
+    };
+
+    if (!State.adicionarEquipamento(novo)) {
+      alert('Não foi possível salvar o cadastro provisório neste ambiente.');
+      return false;
+    }
+    MinimapModule.equipamentoAguardandoPosicao = novo;
+    MinimapModule.abrirModal();
+    DevicePanelModule.abrir({ ...novo, dadosVinculados: true });
+    alert('Cadastro provisório criado. Identifique a unidade e posicione-a na planta para concluir.');
+    return true;
+  },
+
   cadastrarPrompt(payload) {
     if (State.perfilAtual === 'cliente') {
       alert('O modo cliente não pode cadastrar equipamentos.');
