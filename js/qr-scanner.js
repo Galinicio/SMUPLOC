@@ -306,13 +306,13 @@ const QRScannerModule = {
       const nomes = existentes.slice(0, 4).map(eq => eq.nome || eq.id).join(', ');
       const mesma = confirm(
         'Já existe(m) ' + existentes.length + ' cadastro(s) provisório(s) desta categoria neste ambiente: ' +
-        nomes + '.\\n\\nÉ uma unidade já cadastrada? OK para abrir o cadastro existente; Cancelar para cadastrar outra unidade.'
+        nomes + '.\n\nÉ uma unidade já cadastrada? OK para abrir o cadastro existente; Cancelar para cadastrar outra unidade.'
       );
       if (mesma) {
         if (existentes.length === 1) {
           DevicePanelModule.abrir({ ...existentes[0], dadosVinculados: true });
         } else {
-          const escolha = prompt('Informe o ID da unidade que deseja abrir:\\n' + existentes.map(eq => eq.id + ' — ' + (eq.nome || eq.tipo)).join('\\n'));
+          const escolha = prompt('Informe o ID da unidade que deseja abrir:\n' + existentes.map(eq => eq.id + ' — ' + (eq.nome || eq.tipo)).join('\n'));
           const encontrada = existentes.find(eq => eq.id === escolha);
           if (encontrada) DevicePanelModule.abrir({ ...encontrada, dadosVinculados: true });
         }
