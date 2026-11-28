@@ -30,10 +30,14 @@ const IndoorRouting = {
 
     const passo = this.passoGrade;
     const margem = 1.5;
-    const minX = Math.min(start.x, goal.x) - margem;
-    const maxX = Math.max(start.x, goal.x) + margem;
-    const minZ = Math.min(start.z, goal.z) - margem;
-    const maxZ = Math.max(start.z, goal.z) + margem;
+    const pontosLimite = [start, goal];
+    obstaculos.forEach(o => {
+      pontosLimite.push({ x: Number(o.x1), z: Number(o.z1) }, { x: Number(o.x2), z: Number(o.z2) });
+    });
+    const minX = Math.min(...pontosLimite.map(p => p.x)) - margem;
+    const maxX = Math.max(...pontosLimite.map(p => p.x)) + margem;
+    const minZ = Math.min(...pontosLimite.map(p => p.z)) - margem;
+    const maxZ = Math.max(...pontosLimite.map(p => p.z)) + margem;
     const largura = Math.min(240, Math.ceil((maxX - minX) / passo) + 1);
     const altura = Math.min(240, Math.ceil((maxZ - minZ) / passo) + 1);
     const toCell = p => ({
@@ -157,8 +161,11 @@ const IndoorRouting = {
     }
     const primeiro = this.primeiroPonto;
     this.primeiroPonto = null;
-    const larguraInformada = Number(prompt('Largura da parede/obstáculo em metros:', '0.15'));
-    const largura = Number.isFinite(larguraInformada) ? Math.max(0.05, Math.min(2, larguraInformada)) : 0.15;
+    const respostaLargura = prompt('Largura da parede/obstáculo em metros:', '0.15');
+    if (respostaLargura === null) return true;
+    const larguraInformada = Number(respostaLargura);
+    const largura = Number.isFinite(larguraInformada) && larguraInformada > 0
+      ? Math.max(0.05, Math.min(2, larguraInformada)) : 0.15;
     if (Math.hypot(ponto.x - primeiro.x, ponto.z - primeiro.z) < 0.15) {
       alert('A parede ficou muito curta. Tente marcar dois pontos mais distantes.');
       return true;
@@ -173,6 +180,21 @@ const IndoorRouting = {
     }
     const status = document.getElementById('tracking-status');
     if (status) status.textContent = 'Obstáculo cadastrado. A próxima rota considerará esta parede.';
+    return true;
+  },
+
+  desfazerObstaculo() {
+    if (!Array.isArray(State.obstaculos) || !State.obstaculos.length) {
+      alert('Não há obstáculos cadastrados para desfazer.');
+      return false;
+    }
+    State.obstaculos.pop();
+    State.sincronizarAmbienteAtual();
+    this.chaveRota = '';
+    if (typeof MinimapModule !== 'undefined') {
+      MinimapModule.renderExpandido();
+      MinimapModule.renderPequeno();
+    }
     return true;
   },
 
