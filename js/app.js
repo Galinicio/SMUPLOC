@@ -68,7 +68,11 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   canvasExp.addEventListener('pointerdown', evento => {
-    if (typeof IndoorRouting !== 'undefined' && IndoorRouting.registrarToque(evento)) return;
+    if (typeof IndoorRouting !== 'undefined' && IndoorRouting.ativo && IndoorRouting.registrarToque(evento)) {
+      // Bloqueia também os eventos compatíveis mousedown/touchstart deste mesmo toque.
+      MinimapModule.bloquearArraste = true;
+      return;
+    }
     if (typeof ScannerModule !== 'undefined' && (ScannerModule.aguardandoPosicao || ScannerModule.aguardandoMarcoZero)) {
       if (ScannerModule.registrarPosicao(evento)) MinimapModule.bloquearArraste = true;
       return;
