@@ -525,3 +525,59 @@ body.scanner-ativo > #btn-explorar {
   #canvas-expandido-container { height:34vh; min-height:220px; }
   #navegacao-controles .acoes-navegacao { grid-template-columns:1fr; }
 }
+
+/* Menu principal unificado: gaveta entra da esquerda para a direita. */
+#modal-planta {
+  left:0; right:auto; width:min(430px,92vw); height:100dvh;
+  display:none; box-sizing:border-box; padding:max(10px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom));
+  justify-content:flex-start; gap:10px; overflow:hidden;
+  background:rgba(5,15,28,.88); border-right:1px solid rgba(255,255,255,.18); border-left:0;
+  transform:translateX(-102%); transition:transform .28s ease;
+}
+#modal-planta[style*="display: flex"] { transform:translateX(0); }
+#modal-planta .modal-header { flex:0 0 auto; }
+.menu-principal-nav { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; flex:0 0 auto; }
+.menu-nav-item {
+  min-height:64px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:4px;
+  border:1px solid rgba(255,255,255,.14); border-radius:12px; background:rgba(255,255,255,.06);
+  color:#e5edf7; font-size:11px; font-weight:800; cursor:pointer;
+}
+.menu-nav-item .menu-nav-icone { font-size:20px; line-height:1; }
+.menu-nav-item.ativo { color:#07192b; background:#ffc107; border-color:#ffc107; }
+.menu-principal-conteudo { flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding-bottom:12px; }
+.menu-secao[hidden] { display:none !important; }
+.menu-secao { display:block; }
+.menu-secao-cabecalho { display:flex; flex-direction:column; gap:3px; padding:6px 2px 10px; }
+.menu-secao-cabecalho strong { color:#ffc107; font-size:17px; }
+.menu-secao-cabecalho span { color:#cbd5e1; font-size:11px; }
+.menu-secao-corpo { display:flex; flex-direction:column; gap:10px; }
+.menu-secao-corpo > details, .menu-secao-corpo > .mapear-seletor,
+.menu-secao-corpo > .btn-admin, .menu-secao-corpo > label,
+.menu-secao-corpo > #painel-equipamentos { width:100%; box-sizing:border-box; }
+.menu-secao-corpo > details { border:1px solid rgba(255,255,255,.15); border-radius:12px; padding:0 10px 10px; background:rgba(10,37,64,.52); }
+.menu-secao-corpo > details > summary { min-height:44px; display:flex; align-items:center; color:#ffc107; font-weight:800; cursor:pointer; }
+.menu-secao-corpo #ambientes-toolbar { display:flex; flex-direction:column; align-items:stretch; }
+.menu-secao-corpo #ambientes-toolbar > * { width:100%; box-sizing:border-box; }
+.menu-secao-corpo #ambientes-toolbar button, .menu-secao-corpo .btn-importar-ambiente { justify-content:center; }
+.menu-secao-corpo > .btn-admin, .menu-secao-corpo > label.btn-admin,
+.menu-secao-corpo .mapear-seletor > button { min-height:48px; border-radius:12px; font-size:13px; }
+.menu-secao-corpo .mapear-seletor > button { width:100%; }
+#canvas-expandido-container {
+  display:block; height:min(43vh,390px); min-height:230px; overflow:auto;
+  overscroll-behavior:contain; touch-action:pan-x pan-y; padding:0;
+}
+#canvas-expandido { display:block; width:360px; height:360px; max-width:none; max-height:none; touch-action:pan-x pan-y; }
+.mapa-zoom-controles { display:flex; align-items:center; justify-content:center; gap:14px; padding:7px; }
+.mapa-zoom-controles button { width:42px; height:38px; border:0; border-radius:10px; background:#2456a6; color:#fff; font-size:22px; font-weight:900; }
+.mapa-zoom-controles span { min-width:54px; text-align:center; color:#ffc107; font-size:12px; font-weight:800; }
+#navegacao-controles { position:static; display:flex; flex-direction:column; margin-top:8px; }
+#painel-equipamentos { max-height:none; margin:0; }
+#perfil-acoes { order:1; }
+#ambientes-acoes { order:2; }
+#modal-planta .btn-fechar { min-width:42px; min-height:42px; }
+@media(max-width:520px) {
+  #modal-planta { width:92vw; padding-left:10px; padding-right:10px; }
+  .menu-nav-item { min-height:58px; font-size:10px; }
+  #canvas-expandido-container { height:38vh; min-height:210px; }
+}
+@media(prefers-reduced-motion:reduce) { #modal-planta { transition:none; } }
