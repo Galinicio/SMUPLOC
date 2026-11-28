@@ -248,6 +248,9 @@ const IndoorRouting = {
       });
       ctx.stroke();
       ctx.setLineDash([]);
+    } else if (State.destinoId && State.posicaoUsuario && obstaculos.length) {
+      const status = document.getElementById('tracking-status');
+      if (status) status.textContent = 'Não foi encontrada uma rota livre. Confira as paredes cadastradas ou ajuste a posição.';
     }
     ctx.restore();
   }
