@@ -20,7 +20,7 @@ const UIShell = {
     if (typeof MapearModule !== 'undefined' && (MapearModule.ativo || MapearModule.calibracaoAtiva)) {
       const confirmar = confirm('Sair do mapeamento atual? Os pontos ainda não salvos serão descartados.');
       if (!confirmar) return;
-      MapearModule.cancelar();
+      MapearModule.cancelar(true);
       const modalAposCancelar = document.getElementById('modal-planta');
       if (modalAposCancelar) modalAposCancelar.style.display = 'none';
       return;
