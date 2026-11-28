@@ -18,7 +18,7 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 - [x] Testar as seis páginas da ficha em navegador real: Resumo, Monitoramento, Gráficos, Notificações, Calibração e Localização (validado pelo usuário).
 - [x] Simular a abertura da ficha e a navegação pelas seis páginas, verificando abas, contador e limites dos botões anterior/próximo.
 - [ ] Testar navegação entre páginas, botões anterior/próximo, abas e fechamento da ficha.
-- [ ] Confirmar que a câmera/leitor volta a funcionar depois de fechar a ficha.
+- [x] Confirmar que a câmera/leitor volta a funcionar depois de fechar a ficha (validado pelo usuário).
 - [ ] Testar QR Code desconhecido, inválido, repetido e equipamento sem dados opcionais.
 - [x] Alinhar a busca no inventário aos identificadores aceitos pelo leitor (ID, UUID, código, código único, serial, número de série, tag e IDs externos); validar a correspondência em simulação.
 - [x] Simular QR desconhecido e conteúdo textual que não é JSON, confirmando que a ficha informa que o cadastro ainda não está vinculado.
