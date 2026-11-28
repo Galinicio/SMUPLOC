@@ -124,6 +124,23 @@ const DevicePanelModule = {
         ['Setor', eq.setor], ['Ambiente', eq.ambiente || eq.local]
       ];
       dados.forEach(([rotulo, valor]) => conteudo.appendChild(this.criarLinha(rotulo, valor)));
+      if (eq.tipoIdentificadoAutomaticamente && eq.dadosVinculados === false) {
+        conteudo.appendChild(this.criarAviso(
+          'Reconhecemos a categoria deste dispositivo, mas o QR não identifica esta unidade individualmente. O cadastro provisório exige confirmação para evitar duplicidades.'
+        ));
+        if (State.perfilAtual === 'cliente') {
+          conteudo.appendChild(this.criarAviso('O cadastro de ativos é restrito aos perfis de administrador e técnico.'));
+        } else {
+          const cadastrar = document.createElement('button');
+          cadastrar.type = 'button';
+          cadastrar.className = 'device-detail-primary';
+          cadastrar.textContent = 'Cadastrar esta unidade provisoriamente';
+          cadastrar.addEventListener('click', () => {
+            if (typeof QRScannerModule !== 'undefined') QRScannerModule.cadastrarAssinatura(eq);
+          });
+          conteudo.appendChild(cadastrar);
+        }
+      }
     } else if (pagina.id === 'monitoramento') {
       const dados = [
         ['Temperatura', this.valor(eq, ['temperaturaAtual', 'temperatura', 'monitoramento.temperatura'])],
