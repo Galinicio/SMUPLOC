@@ -26,9 +26,13 @@ const UIShell = {
     const configPainel = document.createElement('section');
     configPainel.className = 'smuploc-config-painel';
     configPainel.setAttribute('aria-label', 'Configurações');
-    const configTitulo = document.createElement('div');
-    configTitulo.className = 'smuploc-bloco-titulo smuploc-config-titulo';
-    configTitulo.innerHTML = '<strong>Configurações</strong><span>Ambiente, planta e ferramentas</span>';
+    const configToggle = document.createElement('button');
+    configToggle.type = 'button';
+    configToggle.className = 'smuploc-config-toggle';
+    configToggle.setAttribute('aria-expanded', 'false');
+    configToggle.setAttribute('aria-controls', 'smuploc-config-conteudo');
+    configToggle.innerHTML = '<span class="smuploc-config-engrenagem" aria-hidden="true">⚙</span><span>Configurações</span><span class="smuploc-config-seta" aria-hidden="true">⌄</span>';
+    configToggle.addEventListener('click', () => this.alternarConfiguracoes());
 
     const ambientes = document.getElementById('ambientes-acoes');
     const perfil = document.getElementById('perfil-acoes');
@@ -74,11 +78,14 @@ const UIShell = {
     } else {
       mapaPainel.append(mapaTitulo);
     }
-    configPainel.appendChild(configTitulo);
-    if (equipamentos) configPainel.appendChild(equipamentos);
-    if (btnEquipamentos) configPainel.appendChild(btnEquipamentos);
-    if (perfil) configPainel.appendChild(perfil);
-    if (ambientes) configPainel.appendChild(ambientes);
+    const configConteudo = document.createElement('div');
+    configConteudo.id = 'smuploc-config-conteudo';
+    configConteudo.className = 'smuploc-config-corpo';
+    configConteudo.hidden = true;
+    if (equipamentos) configConteudo.appendChild(equipamentos);
+    if (btnEquipamentos) configConteudo.appendChild(btnEquipamentos);
+    if (perfil) configConteudo.appendChild(perfil);
+    if (ambientes) configConteudo.appendChild(ambientes);
 
     const grupoPlanta = document.createElement('details');
     grupoPlanta.className = 'smuploc-config-grupo';
@@ -91,7 +98,7 @@ const UIShell = {
     if (analisar) corpoPlanta.appendChild(analisar);
     if (upload) corpoPlanta.appendChild(upload);
     grupoPlanta.append(resumoPlanta, corpoPlanta);
-    configPainel.appendChild(grupoPlanta);
+    configConteudo.appendChild(grupoPlanta);
 
     const grupoAvancado = document.createElement('details');
     grupoAvancado.className = 'smuploc-config-grupo';
@@ -101,7 +108,8 @@ const UIShell = {
     corpoAvancado.className = 'smuploc-config-conteudo';
     if (limpar) corpoAvancado.appendChild(limpar);
     grupoAvancado.append(resumoAvancado, corpoAvancado);
-    configPainel.appendChild(grupoAvancado);
+    configConteudo.appendChild(grupoAvancado);
+    configPainel.append(configToggle, configConteudo);
 
     layout.append(mapaPainel, configPainel);
     if (cabecalho) {
@@ -117,6 +125,17 @@ const UIShell = {
     this.mostrarSecao('minimapa');
   },
 
+  alternarConfiguracoes(forcarAbertura) {
+    const painel = document.querySelector('.smuploc-config-painel');
+    const conteudo = document.getElementById('smuploc-config-conteudo');
+    const botao = document.querySelector('.smuploc-config-toggle');
+    if (!painel || !conteudo || !botao) return;
+    const abrir = typeof forcarAbertura === 'boolean' ? forcarAbertura : conteudo.hidden;
+    conteudo.hidden = !abrir;
+    painel.classList.toggle('aberta', abrir);
+    botao.setAttribute('aria-expanded', String(abrir));
+  },
+
   mostrarSecao(id) {
     this.secaoAtiva = id;
     const config = document.querySelector('.smuploc-config-painel');
@@ -125,6 +144,7 @@ const UIShell = {
       grupoPlanta.open = true;
       grupoPlanta.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     } else if (id === 'config' && config) {
+      this.alternarConfiguracoes(true);
       config.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   },
