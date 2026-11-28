@@ -59,6 +59,13 @@
       </div>
     </div>
 
+    <details id="perfil-acoes"><summary>Perfil de acesso</summary>
+      <select id="perfil-select" class="perfil-selector" onchange="State.setPerfil(this.value)">
+        <option value="admin">Administrador</option>
+        <option value="tecnico">Técnico</option>
+        <option value="cliente">Cliente</option>
+      </select>
+    </details>
     <details id="ambientes-acoes"><summary>Ambientes e compartilhamento</summary>
     <section id="ambientes-toolbar" aria-label="Ambientes cadastrados">
       <label for="ambiente-select">Ambiente ativo</label>
