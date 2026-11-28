@@ -850,3 +850,22 @@ body.scanner-ativo > #btn-explorar {
 .leaflet-container{font:12px 'Segoe UI',system-ui,sans-serif}
 .leaflet-control-attribution{font-size:9px!important}
 @media(max-width:650px){.mapa-externo-acoes button{flex:1 1 30%}#mapa-externo-leaflet{min-height:145px}}
+
+/* Correção estrutural: mapa isolado; controles sempre fora da superfície cartográfica. */
+.smuploc-mapa-painel,
+.smuploc-config-painel { min-width:0; min-height:0; }
+.smuploc-mapa-painel { overflow:hidden; isolation:isolate; }
+#mapa-externo { display:flex; flex-direction:column; min-height:0; overflow:hidden; }
+#mapa-externo-leaflet { order:0; position:relative; flex:1 1 0; min-height:140px; z-index:0; }
+.mapa-externo-acoes { order:1; position:relative; z-index:1; flex:0 0 auto; }
+.mapa-externo-status { order:2; position:relative; z-index:1; flex:0 0 auto; }
+#mapa-interno-painel { min-height:0; overflow-y:auto; overflow-x:hidden; gap:7px; }
+#mapa-interno-painel #canvas-expandido-container { flex:1 1 0; min-height:150px; width:100%; margin:0; }
+#mapa-interno-painel #navegacao-controles { position:relative; inset:auto; z-index:auto; flex:0 0 auto; width:100%; box-sizing:border-box; margin:0; }
+#painel-equipamentos { flex:0 0 auto; max-height:24vh; width:100%; box-sizing:border-box; }
+@media(max-width:650px) {
+  .smuploc-mapa-painel { min-height:0; }
+  #mapa-externo-leaflet { min-height:125px; }
+  #mapa-interno-painel #canvas-expandido-container { min-height:125px; }
+  #mapa-interno-painel { overflow-y:auto; }
+}
