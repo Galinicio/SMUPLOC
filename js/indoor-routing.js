@@ -28,7 +28,6 @@ const IndoorRouting = {
     if (![start.x, start.z, goal.x, goal.z].every(Number.isFinite)) return null;
     if (!obstaculos.length) return [start, goal];
 
-    const passo = this.passoGrade;
     const margem = 1.5;
     const pontosLimite = [start, goal];
     obstaculos.forEach(o => {
@@ -38,8 +37,10 @@ const IndoorRouting = {
     const maxX = Math.max(...pontosLimite.map(p => p.x)) + margem;
     const minZ = Math.min(...pontosLimite.map(p => p.z)) - margem;
     const maxZ = Math.max(...pontosLimite.map(p => p.z)) + margem;
-    const largura = Math.min(240, Math.ceil((maxX - minX) / passo) + 1);
-    const altura = Math.min(240, Math.ceil((maxZ - minZ) / passo) + 1);
+    // Mantém resolução de 25 cm em salas comuns e reduz a grade em plantas enormes.
+    const passo = Math.max(this.passoGrade, (maxX - minX) / 220, (maxZ - minZ) / 220);
+    const largura = Math.ceil((maxX - minX) / passo) + 1;
+    const altura = Math.ceil((maxZ - minZ) / passo) + 1;
     const toCell = p => ({
       x: Math.max(0, Math.min(largura - 1, Math.round((p.x - minX) / passo))),
       z: Math.max(0, Math.min(altura - 1, Math.round((p.z - minZ) / passo)))
@@ -57,7 +58,36 @@ const IndoorRouting = {
     }
 
     const heuristica = p => Math.hypot(g.x - p.x, g.z - p.z);
-    const abertos = [{ ...s, g: 0, f: heuristica(s) }];
+    const heap = [];
+    const push = item => {
+      heap.push(item);
+      let index = heap.length - 1;
+      while (index > 0) {
+        const parent = Math.floor((index - 1) / 2);
+        if (heap[parent].f <= heap[index].f) break;
+        [heap[parent], heap[index]] = [heap[index], heap[parent]];
+        index = parent;
+      }
+    };
+    const pop = () => {
+      const first = heap[0];
+      const last = heap.pop();
+      if (heap.length && last) {
+        heap[0] = last;
+        let index = 0;
+        while (true) {
+          const left = index * 2 + 1, right = left + 1;
+          let smallest = index;
+          if (left < heap.length && heap[left].f < heap[smallest].f) smallest = left;
+          if (right < heap.length && heap[right].f < heap[smallest].f) smallest = right;
+          if (smallest === index) break;
+          [heap[index], heap[smallest]] = [heap[smallest], heap[index]];
+          index = smallest;
+        }
+      }
+      return first;
+    };
+    push({ ...s, g: 0, f: heuristica(s) });
     const custos = new Map([[key(s), 0]]);
     const pais = new Map();
     const direcoes = [
@@ -66,9 +96,9 @@ const IndoorRouting = {
     ];
     let encontrado = false;
     let iteracoes = 0;
-    while (abertos.length && iteracoes++ < 50000) {
-      abertos.sort((a,b) => a.f - b.f);
-      const atual = abertos.shift();
+    while (heap.length && iteracoes++ < largura * altura * 2) {
+      const atual = pop();
+      if (atual.g > (custos.get(key(atual)) ?? Infinity)) continue;
       if (atual.x === g.x && atual.z === g.z) { encontrado = true; break; }
       for (const [dx,dz,custo] of direcoes) {
         const proximo = { x: atual.x + dx, z: atual.z + dz };
@@ -80,11 +110,7 @@ const IndoorRouting = {
         if (novoG >= (custos.get(k) ?? Infinity)) continue;
         custos.set(k, novoG);
         pais.set(k, key(atual));
-        const existente = abertos.find(item => key(item) === k);
-        if (existente) {
-          existente.g = novoG;
-          existente.f = novoG + heuristica(proximo);
-        } else abertos.push({ ...proximo, g: novoG, f: novoG + heuristica(proximo) });
+        push({ ...proximo, g: novoG, f: novoG + heuristica(proximo) });
       }
     }
     if (!encontrado) return null;
