@@ -55,6 +55,7 @@ const SmupLocApi = {
   },
 
   async obterUsuario() { return this.requisitar('/api/me'); },
+  async criarUsuario(usuario) { return this.requisitar('/api/users', { method: 'POST', body: JSON.stringify(usuario) }); },
   async listarAmbientes() { return this.requisitar('/api/environments'); },
   async salvarAmbiente(ambiente) {
     return this.requisitar('/api/environments', { method: 'POST', body: JSON.stringify(ambiente) });
