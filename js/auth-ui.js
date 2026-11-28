@@ -7,8 +7,8 @@ const AuthUI = {
   usuario: null,
   modoLocal: false,
   cpfValido(valor) {
-    const cpf = String(valor || '').replace(/\\D/g, '');
-    if (cpf.length !== 11 || /^(\\d)\\1{10}$/.test(cpf)) return false;
+    const cpf = String(valor || '').replace(/\D/g, '');
+    if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
     const digito = (base, peso) => {
       let soma = 0;
       for (let i = 0; i < base.length; i++) soma += Number(base[i]) * (peso - i);
@@ -42,16 +42,28 @@ const AuthUI = {
     document.getElementById('auth-local-demo')?.addEventListener('click', () => this.entrarLocal());
     document.getElementById('auth-logout')?.addEventListener('click', () => this.sair());
     document.getElementById('auth-cpf')?.addEventListener('input', e => {
-      const digits = e.target.value.replace(/\\D/g, '').slice(0, 11);
-      e.target.value = digits.replace(/(\\d{3})(\\d)/, '$1.$2').replace(/(\\d{3})(\\d)/, '$1.$2').replace(/(\\d{3})(\\d{1,2})$/, '$1-$2');
+      const digits = e.target.value.replace(/\D/g, '').slice(0, 11);
+      e.target.value = digits.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
     });
     this.alternar('login');
     gate.hidden = false;
     document.body.classList.add('auth-locked');
+    if (api && this.tokenPresente()) this.restaurarSessao(api);
+  },
+  tokenPresente() { try { return !!sessionStorage.getItem('smuploc_api_token'); } catch (_) { return false; } },
+  async restaurarSessao(api) {
+    try {
+      const token = sessionStorage.getItem('smuploc_api_token');
+      const response = await fetch(api.replace(/\\/+$/, '') + '/api/me', { headers: { Authorization: 'Bearer ' + token } });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.user) throw new Error('Sessão expirada. Entre novamente.');
+      if (window.SmupLocApi) { SmupLocApi.token = token; SmupLocApi.baseUrl = api.replace(/\\/+$/, ''); }
+      this.ativarSessao(data.user, false);
+    } catch (_) { try { sessionStorage.removeItem('smuploc_api_token'); } catch (e) {} }
   },
   async entrar(evento) {
     evento.preventDefault();
-    const api = String((window.SMUPLOC_CONFIG || {}).apiBaseUrl || '').trim().replace(/\\/+$/, '');
+    const api = String((window.SMUPLOC_CONFIG || {}).apiBaseUrl || '').trim().replace(/\/+$/, '');
     if (!api) return this.mensagem('A autenticação real será liberada quando a API HTTPS estiver publicada. Use a demonstração local apenas para testar a interface.', true);
     const username = document.getElementById('auth-username').value.trim();
     const password = document.getElementById('auth-password').value;
@@ -70,7 +82,7 @@ const AuthUI = {
   },
   async primeiroAcesso(evento) {
     evento.preventDefault();
-    const cpf = document.getElementById('auth-cpf').value.replace(/\\D/g, '');
+    const cpf = document.getElementById('auth-cpf').value.replace(/\D/g, '');
     const username = document.getElementById('auth-new-username').value.trim();
     const password = document.getElementById('auth-new-password').value;
     const confirmacao = document.getElementById('auth-confirm-password').value;
@@ -78,7 +90,7 @@ const AuthUI = {
     if (!/^[a-zA-Z0-9._-]{4,40}$/.test(username)) return this.mensagem('O usuário deve ter de 4 a 40 caracteres: letras, números, ponto, hífen ou underline.', true);
     if (password.length < 12) return this.mensagem('Crie uma senha com pelo menos 12 caracteres.', true);
     if (password !== confirmacao) return this.mensagem('As senhas não coincidem.', true);
-    const api = String((window.SMUPLOC_CONFIG || {}).apiBaseUrl || '').trim().replace(/\\/+$/, '');
+    const api = String((window.SMUPLOC_CONFIG || {}).apiBaseUrl || '').trim().replace(/\/+$/, '');
     if (!api) return this.mensagem('Cadastro ainda indisponível: a API segura não foi conectada. Seus dados não foram enviados nem salvos.', true);
     try {
       const response = await fetch(api + '/api/auth/first-access', {
