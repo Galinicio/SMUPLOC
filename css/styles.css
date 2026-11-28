@@ -931,3 +931,63 @@ body.scanner-ativo > #btn-explorar {
     font-size:9px;
   }
 }
+
+
+/* Configurações recolhidas em engrenagem; mapa/planta ficam como área principal. */
+.smuploc-layout {
+  grid-template-rows:minmax(0,1fr) auto !important;
+  gap:8px;
+}
+.smuploc-mapa-painel { min-height:0; }
+.smuploc-config-painel {
+  flex:0 0 auto;
+  max-height:min(42vh,360px);
+  overflow:visible;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+}
+.smuploc-config-toggle {
+  width:100%;
+  min-height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  padding:8px 14px;
+  border:1px solid rgba(0,190,220,.42);
+  border-radius:12px;
+  background:linear-gradient(135deg,rgba(8,54,78,.98),rgba(5,35,55,.98));
+  color:#eafaff;
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:0 5px 16px rgba(0,0,0,.18);
+}
+.smuploc-config-engrenagem { font-size:20px; line-height:1; color:#55d9f2; }
+.smuploc-config-seta { margin-left:auto; font-size:17px; transition:transform .2s ease; }
+.smuploc-config-painel.aberta .smuploc-config-seta { transform:rotate(180deg); }
+.smuploc-config-corpo {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  max-height:calc(min(42vh,360px) - 52px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  margin-top:7px;
+  padding:9px;
+  border:1px solid rgba(0,190,220,.24);
+  border-radius:13px;
+  background:rgba(5,25,41,.98);
+}
+.smuploc-config-corpo[hidden] { display:none !important; }
+.smuploc-config-corpo > details,
+.smuploc-config-corpo > #painel-equipamentos { flex:0 0 auto; }
+.smuploc-config-corpo .smuploc-config-grupo { margin:0; }
+@media(max-width:650px) {
+  .smuploc-layout { grid-template-rows:minmax(0,1fr) auto !important; gap:6px; }
+  .smuploc-config-painel { max-height:38vh; }
+  .smuploc-config-corpo { max-height:calc(38vh - 52px); padding:7px; }
+  .smuploc-config-toggle { min-height:46px; }
+}
