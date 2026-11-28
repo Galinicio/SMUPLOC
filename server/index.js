@@ -289,6 +289,7 @@ async function bootstrap() {
   const email = process.env.BOOTSTRAP_ADMIN_EMAIL;
   const password = process.env.BOOTSTRAP_ADMIN_PASSWORD;
   if (Boolean(email) !== Boolean(password)) throw new Error('Configure BOOTSTRAP_ADMIN_EMAIL e BOOTSTRAP_ADMIN_PASSWORD juntos.');
+  if (password && password.length < 12) throw new Error('BOOTSTRAP_ADMIN_PASSWORD deve ter pelo menos 12 caracteres.');
   if (process.env.NODE_ENV === 'production' && !email) throw new Error('Configure a conta administrativa inicial antes de iniciar em produção.');
   if (email && password) {
     z.string().email().parse(email);
