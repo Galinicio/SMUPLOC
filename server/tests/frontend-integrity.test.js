@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 async function arquivosJs(diretorio) {
   const encontrados = [];
@@ -14,7 +15,7 @@ async function arquivosJs(diretorio) {
 }
 
 test('todos os módulos JavaScript do navegador mantêm sintaxe válida', async () => {
-  const files = await arquivosJs(new URL('../../js', import.meta.url));
+  const files = await arquivosJs(fileURLToPath(new URL('../../js', import.meta.url)));
   assert.ok(files.length > 0, 'nenhum módulo JavaScript encontrado');
   for (const file of files) {
     const source = await readFile(file, 'utf8');
