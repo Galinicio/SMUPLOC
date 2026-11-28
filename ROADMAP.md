@@ -15,11 +15,13 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 ### Leitura de QR Code e ficha digital
 - [ ] Testar a leitura de QR Code em computador e celular, com permissões de câmera concedidas.
 - [ ] Confirmar que a leitura de um equipamento cadastrado abre a ficha digital centralizada sobre a câmera.
-- [ ] Testar as seis páginas da ficha: Resumo, Monitoramento, Gráficos, Notificações, Calibração e Localização.
+- [ ] Testar as seis páginas da ficha em navegador real: Resumo, Monitoramento, Gráficos, Notificações, Calibração e Localização.
+- [x] Simular a abertura da ficha e a navegação pelas seis páginas, verificando abas, contador e limites dos botões anterior/próximo.
 - [ ] Testar navegação entre páginas, botões anterior/próximo, abas e fechamento da ficha.
 - [ ] Confirmar que a câmera/leitor volta a funcionar depois de fechar a ficha.
 - [ ] Testar QR Code desconhecido, inválido, repetido e equipamento sem dados opcionais.
-- [x] Alinhar a busca no inventário aos identificadores aceitos pelo leitor (ID, UUID, código, código único, serial, número de série, tag e IDs externos).
+- [x] Alinhar a busca no inventário aos identificadores aceitos pelo leitor (ID, UUID, código, código único, serial, número de série, tag e IDs externos); validar a correspondência em simulação.
+- [x] Simular QR desconhecido e conteúdo textual que não é JSON, confirmando que a ficha informa que o cadastro ainda não está vinculado.
 - [ ] Revisar a experiência em telas pequenas: painel, textos, botões, rolagem e toque.
 - [ ] Melhorar mensagens de erro e estados vazios para que o usuário saiba o que aconteceu e como continuar.
 - [ ] Verificar se os elementos da ficha continuam funcionando quando faltam informações de certificado, localização ou monitoramento.
