@@ -28,6 +28,7 @@ const pool = new Pool({
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000
 });
+pool.on('error', error => console.error('PostgreSQL pool error:', error));
 
 app.disable('x-powered-by');
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
@@ -265,6 +266,7 @@ app.delete('/api/assets/:assetId', auth(['admin']), async (req, res, next) => {
 });
 
 app.use((error, _req, res, _next) => {
+  if (error instanceof SyntaxError && Object.prototype.hasOwnProperty.call(error, 'body')) return res.status(400).json({ error: 'JSON inválido.' });
   if (error instanceof z.ZodError) return res.status(400).json({ error: 'Requisição inválida.', details: error.flatten() });
   if (error.message === 'Origem não autorizada pelo CORS.') return res.status(403).json({ error: error.message });
   console.error('SMUPLOC API error:', error);
@@ -301,7 +303,9 @@ async function bootstrap() {
     } catch (error) { await client.query('ROLLBACK'); throw error; }
     finally { client.release(); }
   }
-  app.listen(port, '0.0.0.0', () => console.log(`SMUPLOC API ouvindo na porta ${port}`));
+  const server = app.listen(port, '0.0.0.0', () => console.log(`SMUPLOC API ouvindo na porta ${port}`));
+  process.once('SIGTERM', () => server.close(async () => { await pool.end(); process.exit(0); }));
+  process.once('SIGINT', () => server.close(async () => { await pool.end(); process.exit(0); }));
 }
 
 if (process.env.NODE_ENV !== 'test') bootstrap().catch(error => { console.error('Falha ao iniciar API:', error); process.exit(1); });
