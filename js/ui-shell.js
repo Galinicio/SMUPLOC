@@ -19,17 +19,18 @@ const UIShell = {
   fecharPainel() {
     if (typeof MapearModule !== 'undefined' && (MapearModule.ativo || MapearModule.calibracaoAtiva)) {
       const confirmar = confirm('Sair do mapeamento atual? Os pontos ainda não salvos serão descartados.');
-      if (!confirmar) return;
+      if (!confirmar) return false;
       MapearModule.cancelar(true);
       const modalAposCancelar = document.getElementById('modal-planta');
       if (modalAposCancelar) modalAposCancelar.style.display = 'none';
-      return;
+      return true;
     }
     const modal = document.getElementById('modal-planta');
     if (modal) modal.style.display = 'none';
     const opcoes = document.getElementById('mapear-opcoes');
     if (opcoes) opcoes.hidden = true;
     if (typeof EquipmentModule !== 'undefined') EquipmentModule.fechar();
+    return true;
   },
 
   alternarOpcoesMapeamento() {
