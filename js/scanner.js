@@ -74,6 +74,7 @@ const ScannerModule = {
     State.destinoId = eq.id;
     State.sincronizarAmbienteAtual();
     this.fechar();
+    if (typeof MapaExternoModule !== 'undefined') MapaExternoModule.mostrarInterno();
     MinimapModule.abrirModal();
     this.atualizarPainelDestino();
     MinimapModule.renderPequeno();
@@ -163,6 +164,7 @@ const ScannerModule = {
       return;
     }
     this.aguardandoMarcoZero = true;
+    if (typeof MapaExternoModule !== 'undefined') MapaExternoModule.mostrarInterno();
     MinimapModule.abrirModal();
     const status = document.getElementById('tracking-status');
     if (status) status.textContent = 'Toque na planta exatamente onde o QR Code ficará fixado.';
