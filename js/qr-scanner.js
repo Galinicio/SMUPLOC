@@ -228,12 +228,12 @@ const QRScannerModule = {
         String(eq.id || '') === idLido || String(eq.nome || '') === idLido
       );
 
-    const equipamentoEncontrado = Array.isArray(State.equipamentos) &&
+    const equipamentoEncontradoFallback = Array.isArray(State.equipamentos) &&
       State.equipamentos.find(eq => String(eq.id || '') === idLido || String(eq.nome || '') === idLido);
-    if (equipamentoEncontrado && typeof DevicePanelModule !== 'undefined') {
+    if (equipamentoEncontradoFallback && typeof DevicePanelModule !== 'undefined') {
       clearTimeout(this.timerToast);
       if (toastInfo) toastInfo.style.display = 'none';
-      DevicePanelModule.abrir(equipamentoEncontrado);
+      DevicePanelModule.abrir(equipamentoEncontradoFallback);
       return;
     }
 
