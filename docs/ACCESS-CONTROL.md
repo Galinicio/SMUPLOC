@@ -42,6 +42,36 @@ Nenhuma senha, CPF, token de bootstrap ou credencial administrativa pode ser gra
 - Testes de autorização negativa, isolamento entre organizações, abuso de sessão, CSRF/XSS e restauração de backup antes da liberação.
 - CPF é dado pessoal: coletar somente quando necessário, com aviso de privacidade, base legal, controle de acesso e retenção definida.
 
+
+## Autenticação e vinculação pelo Telegram (preparação)
+
+O Telegram pode ser um provedor externo de identidade do SMUPLOC, sem substituir a autorização interna da aplicação.
+
+### Fluxos previstos
+1. **Login Telegram:** usar o fluxo oficial atual de Telegram Login baseado em OpenID Connect (Authorization Code Flow com PKCE). O backend inicia o fluxo, valida state e nonce, troca o código no servidor e valida assinatura e claims do ID Token (iss, aud, exp, iat, sub).
+2. **Vincular Telegram a uma conta existente:** usuário já autenticado no SMUPLOC inicia a vinculação; o backend cria state/nonce de uso único e associa o identificador estável do provedor (iss + sub) somente após callback válido e confirmação da sessão atual.
+3. **Login futuro por Telegram:** permitido apenas para identidade previamente vinculada e conta ativa. Não criar automaticamente contas privilegiadas com base em nome, username ou telefone.
+4. **Acesso do bot:** depois de autorização explícita do usuário, o bot poderá enviar notificações e links de acesso. A capacidade de o bot enviar mensagens não é, por si só, prova de identidade nem concede sessão no SMUPLOC.
+
+### Regras de segurança
+- Não confiar em username, nome, foto, chat_id isolado ou dados enviados pelo navegador como prova de identidade.
+- Usar sub do ID Token validado, junto com iss, como chave externa estável; armazenar vínculo em tabela própria de identidades externas (user_id, provider, issuer, subject, linked_at, revoked_at).
+- client_secret/segredo do Telegram e qualquer token do bot ficam somente no secret manager/ambiente protegido do backend. Nunca no frontend, Git, logs ou documentação.
+- Usar HTTPS, redirect URI previamente permitido no BotFather, PKCE S256, state aleatório de uso único, nonce, validação de assinatura via JWKS, iss, aud, exp e proteção contra replay.
+- Nunca aceitar papel, organização ou permissões vindos do Telegram. Papéis e escopo continuam definidos exclusivamente pelo banco e pela API SMUPLOC.
+- Vinculação exige sessão SMUPLOC autenticada e proteção contra troca de conta; desvinculação exige confirmação e método alternativo de recuperação.
+- Login Telegram não comprova identidade civil nem vínculo empregatício/organizacional. Para acesso a dados de clientes, o administrador ainda precisa atribuir a organização e o papel.
+- Não enviar senha, token de sessão ou código de bootstrap pelo chat do bot.
+- O bot pode usar a Bot API para mensagens, mas a autenticação web deve validar o fluxo oficial de Login/OIDC no servidor.
+
+### Rotas futuras (a definir na implementação)
+- GET /api/auth/telegram/start: iniciar OIDC com state, nonce e PKCE.
+- GET /api/auth/telegram/callback: validar callback, trocar código e validar ID Token; criar sessão somente para conta vinculada e ativa.
+- POST /api/me/identities/telegram/link/start: iniciar vinculação para usuário já autenticado.
+- POST /api/me/identities/telegram/unlink: revogar vínculo após confirmação e checar se resta método seguro de acesso.
+
+A integração deve ser opcional: login por e-mail/senha continua disponível até a validação do novo provedor. Não presumir que o bot atual já está configurado para Login OIDC; confirmar o bot e cadastrar URLs permitidas no BotFather antes da implementação.
+
 ## Contrato de API esperado pelo frontend
 - `POST /api/auth/login`: `{ username, password }` → `{ token, user: { id, username, name, role } }`
 - `POST /api/auth/bootstrap/send-code`: `{ email }` → envia código somente ao e-mail bootstrap autorizado, sem revelar se outros endereços existem.\n- `POST /api/auth/first-access`: `{ bootstrapUsername, bootstrapPassword, email, emailCode, username, password }` → valida código e e-mail, invalida bootstrap e conclui configuração inicial.
