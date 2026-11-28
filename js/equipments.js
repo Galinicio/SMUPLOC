@@ -56,13 +56,17 @@ const EquipmentModule = {
       const setor = document.createElement('p');
       setor.textContent = `Setor: ${String(eq.setor || 'Não informado')}`;
 
+      const referencia = document.createElement('p');
+      referencia.textContent = eq.referenciaEspacial === true ? 'Referência espacial ativa' : 'Não é referência espacial';
       const acoes = document.createElement('div');
       acoes.className = 'equipamento-acoes';
       const editar = this.criarBotao('Editar', () => this.editar(eq.id));
       const posicionar = this.criarBotao(eq.posicionado === false ? 'Posicionar' : 'Reposicionar', () => this.reposicionar(eq.id));
       const excluir = this.criarBotao('Excluir', () => this.excluir(eq.id), 'btn-excluir-equipamento');
-      acoes.append(editar, posicionar, excluir);
-      card.append(titulo, meta, local, setor, acoes);
+      const referenciaBtn = this.criarBotao(eq.referenciaEspacial === true ? 'Remover referência' : 'Usar como referência', () => SpatialAnchors.definir(eq.id));
+      referenciaBtn.disabled = eq.posicionado !== true;
+      acoes.append(editar, posicionar, referenciaBtn, excluir);
+      card.append(titulo, meta, local, setor, referencia, acoes);
       lista.appendChild(card);
     });
   },
