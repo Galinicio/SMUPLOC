@@ -43,34 +43,43 @@ Nenhuma senha, CPF, token de bootstrap ou credencial administrativa pode ser gra
 - CPF é dado pessoal: coletar somente quando necessário, com aviso de privacidade, base legal, controle de acesso e retenção definida.
 
 
-## Autenticação e vinculação pelo Telegram (preparação)
+## Autenticação dos usuários pela SMUP e acesso administrativo local
 
-O Telegram pode ser um provedor externo de identidade do SMUPLOC, sem substituir a autorização interna da aplicação.
+### Decisão de arquitetura
 
-### Fluxos previstos
-1. **Login Telegram:** usar o fluxo oficial atual de Telegram Login baseado em OpenID Connect (Authorization Code Flow com PKCE). O backend inicia o fluxo, valida state e nonce, troca o código no servidor e valida assinatura e claims do ID Token (iss, aud, exp, iat, sub).
-2. **Vincular Telegram a uma conta existente:** usuário já autenticado no SMUPLOC inicia a vinculação; o backend cria state/nonce de uso único e associa o identificador estável do provedor (iss + sub) somente após callback válido e confirmação da sessão atual.
-3. **Login futuro por Telegram:** permitido apenas para identidade previamente vinculada e conta ativa. Não criar automaticamente contas privilegiadas com base em nome, username ou telefone.
-4. **Acesso do bot:** depois de autorização explícita do usuário, o bot poderá enviar notificações e links de acesso. A capacidade de o bot enviar mensagens não é, por si só, prova de identidade nem concede sessão no SMUPLOC.
+O SMUPLOC terá duas vias de acesso, com finalidades e autoridades distintas:
 
-### Regras de segurança
-- Não confiar em username, nome, foto, chat_id isolado ou dados enviados pelo navegador como prova de identidade.
-- Usar sub do ID Token validado, junto com iss, como chave externa estável; armazenar vínculo em tabela própria de identidades externas (user_id, provider, issuer, subject, linked_at, revoked_at).
-- client_secret/segredo do Telegram e qualquer token do bot ficam somente no secret manager/ambiente protegido do backend. Nunca no frontend, Git, logs ou documentação.
-- Usar HTTPS, redirect URI previamente permitido no BotFather, PKCE S256, state aleatório de uso único, nonce, validação de assinatura via JWKS, iss, aud, exp e proteção contra replay.
-- Nunca aceitar papel, organização ou permissões vindos do Telegram. Papéis e escopo continuam definidos exclusivamente pelo banco e pela API SMUPLOC.
-- Vinculação exige sessão SMUPLOC autenticada e proteção contra troca de conta; desvinculação exige confirmação e método alternativo de recuperação.
-- Login Telegram não comprova identidade civil nem vínculo empregatício/organizacional. Para acesso a dados de clientes, o administrador ainda precisa atribuir a organização e o papel.
-- Não enviar senha, token de sessão ou código de bootstrap pelo chat do bot.
-- O bot pode usar a Bot API para mensagens, mas a autenticação web deve validar o fluxo oficial de Login/OIDC no servidor.
+1. **Usuários comuns — autenticação integral pela SMUP:** o usuário informa e-mail e número de telefone no fluxo oficial já utilizado pela SMUP. A SMUP envia o token por SMS e realiza a validação. Após a autenticação, o SMUPLOC recebe uma confirmação de identidade por integração oficial e confiável com o backend/serviço de identidade da SMUP. O SMUPLOC não envia o SMS, não valida o código e não mantém senha própria para esses usuários.
+2. **Administrador de manutenção do SMUPLOC — autenticação local separada:** conta administrativa própria, restrita à manutenção técnica, configuração e administração do SMUPLOC. Essa conta não substitui nem participa do login normal dos usuários autenticados pela SMUP.
 
-### Rotas futuras (a definir na implementação)
-- GET /api/auth/telegram/start: iniciar OIDC com state, nonce e PKCE.
-- GET /api/auth/telegram/callback: validar callback, trocar código e validar ID Token; criar sessão somente para conta vinculada e ativa.
-- POST /api/me/identities/telegram/link/start: iniciar vinculação para usuário já autenticado.
-- POST /api/me/identities/telegram/unlink: revogar vínculo após confirmação e checar se resta método seguro de acesso.
+O login local de administrador não deve ser apresentado como alternativa comum para usuários finais. A interface deve deixar clara a separação entre “Entrar com a SMUP” e o acesso administrativo restrito.
 
-A integração deve ser opcional: login por e-mail/senha continua disponível até a validação do novo provedor. Não presumir que o bot atual já está configurado para Login OIDC; confirmar o bot e cadastrar URLs permitidas no BotFather antes da implementação.
+### Integração com a autenticação SMUP
+
+- O SMUPLOC deve atuar como cliente/consumidor da autenticação oficial da SMUP; não deve recriar o fluxo de e-mail, telefone ou SMS.
+- A confirmação de autenticação precisa ser entregue ao backend SMUPLOC por mecanismo oficial e verificável (por exemplo, protocolo de federação/SSO, token assinado ou troca server-to-server), conforme o contrato que a SMUP disponibilizar.
+- **Não presumir OIDC, OAuth, API ou webhook específico** antes de receber documentação oficial. O adaptador de identidade deve isolar o protocolo para permitir implementação quando o contrato real for conhecido.
+- O backend deve validar origem, assinatura/credenciais, emissor, público, validade, nonce/state ou proteção contra replay, conforme o mecanismo oficial escolhido.
+- Não aceitar como prova de identidade isolada o username do Telegram, telefone digitado, e-mail informado, chat_id, captura de tela, mensagem do bot ou payload enviado diretamente pelo navegador.
+- O navegador nunca recebe segredos da integração. Credenciais e chaves ficam somente no ambiente protegido/secret manager do backend.
+- Após a confirmação oficial, o SMUPLOC resolve a identidade externa para uma conta local e aplica os papéis e organizações cadastrados no próprio SMUPLOC. A autenticação SMUP não concede automaticamente papel administrativo nem acesso a qualquer organização.
+- Contas comuns devem ser provisionadas ou vinculadas segundo regra aprovada pela SMUP; contas não reconhecidas devem seguir fluxo controlado, sem criar privilégios automaticamente.
+- A indisponibilidade do serviço de identidade SMUP não deve provocar fallback silencioso para login local comum. O acesso administrativo de manutenção permanece separado e restrito.
+- Não criar, registrar ou modificar outro bot. O bot/fluxo oficial existente da SMUP permanece sob responsabilidade da SMUP.
+
+### Contrato futuro e preparação do código
+
+Criar uma interface de provedor de identidade (adaptador SMUP) independente do protocolo. Ela deverá receber uma resposta autenticada do serviço oficial e devolver ao núcleo de autenticação uma identidade externa estável e validada. O núcleo então cria a sessão local SMUPLOC e carrega permissões/organizações do banco local.
+
+As rotas definitivas, campos, callbacks e formato dos tokens ficam **pendentes da documentação e autorização da SMUP**. Não implementar endpoints fictícios nem simular validação SMS.
+
+### Acesso administrativo de manutenção
+
+- Manter uma conta local administrativa separada, criada pelo fluxo de primeiro acesso seguro descrito acima.
+- A conta local serve para manutenção/configuração do SMUPLOC; não deve ser usada para autenticar clientes, técnicos ou usuários comuns.
+- Exigir senha forte, hash Argon2id (preferencial) ou bcrypt, MFA antes de produção, sessão segura, rate limit, auditoria e recuperação controlada.
+- Não embutir credenciais administrativas no frontend, no Git ou na documentação.
+- Proteger rotas administrativas no backend; esconder telas no frontend não é controle de acesso suficiente.
 
 ## Contrato de API esperado pelo frontend
 - `POST /api/auth/login`: `{ username, password }` → `{ token, user: { id, username, name, role } }`
