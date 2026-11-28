@@ -6,15 +6,15 @@ A interface de autenticação e o fluxo de primeiro acesso estão preparados no 
 Nenhuma senha, CPF, token de bootstrap ou credencial administrativa pode ser gravada em HTML, JavaScript, CSS, Git, localStorage ou documentação operacional.
 
 ## Primeiro acesso do administrador
-1. A API provisiona uma única conta bootstrap `admin` no servidor, com segredo temporário definido fora do repositório (secret manager/variável protegida).
-2. O acesso temporário é de uso único e deve exigir configuração antes de liberar o sistema.
-3. A pessoa informa CPF, novo nome de usuário e senha forte (mínimo 12 caracteres; política final deve incluir verificação de senha comprometida, limite de tentativas e MFA para administradores).
-4. A API valida os dígitos verificadores do CPF e, se for exigida confirmação de identidade, integra um provedor autorizado. Dígitos verificadores sozinhos não provam titularidade.
-5. A API guarda CPF com minimização de acesso, criptografia em repouso/gestão de chave, finalidade definida, retenção e trilha de auditoria. Nunca registrar CPF completo em logs.
+1. O servidor provisiona uma única conta bootstrap `admin`, com credencial temporária definida fora do repositório (secret manager/variável protegida).
+2. O único e-mail autorizado para ativação inicial é `alandesouzalobox@gmail.com`; essa autorização deve existir somente na configuração protegida do servidor, nunca ser confiada ao valor enviado pelo navegador.
+3. A API envia um código aleatório de verificação para esse endereço. O código deve expirar em poucos minutos, ser armazenado somente como hash, ser de uso único e ter limites rígidos de envio e tentativas.
+4. O administrador apresenta a credencial temporária e o código recebido por e-mail, escolhe nome de usuário e senha forte (mínimo 12 caracteres).
+5. A API verifica e-mail autorizado, código, validade, tentativas e estado bootstrap ainda não consumido. O primeiro administrador é criado atomicamente; o código e a credencial bootstrap são invalidados.
 6. A senha é armazenada exclusivamente como hash Argon2id (preferencial) ou bcrypt com fator de custo adequado. Nunca reversível.
-7. Após concluir, o segredo temporário é invalidado e a conta bootstrap não pode ser reutilizada.
+7. O endereço confirmado comprova acesso à caixa postal, não identidade civil. Não coletar CPF neste fluxo. Para verificação de identidade civil futura, usar provedor autorizado e finalidade/base legal definidas.
 
-**Importante sobre admin/admin:** essa combinação foi solicitada como identificador/senha inicial temporária, mas não pode ser embutida no frontend ou armazenada no Git. A API deve aceitá-la somente como credencial de bootstrap de uso único, configurada em segredo no servidor, e forçar sua troca no primeiro acesso. Antes de qualquer uso público, substituir por segredo aleatório forte entregue por canal seguro; admin/admin é previsível e não é aceitável como senha permanente.
+**Importante sobre admin/admin:** a combinação foi indicada pelo usuário como credencial inicial temporária. Não pode ser embutida no frontend ou armazenada no Git. A API deve aceitar eventual credencial bootstrap somente uma vez, exigir troca imediata e nunca permitir seu uso como senha permanente. Antes de exposição pública, substituir por segredo aleatório forte entregue por canal seguro.
 
 ## Hierarquia e permissões
 
@@ -44,7 +44,7 @@ Nenhuma senha, CPF, token de bootstrap ou credencial administrativa pode ser gra
 
 ## Contrato de API esperado pelo frontend
 - `POST /api/auth/login`: `{ username, password }` → `{ token, user: { id, username, name, role } }`
-- `POST /api/auth/first-access`: `{ bootstrapUsername, bootstrapPassword, cpf, username, password }` → invalida bootstrap e conclui configuração inicial.
+- `POST /api/auth/bootstrap/send-code`: `{ email }` → envia código somente ao e-mail bootstrap autorizado, sem revelar se outros endereços existem.\n- `POST /api/auth/first-access`: `{ bootstrapUsername, bootstrapPassword, email, emailCode, username, password }` → valida código e e-mail, invalida bootstrap e conclui configuração inicial.
 - Futuro: `POST /api/auth/logout`, `GET /api/me`, renovação/revogação de sessão, MFA e recuperação de senha.
 
 As rotas de primeiro acesso devem ser limitadas, idempotentes e fechadas após a criação do primeiro administrador. Não aceitar o CPF como prova de identidade sem validação adicional apropriada.
