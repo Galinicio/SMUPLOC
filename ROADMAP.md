@@ -13,11 +13,11 @@
 Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcionalidades.
 
 ### Leitura de QR Code e ficha digital
-- [~] Leitura de QR Code validada pelo usuário em um dispositivo; falta repetir no outro tipo de aparelho (computador/celular).
+- [x] Leitura de QR Code validada pelo usuário no dispositivo testado; falta repetir no outro tipo de aparelho (computador/celular).
 - [x] Confirmar que a leitura de QR Code abre a ficha digital sobre a câmera (validado pelo usuário).
 - [x] Testar as seis páginas da ficha em navegador real: Resumo, Monitoramento, Gráficos, Notificações, Calibração e Localização (validado pelo usuário).
 - [x] Simular a abertura da ficha e a navegação pelas seis páginas, verificando abas, contador e limites dos botões anterior/próximo.
-- [ ] Testar navegação entre páginas, botões anterior/próximo, abas e fechamento da ficha.
+- [x] Validar pelo usuário a navegação entre as seis páginas e o fechamento da ficha; botões/abas também passaram pela simulação estática.
 - [x] Confirmar que a câmera/leitor volta a funcionar depois de fechar a ficha (validado pelo usuário).
 - [ ] Testar QR Code desconhecido, inválido, repetido e equipamento sem dados opcionais.
 - [x] Alinhar a busca no inventário aos identificadores aceitos pelo leitor (ID, UUID, código, código único, serial, número de série, tag e IDs externos); validar a correspondência em simulação.
@@ -37,10 +37,17 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 ### Situação conhecida
 - [x] Corrigida a redeclaração de variável que impedia o módulo do leitor QR de carregar (PR #18).
 - [x] Publicação do commit da correção confirmada como `live` no Render.
-- [ ] Validação prática da câmera, leitura e ficha após o deploy.
+- [x] Validação prática da câmera, leitura da etiqueta, abertura/navegação da ficha e retomada da câmera após fechar (confirmado pelo usuário na versão publicada anteriormente).
 - [!] O deploy publicado não equivale a um teste funcional em todos os navegadores e celulares.
 
 ## 2. Próximas etapas — evolução planejada
+
+### Reconhecimento de dispositivos por assinatura do QR Code
+- [~] Implementar reconhecimento automático do tipo UC a partir da combinação observada: `www.smupweb.com.br`, `EL5200.05VUSB` e `correntout2000mA` (código na branch; significado técnico dos campos ainda precisa ser confirmado).
+- [~] Implementar reconhecimento automático do tipo UC HYB quando o conteúdo lido for exatamente `wifismup` (código na branch).
+- [ ] Descobrir e documentar a assinatura QR dos dispositivos US.
+- [!] Cadastro automático de uma unidade individual ainda depende de identificador único: os dados conhecidos da UC não incluem número de série confirmado e o QR da UC HYB contém somente a senha do Access Point. A senha é tratada como informação sensível e não é usada como ID nem exibida na ficha.
+- [ ] Após obter identificadores individuais confiáveis, automatizar criação do ativo, evitar duplicidades e solicitar apenas os dados espaciais ausentes.
 
 ### Cadastro e ficha dos ativos
 - [ ] Padronizar o cadastro de qualquer ativo físico: nome, categoria, fabricante, modelo, código, cliente, unidade, prédio, andar, setor e ambiente.
