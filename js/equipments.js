@@ -64,7 +64,7 @@ const EquipmentModule = {
       const posicionar = this.criarBotao(eq.posicionado === false ? 'Posicionar' : 'Reposicionar', () => this.reposicionar(eq.id));
       const excluir = this.criarBotao('Excluir', () => this.excluir(eq.id), 'btn-excluir-equipamento');
       const referenciaBtn = this.criarBotao(eq.referenciaEspacial === true ? 'Remover referência' : 'Usar como referência', () => SpatialAnchors.definir(eq.id));
-      referenciaBtn.disabled = eq.posicionado === false;
+      referenciaBtn.disabled = eq.posicionado !== true;
       acoes.append(editar, posicionar, referenciaBtn, excluir);
       card.append(titulo, meta, local, setor, referencia, acoes);
       lista.appendChild(card);
