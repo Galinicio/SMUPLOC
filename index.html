@@ -181,13 +181,35 @@
     </a-entity>
   </a-scene>
 
+  <section id="device-detail-overlay" class="device-detail-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="device-detail-title">
+    <article class="device-detail-card">
+      <header class="device-detail-header">
+        <div class="device-detail-heading">
+          <span class="device-detail-eyebrow">SMUPLOC · FICHA DIGITAL</span>
+          <h2 id="device-detail-title">Dispositivo</h2>
+          <p id="device-detail-subtitle">Identificação do equipamento</p>
+        </div>
+        <button type="button" class="device-detail-close" onclick="DevicePanelModule.fechar()" aria-label="Fechar ficha">✕</button>
+      </header>
+      <div class="device-detail-live"><span class="device-detail-live-dot"></span><span id="device-detail-live-status">Dados cadastrados neste dispositivo</span></div>
+      <nav id="device-detail-tabs" class="device-detail-tabs" aria-label="Páginas da ficha"></nav>
+      <main id="device-detail-content" class="device-detail-content" aria-live="polite"></main>
+      <footer class="device-detail-footer">
+        <button type="button" id="device-detail-prev" onclick="DevicePanelModule.anterior()">Anterior</button>
+        <span id="device-detail-page-count">1 / 6</span>
+        <button type="button" id="device-detail-next" onclick="DevicePanelModule.proxima()">Próxima</button>
+      </footer>
+      <p class="device-detail-disclaimer">As informações exibidas dependem do cadastro local e da integração oficial com a Nuvem SMUP. Dados indisponíveis não são estimados.</p>
+    </article>
+  </section>
+
   <canvas id="qr-canvas" style="display:none;"></canvas>
 
   <!-- Scripts Modulares -->
   <script src="js/state.js"></script>
   <script src="js/environments.js"></script>
   <script src="js/equipments.js"></script>
-  <script src="js/qr-scanner.js"></script>
+  <script src="js/qr-scanner.js"></script>\n  <script src="js/device-panel.js"></script>
   <script src="js/minimap.js"></script>
   <script src="js/plan-analysis.js"></script>
   <script src="js/scanner.js"></script>
