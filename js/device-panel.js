@@ -48,7 +48,9 @@ const DevicePanelModule = {
     document.getElementById('device-detail-subtitle').textContent =
       [equipamento.tipo, equipamento.id ? 'ID: ' + equipamento.id : '', equipamento.setor, ambiente && ambiente.unidade].filter(Boolean).join(' · ');
     const status = document.getElementById('device-detail-live-status');
-    status.textContent = equipamento.dadosVinculados === false ? 'QR reconhecido · cadastro ainda não vinculado' : (this.valor(equipamento, ['status', 'estado', 'monitoramento.status']) || 'Identificado pelo QR Code');
+    status.textContent = equipamento.tipoIdentificadoAutomaticamente && equipamento.identificacaoIndividualDisponivel === false
+      ? 'Tipo reconhecido automaticamente · falta identificar esta unidade individualmente'
+      : (equipamento.dadosVinculados === false ? 'QR reconhecido · cadastro ainda não vinculado' : (this.valor(equipamento, ['status', 'estado', 'monitoramento.status']) || 'Identificado pelo QR Code'));
     this.renderizar();
     return true;
   },
