@@ -92,8 +92,13 @@ const ScannerModule = {
       if (!eq) painel.textContent = 'Escolha um equipamento para definir o destino.';
       else if (!State.posicaoUsuario) painel.textContent = 'Destino: ' + (eq.nome || eq.id) + ' · falta marcar sua posição.';
       else {
-        const distancia = Math.hypot(Number(eq.x) - Number(State.posicaoUsuario.x), Number(eq.z) - Number(State.posicaoUsuario.z));
-        painel.textContent = 'Destino: ' + (eq.nome || eq.id) + ' · distância no mapa: ' + distancia.toFixed(1) + ' m';
+        const rota = typeof IndoorRouting !== 'undefined' ? IndoorRouting.calcularRota() : null;
+        const distanciaRota = rota && rota.length > 1
+          ? rota.reduce((total, ponto, indice) => indice
+            ? total + Math.hypot(ponto.x - rota[indice - 1].x, ponto.z - rota[indice - 1].z) : 0, 0)
+          : Math.hypot(Number(eq.x) - Number(State.posicaoUsuario.x), Number(eq.z) - Number(State.posicaoUsuario.z));
+        painel.textContent = 'Destino: ' + (eq.nome || eq.id) + ' · ' +
+          (rota ? 'rota estimada: ' : 'distância direta: ') + distanciaRota.toFixed(1) + ' m';
       }
     }
     if (botao) {
