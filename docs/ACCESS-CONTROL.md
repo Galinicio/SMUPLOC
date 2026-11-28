@@ -7,7 +7,7 @@ Nenhuma senha, CPF, token de bootstrap ou credencial administrativa pode ser gra
 
 ## Primeiro acesso do administrador
 1. O servidor provisiona uma única conta bootstrap `admin`, com credencial temporária definida fora do repositório (secret manager/variável protegida).
-2. O único e-mail autorizado para ativação inicial é `alandesouzalobox@gmail.com`; essa autorização deve existir somente na configuração protegida do servidor, nunca ser confiada ao valor enviado pelo navegador.
+2. O único e-mail autorizado para ativação inicial é o endereço fornecido pelo proprietário do sistema e configurado em `BOOTSTRAP_ADMIN_EMAIL` no ambiente protegido do servidor. Não publicar esse endereço no repositório nem confiar no valor enviado pelo navegador.
 3. A API envia um código aleatório de verificação para esse endereço. O código deve expirar em poucos minutos, ser armazenado somente como hash, ser de uso único e ter limites rígidos de envio e tentativas.
 4. O administrador apresenta a credencial temporária e o código recebido por e-mail, escolhe nome de usuário e senha forte (mínimo 12 caracteres).
 5. A API verifica e-mail autorizado, código, validade, tentativas e estado bootstrap ainda não consumido. O primeiro administrador é criado atomicamente; o código e a credencial bootstrap são invalidados.
