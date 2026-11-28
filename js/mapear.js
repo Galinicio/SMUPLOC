@@ -25,9 +25,10 @@ const MapearModule = {
       return;
     }
 
+    if (typeof UIShell !== 'undefined') UIShell.abrirPainel();
     const modal = document.getElementById('modal-planta');
     const hud = document.getElementById('mapear-hud');
-    if (modal) modal.style.display = 'flex';
+    if (modal) { modal.style.display = 'flex'; modal.classList.add('mapeamento-ativo'); }
     if (hud) hud.style.display = 'block';
 
     this.pontosAnteriores = State.cantosMapear.map(ponto => ({ ...ponto }));
@@ -42,6 +43,8 @@ const MapearModule = {
     this.ativo = false;
     const hud = document.getElementById('mapear-hud');
     if (hud) hud.style.display = 'none';
+    const modal = document.getElementById('modal-planta');
+    if (modal) modal.classList.remove('mapeamento-ativo');
   },
 
   obterPontoCanvas(evento) {
@@ -133,6 +136,25 @@ const MapearModule = {
     State.cantosMapear.pop();
     this.atualizarStats();
     MinimapModule.renderExpandido();
+  },
+
+  iniciarCamera() {
+    if (State.perfilAtual === 'cliente') {
+      alert('O modo cliente não pode iniciar o mapeamento.');
+      return;
+    }
+    this.ativo = false;
+    this.calibracaoAtiva = false;
+    const hud = document.getElementById('mapear-hud');
+    if (hud) hud.style.display = 'none';
+    if (typeof UIShell !== 'undefined') UIShell.fecharPainel();
+    const camera = document.getElementById('camera-mapeamento');
+    if (camera) camera.hidden = false;
+  },
+
+  encerrarCamera() {
+    const camera = document.getElementById('camera-mapeamento');
+    if (camera) camera.hidden = true;
   },
 
   iniciarCalibracao() {
