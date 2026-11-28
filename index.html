@@ -95,6 +95,8 @@
 <button type="button" onclick="IndoorTracker.recalibrarPasso()">Ajustar tamanho do passo</button>
 <button type="button" onclick="ScannerModule.limparDestino()">Limpar destino</button>
 <button type="button" onclick="ScannerModule.definirMarcoZero()">Definir marco zero (admin)</button>
+<button type="button" onclick="IndoorRouting.iniciarCadastro()">Adicionar parede / obstáculo</button>
+<button type="button" onclick="IndoorRouting.cancelarCadastro()">Cancelar marcação de obstáculo</button>
 </details></div>
     </div>
 
@@ -218,6 +220,7 @@
   <script src="js/scanner.js"></script>
   <script src="js/indoor-tracker.js"></script>
   <script src="js/spatial-anchors.js"></script>
+  <script src="js/indoor-routing.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="js/external-map.js"></script>
   <script src="js/mapear.js"></script>
