@@ -17,13 +17,15 @@ const port = Number(process.env.PORT || 10000);
 const jwtSecret = process.env.JWT_SECRET;
 const databaseUrl = process.env.DATABASE_URL;
 const allowedOrigins = (process.env.CORS_ORIGINS || '').split(',').map(v => v.trim()).filter(Boolean);
+if (process.env.NODE_ENV === 'production' && allowedOrigins.length === 0) throw new Error('CORS_ORIGINS deve listar a origem do frontend em produção.');
 
 if (!databaseUrl) throw new Error('DATABASE_URL não configurada.');
 if (!jwtSecret || jwtSecret.length < 32) throw new Error('JWT_SECRET deve ter pelo menos 32 caracteres.');
 
 const pool = new Pool({
   connectionString: databaseUrl,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,
+  // Render internal Postgres URLs usam rede privada; TLS externo pode ser habilitado
+  // pela própria DATABASE_URL/PGSSLMODE sem desativar validação de certificado.
   max: Number(process.env.PG_POOL_MAX || 10),
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000
