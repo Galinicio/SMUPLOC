@@ -22,7 +22,7 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 - [ ] Testar QR Code desconhecido, inválido, repetido e equipamento sem dados opcionais.
 - [x] Alinhar a busca no inventário aos identificadores aceitos pelo leitor (ID, UUID, código, código único, serial, número de série, tag e IDs externos); validar a correspondência em simulação.
 - [x] Simular QR desconhecido e conteúdo textual que não é JSON, confirmando que a ficha informa que o cadastro ainda não está vinculado.
-- [ ] Revisar a experiência em telas pequenas: painel, textos, botões, rolagem e toque.
+- [~] Revisar a experiência em telas pequenas: controles de parede ficaram mais simples e responsivos; falta teste em aparelhos reais.
 - [ ] Melhorar mensagens de erro e estados vazios para que o usuário saiba o que aconteceu e como continuar.
 - [ ] Verificar se os elementos da ficha continuam funcionando quando faltam informações de certificado, localização ou monitoramento.
 
@@ -66,7 +66,7 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 - [ ] Planejar histórico de certificados e calibrações, quando houver dados disponíveis.
 
 ### Dados, persistência e integração SMUP
-- [~] Fonte central de dados: esquema PostgreSQL, API própria inicial e cliente frontend opcional criados; tela de login, sincronização e migração sem perda ainda pendentes.
+- [~] Fonte central de dados: esquema PostgreSQL, API própria inicial e cliente frontend opcional criados; login e sincronização continuam bloqueados até publicar/testar API e banco. A interface não deve simular um login funcional antes disso.
 - [~] Backend inicial com Express, JWT, papéis, isolamento por organização, validação e auditoria implementado; criação administrativa de usuários adicionada; redefinição de acesso, testes de integração e publicação pendentes.
 - [ ] Sincronização autenticada entre dispositivos. Cliente API carregado, mas ainda sem sincronização automática; preservar modo local e exportação/importação até validar migração.
 - [!] Integração com API oficial SMUP adiada conforme decisão do projeto.
@@ -81,7 +81,7 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 - [ ] Calibrar a escala da planta com medidas reais.
 - [ ] Cadastrar QR Codes como marcos espaciais com posição conhecida.
 - [ ] Permitir que o usuário defina ou corrija manualmente sua posição.
-- [~] Melhorar a orientação até um ativo: roteador A* em grade, desenho de obstáculos por dois pontos e rota visual evitando paredes cadastradas implementados em código; falta validar em plantas reais e calibrar escala.
+- [~] Melhorar a orientação até um ativo: roteador A* em grade, desenho de obstáculos por dois pontos e rota visual evitando paredes cadastradas implementados; controles de largura no painel e bloqueio do arraste durante o desenho adicionados; falta validar em plantas reais e calibrar escala.
 - [ ] Testar a navegação em locais reais, medir o erro de posicionamento e verificar rotas com paredes/portas reais.
 
 ### Itens de maior esforço — precisam de projeto técnico e decisões antes de implementar
@@ -92,14 +92,15 @@ Estes itens não são pequenas correções. Precisam de arquitetura, testes e/ou
 - [!] **Integração com a API oficial SMUP:** deliberadamente adiada; não iniciar nesta fase.
 - [~] **Cadastro automático seguro:** reconhecimento de categoria e cadastro provisório com confirmação humana implementados; vínculo definitivo ainda depende de identificador individual e regras para QR compartilhado.
 - [~] **Navegação indoor confiável:** A* e cadastro manual de obstáculos implementados em código; falta estrutura completa por pavimento, portas/áreas restritas, escala real e validação de campo.
-- [~] **AR ancorada no ambiente:** diagnóstico de compatibilidade implementado; sessão AR, hit-test, ancoragem persistente e reconhecimento de planos/profundidade continuam pendentes.
-- [~] **Experiência mobile:** reforçar alvos de toque, rolagem, foco acessível e comportamento do painel em telas pequenas; testes em aparelhos/navegadores reais ainda pendentes.
+- [~] **AR ancorada no ambiente:** diagnóstico de compatibilidade e documento técnico `docs/AR-ROADMAP.md` implementados; sessão AR, hit-test, ancoragem persistente e reconhecimento de planos/profundidade continuam pendentes.
+- [~] **Experiência mobile:** reforçar alvos de toque, rolagem, foco acessível e comportamento do painel em telas pequenas; controles de obstáculos simplificados; testes em aparelhos/navegadores reais ainda pendentes.
 - [~] **Testes automatizados de regressão:** CI e primeiros testes de QR, sintaxe e integridade HTML adicionados; falta execução verde e cobertura de cadastro, ficha, planta, navegação, API e persistência.
 
 ## 3. Futuro — recursos avançados
 
 ### Realidade aumentada (AR)
-- [~] Adicionar diagnóstico de compatibilidade WebXR/câmera/sensores/WebGL sem solicitar permissões; sessão AR ancorada e integração ARCore/ARKit continuam pendentes.
+- [x] Documentar arquitetura, limites e matriz de testes em `docs/AR-ROADMAP.md`.
+- [~] Diagnóstico de compatibilidade WebXR/câmera/sensores/WebGL sem solicitar permissões; sessão AR ancorada e integração ARCore/ARKit continuam pendentes.
 - [ ] Ancorar marcadores e fichas de ativos em posições físicas reconhecidas pela câmera.
 - [ ] Avaliar reconhecimento de paredes, planos, profundidade e obstáculos em dispositivos compatíveis.
 - [ ] Criar uma experiência de orientação visual que indique o caminho até o ativo.
