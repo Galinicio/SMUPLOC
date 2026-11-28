@@ -1141,3 +1141,44 @@ body.device-detail-open #btn-explorar,body.device-detail-open #mapa-container,bo
  .device-detail-footer button { min-width:82px; }
 }
 @media(prefers-reduced-motion:reduce) { .device-detail-card { animation:none; } }
+
+
+/* Correção QR: ficha principal sobre a câmera, não aviso pequeno no canto. */
+#device-detail-overlay {
+  z-index: 25000 !important;
+  position: fixed !important;
+  inset: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(1, 12, 24, .12) !important;
+  pointer-events: auto !important;
+  perspective: 1400px;
+}
+#device-detail-overlay[hidden] { display: none !important; }
+#device-detail-overlay .device-detail-card {
+  width: min( min(92vw, 720px), 720px) !important;
+  max-height: 84dvh !important;
+  min-height: min(540px, 72dvh);
+  margin: auto;
+  overflow: hidden auto !important;
+  transform: perspective(1400px) rotateY(-2deg) rotateX(1deg) translateZ(28px) !important;
+  transform-style: preserve-3d;
+  border: 1px solid rgba(91, 225, 255, .88) !important;
+  background: linear-gradient(145deg, rgba(5, 44, 69, .97), rgba(2, 17, 32, .97)) !important;
+  box-shadow: 0 32px 90px rgba(0,0,0,.62), 0 0 42px rgba(0,200,240,.28), inset 0 1px 0 rgba(255,255,255,.2) !important;
+}
+body.device-detail-open #toast-info { display: none !important; }
+body.device-detail-open a-scene { filter: brightness(.78) saturate(.9); }
+body.device-detail-open #mapa-container { opacity: .15; pointer-events: none; }
+@media(max-width:600px) {
+  #device-detail-overlay { padding: max(12px,env(safe-area-inset-top)) 10px max(12px,env(safe-area-inset-bottom)) !important; }
+  #device-detail-overlay .device-detail-card {
+    width: 94vw !important;
+    max-height: 86dvh !important;
+    min-height: min(520px, 76dvh);
+    padding: 14px !important;
+    transform: perspective(1100px) rotateY(-1deg) rotateX(1deg) translateZ(18px) !important;
+  }
+  #device-detail-overlay .device-detail-content { min-height: 220px; }
+}
