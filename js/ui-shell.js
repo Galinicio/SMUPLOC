@@ -127,6 +127,7 @@ const UIShell = {
     const meio = (a,b) => ({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
 
     container.addEventListener('pointerdown', event => {
+      if (event.target !== canvas) return;
       if (event.pointerType === 'mouse' && event.button !== 0) return;
       const state = this.estadoGestosMapa;
       state.pointers.set(event.pointerId, ponto(event));
@@ -154,9 +155,8 @@ const UIShell = {
         const mid = meio(pts[0],pts[1]);
         const factor = distancia(pts[0],pts[1]) / Math.max(1,state.start.distance);
         const nextScale = Math.max(.65,Math.min(4,state.start.scale * factor));
-        const rect = container.getBoundingClientRect();
-        const midX = mid.x - rect.left + rect.left - container.getBoundingClientRect().left;
-        const midY = mid.y - rect.top + rect.top - container.getBoundingClientRect().top;
+        const midX = mid.x;
+        const midY = mid.y;
         const contentX = (state.start.midpoint.x - state.start.x) / state.start.scale;
         const contentY = (state.start.midpoint.y - state.start.y) / state.start.scale;
         state.scale = nextScale;
@@ -201,6 +201,7 @@ const UIShell = {
     container.addEventListener('lostpointercapture', terminar);
 
     container.addEventListener('wheel', event => {
+      if (event.target !== canvas) return;
       const state = this.estadoGestosMapa;
       const rect = container.getBoundingClientRect();
       const cx = event.clientX - rect.left;
