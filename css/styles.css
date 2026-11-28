@@ -991,3 +991,101 @@ body.scanner-ativo > #btn-explorar {
   .smuploc-config-corpo { max-height:calc(38vh - 52px); padding:7px; }
   .smuploc-config-toggle { min-height:46px; }
 }
+
+
+/* Navegação funcional separada da superfície do mapa/planta. */
+.smuploc-layout {
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+}
+.smuploc-mapa-painel { flex:1 1 auto; min-height:220px; }
+.smuploc-navegacao-painel {
+  flex:0 0 auto;
+  min-width:0;
+  margin:0;
+}
+.smuploc-navegacao-painel[hidden] { display:none !important; }
+.smuploc-navegacao-painel #navegacao-controles {
+  position:static;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px 12px;
+  width:100%;
+  box-sizing:border-box;
+  margin:0;
+  padding:10px 12px;
+  border:1px solid rgba(0,190,220,.24);
+  border-radius:12px;
+  background:rgba(5,25,41,.98);
+}
+.smuploc-navegacao-painel #navegacao-destino {
+  grid-column:1 / -1;
+  display:block;
+  width:auto;
+  max-width:none;
+  min-height:0;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  color:#eafaff;
+  font-size:12px;
+  font-weight:800;
+}
+.smuploc-navegacao-painel #navegacao-destino::before,
+.smuploc-navegacao-painel #tracking-status::before { content:none; }
+.smuploc-navegacao-painel #tracking-status {
+  display:block;
+  width:auto;
+  max-width:none;
+  min-height:0;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:#a9c5d5;
+  font-size:11px;
+}
+.smuploc-navegacao-painel .acoes-navegacao {
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  gap:6px;
+}
+.smuploc-navegacao-painel .acoes-navegacao button {
+  min-height:38px;
+  padding:7px 11px;
+  border-radius:9px;
+  font-size:11px;
+}
+.smuploc-navegacao-painel .acoes-navegacao .acao-principal {
+  background:#00a6c8;
+  color:#041d2b;
+}
+.smuploc-navegacao-painel .acao-principal.aguardando-posicao {
+  background:#ffc857;
+  color:#18212b;
+  animation:smuploc-pulse 1.4s ease-in-out infinite;
+}
+.smuploc-navegacao-painel .opcoes-secundarias {
+  grid-column:1 / -1;
+  margin:0;
+}
+.smuploc-navegacao-painel .opcoes-secundarias summary {
+  min-height:28px;
+  color:#8fc9dc;
+  font-size:10px;
+}
+.smuploc-navegacao-painel .opcoes-secundarias button {
+  min-height:34px;
+  margin:3px;
+}
+@keyframes smuploc-pulse { 50% { filter:brightness(1.25); } }
+@media(max-width:650px) {
+  .smuploc-mapa-painel { min-height:200px; }
+  .smuploc-navegacao-painel #navegacao-controles { grid-template-columns:1fr; gap:8px; }
+  .smuploc-navegacao-painel .acoes-navegacao { display:grid; grid-template-columns:1fr 1fr; }
+  .smuploc-navegacao-painel .acoes-navegacao button { min-height:42px; }
+  .smuploc-navegacao-painel .acoes-navegacao .acao-principal { grid-column:1 / -1; }
+}
