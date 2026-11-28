@@ -43,16 +43,13 @@ const UIShell = {
     const btnEquipamentos = controles?.querySelector('[onclick*="EquipmentModule.abrir"]');
     const upload = controles?.querySelector('label');
 
-    const zoom = document.createElement('div');
-    zoom.className = 'mapa-zoom-controles';
-    zoom.innerHTML = '<button type="button" aria-label="Diminuir zoom">−</button><span>100%</span><button type="button" aria-label="Aumentar zoom">+</button>';
-    zoom.children[0].addEventListener('click', () => this.ajustarZoom(-0.15));
-    zoom.children[2].addEventListener('click', () => this.ajustarZoom(0.15));
+
 
     if (canvas) {
-      mapaPainel.append(mapaTitulo, zoom, canvas);
+      mapaPainel.append(mapaTitulo, canvas);
+      this.vincularGestosMapa(canvas);
     } else {
-      mapaPainel.append(mapaTitulo, zoom);
+      mapaPainel.append(mapaTitulo);
     }
     if (equipamentos) mapaPainel.appendChild(equipamentos);
     if (btnEquipamentos) mapaPainel.appendChild(btnEquipamentos);
@@ -110,15 +107,119 @@ const UIShell = {
     }
   },
 
-  ajustarZoom(delta) {
-    this.zoomMapa = Math.max(0.7, Math.min(2.2, this.zoomMapa + delta));
-    const canvas = document.getElementById('canvas-expandido');
+  estadoGestosMapa: null,
+
+  vincularGestosMapa(container) {
+    if (!container || container.dataset.gestosMapa === 'true') return;
+    const canvas = container.querySelector('#canvas-expandido');
     if (!canvas) return;
-    const px = Math.round(360 * this.zoomMapa);
-    canvas.style.width = px + 'px';
-    canvas.style.height = px + 'px';
-    const label = document.querySelector('.mapa-zoom-controles span');
-    if (label) label.textContent = Math.round(this.zoomMapa * 100) + '%';
+    container.dataset.gestosMapa = 'true';
+    this.estadoGestosMapa = {
+      container, canvas, pointers: new Map(), scale: 1, x: 0, y: 0,
+      start: null, moved: false, suppressClick: false
+    };
+
+    const ponto = event => {
+      const rect = container.getBoundingClientRect();
+      return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    };
+    const distancia = (a,b) => Math.hypot(a.x-b.x,a.y-b.y);
+    const meio = (a,b) => ({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
+
+    container.addEventListener('pointerdown', event => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      const state = this.estadoGestosMapa;
+      state.pointers.set(event.pointerId, ponto(event));
+      try { container.setPointerCapture(event.pointerId); } catch (_) {}
+      if (state.pointers.size === 1) {
+        const p = state.pointers.get(event.pointerId);
+        state.start = { id:event.pointerId, point:p, x:state.x, y:state.y, moved:false };
+      } else if (state.pointers.size === 2) {
+        const pts = [...state.pointers.values()];
+        state.start = {
+          pinch:true, distance:distancia(pts[0],pts[1]), scale:state.scale,
+          midpoint:meio(pts[0],pts[1]), x:state.x, y:state.y
+        };
+        state.suppressClick = true;
+        event.preventDefault();
+      }
+    }, {passive:false});
+
+    container.addEventListener('pointermove', event => {
+      const state = this.estadoGestosMapa;
+      if (!state.pointers.has(event.pointerId)) return;
+      state.pointers.set(event.pointerId, ponto(event));
+      if (state.pointers.size >= 2 && state.start?.pinch) {
+        const pts = [...state.pointers.values()];
+        const mid = meio(pts[0],pts[1]);
+        const factor = distancia(pts[0],pts[1]) / Math.max(1,state.start.distance);
+        const nextScale = Math.max(.65,Math.min(4,state.start.scale * factor));
+        const rect = container.getBoundingClientRect();
+        const midX = mid.x - rect.left + rect.left - container.getBoundingClientRect().left;
+        const midY = mid.y - rect.top + rect.top - container.getBoundingClientRect().top;
+        const contentX = (state.start.midpoint.x - state.start.x) / state.start.scale;
+        const contentY = (state.start.midpoint.y - state.start.y) / state.start.scale;
+        state.scale = nextScale;
+        state.x = midX - contentX * nextScale;
+        state.y = midY - contentY * nextScale;
+        this.aplicarTransformacaoMapa();
+        event.preventDefault();
+        return;
+      }
+      if (state.pointers.size === 1 && state.start && !state.start.pinch) {
+        const p = state.pointers.get(event.pointerId);
+        const dx = p.x - state.start.point.x;
+        const dy = p.y - state.start.point.y;
+        if (!state.start.moved && Math.hypot(dx,dy) < 6) return;
+        state.start.moved = true;
+        state.suppressClick = true;
+        state.x = state.start.x + dx;
+        state.y = state.start.y + dy;
+        this.aplicarTransformacaoMapa();
+        event.preventDefault();
+      }
+    }, {passive:false});
+
+    const terminar = event => {
+      const state = this.estadoGestosMapa;
+      state.pointers.delete(event.pointerId);
+      if (state.pointers.size === 1) {
+        const [id,p] = [...state.pointers.entries()][0];
+        state.start = {id,point:p,x:state.x,y:state.y,moved:true};
+      } else if (state.pointers.size === 0) {
+        state.start = null;
+        if (state.suppressClick) {
+          const canvasEl = state.canvas;
+          const bloquear = e => { e.preventDefault(); e.stopImmediatePropagation(); };
+          canvasEl.addEventListener('click', bloquear, {capture:true,once:true});
+          setTimeout(() => { state.suppressClick = false; }, 0);
+        }
+      }
+    };
+    container.addEventListener('pointerup', terminar);
+    container.addEventListener('pointercancel', terminar);
+    container.addEventListener('lostpointercapture', terminar);
+
+    container.addEventListener('wheel', event => {
+      const state = this.estadoGestosMapa;
+      const rect = container.getBoundingClientRect();
+      const cx = event.clientX - rect.left;
+      const cy = event.clientY - rect.top;
+      const next = Math.max(.65,Math.min(4,state.scale * (event.deltaY < 0 ? 1.12 : .89)));
+      const contentX = (cx-state.x)/state.scale;
+      const contentY = (cy-state.y)/state.scale;
+      state.scale=next; state.x=cx-contentX*next; state.y=cy-contentY*next;
+      this.aplicarTransformacaoMapa();
+      event.preventDefault();
+    }, {passive:false});
+    this.aplicarTransformacaoMapa();
+  },
+
+  aplicarTransformacaoMapa() {
+    const state = this.estadoGestosMapa;
+    if (!state) return;
+    state.canvas.style.transform = `translate(${state.x}px,${state.y}px) scale(${state.scale})`;
+    state.canvas.style.transformOrigin = '0 0';
   },
 
   abrirPainel() {
