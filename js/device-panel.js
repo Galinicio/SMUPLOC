@@ -35,6 +35,9 @@ const DevicePanelModule = {
     if (!equipamento) return false;
     this.equipamento = equipamento;
     this.pagina = 0;
+    if (typeof QRScannerModule !== 'undefined') QRScannerModule.pararLoop();
+    const toast = document.getElementById('toast-info');
+    if (toast) toast.style.display = 'none';
     const overlay = document.getElementById('device-detail-overlay');
     if (!overlay) return false;
     overlay.hidden = false;
@@ -45,7 +48,7 @@ const DevicePanelModule = {
     document.getElementById('device-detail-subtitle').textContent =
       [equipamento.tipo, equipamento.id ? 'ID: ' + equipamento.id : '', equipamento.setor, ambiente && ambiente.unidade].filter(Boolean).join(' · ');
     const status = document.getElementById('device-detail-live-status');
-    status.textContent = this.valor(equipamento, ['status', 'estado', 'monitoramento.status']) || 'Identificado pelo QR Code';
+    status.textContent = equipamento.dadosVinculados === false ? 'QR reconhecido · cadastro ainda não vinculado' : (this.valor(equipamento, ['status', 'estado', 'monitoramento.status']) || 'Identificado pelo QR Code');
     this.renderizar();
     return true;
   },
@@ -55,6 +58,7 @@ const DevicePanelModule = {
     if (overlay) overlay.hidden = true;
     document.body.classList.remove('device-detail-open');
     this.equipamento = null;
+    if (typeof QRScannerModule !== 'undefined') QRScannerModule.iniciarLoop();
   },
 
   anterior() { this.irPara(Math.max(0, this.pagina - 1)); },
