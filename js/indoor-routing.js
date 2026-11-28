@@ -49,13 +49,26 @@ const IndoorRouting = {
     const s = toCell(start), g = toCell(goal);
     const key = p => p.x + ',' + p.z;
     const blocked = new Set();
-    for (let z = 0; z < altura; z++) {
-      for (let x = 0; x < largura; x++) {
-        if ((x === s.x && z === s.z) || (x === g.x && z === g.z)) continue;
-        const world = toWorld({ x, z });
-        if (this.bloqueado(world.x, world.z, obstaculos, passo)) blocked.add(key({ x, z }));
+    // Rasteriza apenas a vizinhança de cada segmento, evitando testar toda a grade
+    // contra todas as paredes (importante para celulares e plantas com muitos itens).
+    obstaculos.forEach(o => {
+      const a = toCell({ x: Number(o.x1), z: Number(o.z1) });
+      const b = toCell({ x: Number(o.x2), z: Number(o.z2) });
+      const margemCelulas = Math.ceil((Math.max(0.05, Number(o.largura) || 0.12) / 2 + passo * 0.55) / passo) + 1;
+      const minCellX = Math.max(0, Math.min(a.x, b.x) - margemCelulas);
+      const maxCellX = Math.min(largura - 1, Math.max(a.x, b.x) + margemCelulas);
+      const minCellZ = Math.max(0, Math.min(a.z, b.z) - margemCelulas);
+      const maxCellZ = Math.min(altura - 1, Math.max(a.z, b.z) + margemCelulas);
+      for (let z = minCellZ; z <= maxCellZ; z++) {
+        for (let x = minCellX; x <= maxCellX; x++) {
+          if ((x === s.x && z === s.z) || (x === g.x && z === g.z)) continue;
+          const world = toWorld({ x, z });
+          if (this.distanciaSegmento(world.x, world.z, o) <= Math.max(0.05, Number(o.largura) || 0.12) / 2 + passo * 0.55) {
+            blocked.add(key({ x, z }));
+          }
+        }
       }
-    }
+    });
 
     const heuristica = p => Math.hypot(g.x - p.x, g.z - p.z);
     const heap = [];
