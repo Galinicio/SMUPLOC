@@ -5,7 +5,7 @@ import vm from 'node:vm';
 
 const source = await readFile(new URL('../../js/indoor-routing.js', import.meta.url), 'utf8');
 const context = { State: {}, MapearModule: {}, MinimapModule: {} };
-vm.runInNewContext(source + '\\nglobalThis.__routing = IndoorRouting;', context);
+vm.runInNewContext(source + String.fromCharCode(10) + 'globalThis.__routing = IndoorRouting;', context);
 const routing = context.__routing;
 
 test('sem obstáculos mantém rota direta entre origem e destino', () => {
