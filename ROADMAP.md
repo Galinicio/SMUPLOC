@@ -66,9 +66,9 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 - [ ] Planejar histórico de certificados e calibrações, quando houver dados disponíveis.
 
 ### Dados, persistência e integração SMUP
-- [~] Fonte central de dados: esquema PostgreSQL e API própria inicial criados; frontend e migração sem perda ainda pendentes.
-- [~] Backend inicial com Express, JWT, papéis, isolamento por organização, validação e auditoria implementado; gestão de usuários, testes de integração e publicação pendentes.
-- [ ] Sincronização autenticada entre dispositivos, mantendo modo local até validar a migração.
+- [~] Fonte central de dados: esquema PostgreSQL, API própria inicial e cliente frontend opcional criados; tela de login, sincronização e migração sem perda ainda pendentes.
+- [~] Backend inicial com Express, JWT, papéis, isolamento por organização, validação e auditoria implementado; criação administrativa de usuários adicionada; redefinição de acesso, testes de integração e publicação pendentes.
+- [ ] Sincronização autenticada entre dispositivos. Cliente API carregado, mas ainda sem sincronização automática; preservar modo local e exportação/importação até validar migração.
 - [!] Integração com API oficial SMUP adiada conforme decisão do projeto.
 - [ ] Integrar dados de monitoramento da SMUP: leituras, temperatura, umidade, sinal, histórico e atualização mais recente, conforme disponibilidade da API.
 - [ ] Integrar alarmes, notificações e ocorrências, respeitando permissões.
