@@ -279,24 +279,27 @@ async function bootstrap() {
   if (Boolean(email) !== Boolean(password)) throw new Error('Configure BOOTSTRAP_ADMIN_EMAIL e BOOTSTRAP_ADMIN_PASSWORD juntos.');
   if (process.env.NODE_ENV === 'production' && !email) throw new Error('Configure a conta administrativa inicial antes de iniciar em produção.');
   if (email && password) {
-    const exists = await pool.query('SELECT id FROM users LIMIT 1');
-    if (!exists.rowCount) {
-      const orgId = randomUUID();
-      const userId = randomUUID();
-      const hash = await bcrypt.hash(password, 12);
-      const client = await pool.connect();
-      try {
-        await client.query('BEGIN');
+    z.string().email().parse(email);
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      // Evita duas instâncias criarem organizações iniciais em paralelo.
+      await client.query('SELECT pg_advisory_xact_lock(72419021)');
+      const exists = await client.query('SELECT id FROM users LIMIT 1');
+      if (!exists.rowCount) {
+        const orgId = randomUUID();
+        const userId = randomUUID();
+        const hash = await bcrypt.hash(password, 12);
         await client.query('INSERT INTO organizations (id,name) VALUES ($1,$2)', [orgId, process.env.BOOTSTRAP_ORG_NAME || 'Organização SMUPLOC']);
         await client.query(
           'INSERT INTO users (id,organization_id,email,password_hash,display_name,role) VALUES ($1,$2,lower($3),$4,$5,$6)',
           [userId, orgId, email, hash, process.env.BOOTSTRAP_ADMIN_NAME || 'Administrador', 'admin']
         );
-        await client.query('COMMIT');
         console.log('Conta administrativa inicial criada.');
-      } catch (error) { await client.query('ROLLBACK'); throw error; }
-      finally { client.release(); }
-    }
+      }
+      await client.query('COMMIT');
+    } catch (error) { await client.query('ROLLBACK'); throw error; }
+    finally { client.release(); }
   }
   app.listen(port, '0.0.0.0', () => console.log(`SMUPLOC API ouvindo na porta ${port}`));
 }
