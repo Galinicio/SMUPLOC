@@ -12,8 +12,8 @@ const MapaExternoModule = {
     this.map.on('click',e=>{if(!this.modoAdicionar)return;const nome=prompt('Nome deste ponto de interesse:');if(nome===null||!nome.trim())return;this.adicionarPonto(nome.trim(),e.latlng.lat,e.latlng.lng);this.alternarModoPonto(false)});
   },
   status(t){const e=document.getElementById('mapa-externo-status');if(e)e.textContent=t},
-  mostrar(){const a=document.getElementById('mapa-externo'),b=document.getElementById('mapa-interno-painel');if(a)a.style.display='flex';if(b)b.classList.remove('ativo');document.querySelectorAll('[data-mapa-aba]').forEach(x=>x.classList.toggle('ativa',x.dataset.mapaAba==='externo'));if(!this.map)this.iniciar();requestAnimationFrame(()=>this.map&&this.map.invalidateSize())},
-  mostrarInterno(){const a=document.getElementById('mapa-externo'),b=document.getElementById('mapa-interno-painel');if(a)a.style.display='none';if(b)b.classList.add('ativo');document.querySelectorAll('[data-mapa-aba]').forEach(x=>x.classList.toggle('ativa',x.dataset.mapaAba==='interno'));if(typeof MinimapModule!=='undefined')MinimapModule.renderExpandido()},
+  mostrar(){const a=document.getElementById('mapa-externo'),b=document.getElementById('mapa-interno-painel');if(a)a.style.display='flex';if(b)b.classList.remove('ativo');if(typeof UIShell!=='undefined')UIShell.atualizarPainelNavegacao(false);document.querySelectorAll('[data-mapa-aba]').forEach(x=>x.classList.toggle('ativa',x.dataset.mapaAba==='externo'));if(!this.map)this.iniciar();requestAnimationFrame(()=>this.map&&this.map.invalidateSize())},
+  mostrarInterno(){const a=document.getElementById('mapa-externo'),b=document.getElementById('mapa-interno-painel');if(a)a.style.display='none';if(b)b.classList.add('ativo');if(typeof UIShell!=='undefined')UIShell.atualizarPainelNavegacao(true);document.querySelectorAll('[data-mapa-aba]').forEach(x=>x.classList.toggle('ativa',x.dataset.mapaAba==='interno'));if(typeof MinimapModule!=='undefined')MinimapModule.renderExpandido()},
   localizar(){this.obterGPS(false)},
   marcarCasa(){this.obterGPS(true)},
   obterGPS(casa){
