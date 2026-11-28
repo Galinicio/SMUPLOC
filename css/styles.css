@@ -1182,3 +1182,37 @@ body.device-detail-open #mapa-container { opacity: .15; pointer-events: none; }
   }
   #device-detail-overlay .device-detail-content { min-height: 220px; }
 }
+
+
+/* Refinamento mobile: alvos de toque, rolagem e foco acessível. */
+@media (max-width: 600px) {
+  button, .btn-admin, .btn-mp-action, .scanner-item, .device-detail-tabs button {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  #device-detail-overlay .device-detail-tabs {
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 12px;
+  }
+  #device-detail-overlay .device-detail-tabs button { scroll-snap-align: start; }
+  #device-detail-overlay .device-detail-content {
+    min-height: 0;
+    flex: 1 1 auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  #device-detail-overlay .device-detail-footer button { min-height: 44px; }
+  #canvas-expandido { touch-action: none; }
+  .scanner-painel, .device-detail-card, #modal-planta {
+    max-width: 100vw;
+    box-sizing: border-box;
+  }
+}
+:focus-visible {
+  outline: 3px solid #65d9f2;
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
