@@ -128,6 +128,19 @@ const QRScannerModule = {
   },
 
   processarPayload(payload) {
+    if (typeof SpatialAnchors !== 'undefined' && SpatialAnchors.reconhecer(payload)) {
+      const toastInfo = document.getElementById('toast-info');
+      const toastTitle = document.getElementById('toast-title');
+      const toastBody = document.getElementById('toast-body');
+      if (toastTitle) toastTitle.textContent = 'REFERÊNCIA ESPACIAL RECONHECIDA';
+      if (toastBody) toastBody.textContent = 'Posição do técnico corrigida usando as coordenadas cadastradas deste equipamento.';
+      if (toastInfo) {
+        toastInfo.style.display = 'block';
+        clearTimeout(this.timerToast);
+        this.timerToast = setTimeout(() => { toastInfo.style.display = 'none'; }, 4000);
+      }
+      return;
+    }
     const texto = (valor, limite = 180) => {
       if (valor === null || valor === undefined) return '';
       if (typeof valor === 'object') return '';
