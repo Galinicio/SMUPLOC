@@ -129,24 +129,21 @@ const MinimapModule = {
   desenharNavegacao(ctx, escala, cx, cy, expandido) {
     const destino = State.equipamentos.find(eq => String(eq.id) === String(State.destinoId) && eq.posicionado !== false);
     const usuario = State.posicaoUsuario;
+    if (typeof IndoorRouting !== 'undefined') {
+      IndoorRouting.desenhar(ctx, escala, ctx.canvas.width / 2, ctx.canvas.height / 2, expandido);
+    }
     if (destino && usuario) {
-      const ux = cx + Number(usuario.x) * escala;
-      const uy = cy + Number(usuario.z) * escala;
-      const dx = cx + Number(destino.x) * escala;
-      const dy = cy + Number(destino.z) * escala;
+      const ux = ctx.canvas.width / 2 + Number(usuario.x) * escala;
+      const uy = ctx.canvas.height / 2 + Number(usuario.z) * escala;
       ctx.save();
-      ctx.strokeStyle = '#00e5ff';
-      ctx.lineWidth = expandido ? 4 : 2;
-      ctx.setLineDash(expandido ? [8, 5] : [4, 3]);
-      ctx.beginPath(); ctx.moveTo(ux, uy); ctx.lineTo(dx, dy); ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle = '#00e5ff'; ctx.beginPath(); ctx.arc(ux, uy, expandido ? 8 : 4, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#00e5ff';
+      ctx.beginPath(); ctx.arc(ux, uy, expandido ? 8 : 4, 0, Math.PI * 2); ctx.fill();
       ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
       ctx.restore();
     }
     if (destino) {
-      const dx = cx + Number(destino.x) * escala;
-      const dy = cy + Number(destino.z) * escala;
+      const dx = ctx.canvas.width / 2 + Number(destino.x) * escala;
+      const dy = ctx.canvas.height / 2 + Number(destino.z) * escala;
       ctx.save(); ctx.strokeStyle = '#ff3b5c'; ctx.lineWidth = expandido ? 3 : 2;
       ctx.beginPath(); ctx.arc(dx, dy, expandido ? 15 : 7, 0, Math.PI * 2); ctx.stroke();
       ctx.restore();
