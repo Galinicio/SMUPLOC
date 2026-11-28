@@ -807,3 +807,29 @@ body.scanner-ativo > #btn-explorar {
   #navegacao-controles .acoes-navegacao button { min-height:31px; }
 }
 @media(prefers-reduced-motion:reduce) { #modal-planta { transition:none; } }
+
+
+/* Zoom e deslocamento do mapa por gestos, sem controles +/- visíveis. */
+.smuploc-mapa-painel #canvas-expandido-container {
+  position:relative;
+  overflow:hidden;
+  touch-action:none;
+  overscroll-behavior:contain;
+  cursor:grab;
+}
+.smuploc-mapa-painel #canvas-expandido-container:active { cursor:grabbing; }
+.smuploc-mapa-painel #canvas-expandido {
+  position:absolute;
+  left:0;
+  top:0;
+  width:360px;
+  height:360px;
+  max-width:none;
+  max-height:none;
+  transform-origin:0 0;
+  touch-action:none;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-user-drag:none;
+}
+.mapa-zoom-controles { display:none !important; }
