@@ -17,7 +17,7 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 - [x] Remover seletor de perfil livre da interface; perfil passa a derivar da sessão autenticada.
 - [!] Login real, bootstrap de uso único, verificação do código enviado ao e-mail bootstrap, sessão segura e autorização server-side dependem da API HTTPS/PostgreSQL.
 - [!] Modo demonstração local é explicitamente não autenticado e somente perfil cliente; não usar com dados reais.
-- [ ] Implementar backend de bootstrap único, código de e-mail com hash/expiração/uso único, nome de usuário e troca obrigatória da credencial temporária. E-mail inicial autorizado: alandesouzalobox@gmail.com (validar exclusivamente no servidor).
+- [ ] Implementar backend de bootstrap único, código de e-mail com hash/expiração/uso único, nome de usuário e troca obrigatória da credencial temporária. E-mail inicial autorizado configurado exclusivamente em `BOOTSTRAP_ADMIN_EMAIL` no servidor; não expor no frontend ou repositório.
 - [ ] Adicionar MFA administrativo, revogação de sessão, recuperação segura e testes de isolamento multi-organização.
 
 ### Leitura de QR Code e ficha digital
