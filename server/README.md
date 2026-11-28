@@ -13,7 +13,7 @@ Esta API é um backend próprio do SMUPLOC. Ela **não integra a API oficial da 
 - Validação de entrada, limite de requisições de login, Helmet e CORS.
 - Migração inicial idempotente em `schema.sql`.
 
-A API ainda não está publicada e o frontend ainda não sincroniza automaticamente com ela. O modo local atual permanece preservado até concluir a camada cliente e validar a migração sem perda.
+A API ainda não está publicada e o frontend ainda não sincroniza automaticamente com ela. Não exibir um login que pareça operacional enquanto não houver URL HTTPS, banco e serviço publicados e testados. O modo local atual permanece preservado até concluir a camada cliente e validar a migração sem perda.
 
 ## Variáveis de ambiente
 
@@ -55,12 +55,14 @@ O bootstrap cria a organização e o administrador somente quando ainda não há
 
 ## Próximas etapas necessárias
 
-1. Criar fluxo administrativo seguro de convite/gestão de usuários e troca de senha.
-2. Implementar cliente frontend autenticado, com sincronização incremental e fila offline.
-3. Migrar cadastros locais para a API sem apagar dados existentes; manter exportação JSON como backup.
-4. Adicionar testes de integração com PostgreSQL e autorização multi-organização.
-5. Provisionar PostgreSQL e serviço web no Render após revisar plano/custos e configurar segredos. A infraestrutura ainda não foi criada.
-6. Só depois habilitar a sincronização remota por configuração, mantendo fallback local.
+1. Provisionar PostgreSQL e serviço web somente depois de revisar e aprovar os custos, configurar segredos e validar HTTPS/CORS.
+2. Executar testes de integração com PostgreSQL, login, autorização multi-organização e isolamento de dados.
+3. Configurar a URL HTTPS da API no frontend e confirmar o endpoint de saúde.
+4. Criar interface de login com estados claros (servidor indisponível, sessão expirada, sem conexão).
+5. Mapear os perfis do frontend (`admin`, `tecnico`, `cliente`) para os papéis da API (`admin`, `technician`, `client`).
+6. Implementar sincronização incremental e fila offline sem substituir os dados locais automaticamente.
+7. Criar exportação/backup, prévia de conflitos e confirmação antes da primeira migração; testar restauração.
+8. Só então habilitar sincronização remota por configuração, mantendo fallback local.
 
 ## Limitações deliberadas
 
