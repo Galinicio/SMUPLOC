@@ -148,6 +148,7 @@ const DevicePanelModule = {
     } else if (pagina.id === 'calibracao') {
       const certificado = this.valor(eq, ['certificadoCalibracao', 'certificado', 'calibracao']);
       const registro = certificado && typeof certificado === 'object' ? certificado : {};
+      const certificadoDireto = typeof certificado === 'string' ? certificado : null;
       const dados = [
         ['Número do certificado', this.valor(registro, ['numero', 'numeroCertificado']) || this.valor(eq, ['numeroCertificado'])],
         ['Laboratório responsável', this.valor(registro, ['laboratorio', 'responsavel']) || this.valor(eq, ['laboratorioCalibracao'])],
@@ -155,7 +156,7 @@ const DevicePanelModule = {
         ['Validade / próxima calibração', this.valor(registro, ['validade', 'proximaCalibracao']) || this.valor(eq, ['validadeCalibracao'])]
       ];
       dados.forEach(([rotulo, valor]) => conteudo.appendChild(this.criarLinha(rotulo, valor)));
-      const url = this.urlSegura(this.valor(registro, ['url', 'arquivo', 'pdf']) || this.valor(eq, ['certificadoUrl', 'certificadoPDF']));
+      const url = this.urlSegura(certificadoDireto || this.valor(registro, ['url', 'arquivo', 'pdf']) || this.valor(eq, ['certificadoUrl', 'certificadoPDF']));
       if (url) {
         const link = document.createElement('a');
         link.className = 'device-detail-document';
