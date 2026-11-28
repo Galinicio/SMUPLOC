@@ -81,8 +81,8 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 - [ ] Calibrar a escala da planta com medidas reais.
 - [ ] Cadastrar QR Codes como marcos espaciais com posição conhecida.
 - [ ] Permitir que o usuário defina ou corrija manualmente sua posição.
-- [ ] Melhorar a orientação até um ativo, exibindo destino, direção e distância estimada.
-- [ ] Testar a navegação em locais reais e medir o erro de posicionamento.
+- [~] Melhorar a orientação até um ativo: roteador A* em grade, desenho de obstáculos por dois pontos e rota visual evitando paredes cadastradas implementados em código; falta validar em plantas reais e calibrar escala.
+- [ ] Testar a navegação em locais reais, medir o erro de posicionamento e verificar rotas com paredes/portas reais.
 
 ### Itens de maior esforço — precisam de projeto técnico e decisões antes de implementar
 
@@ -93,13 +93,13 @@ Estes itens não são pequenas correções. Precisam de arquitetura, testes e/ou
 - [!] **Cadastro automático seguro:** definir identificador individual estável por dispositivo, regras contra duplicidade, revisão humana e recuperação quando o QR só informa uma categoria ou senha compartilhada.
 - [!] **Navegação indoor confiável:** estruturar plantas por cliente/unidade/andar, escala real, obstáculos, marcos QR, posição inicial e cálculo de rotas; medir erro em ambientes reais.
 - [!] **AR ancorada no ambiente:** avaliar WebXR/ARCore/ARKit, rastreamento persistente, planos, profundidade, compatibilidade e alternativa para aparelhos sem suporte.
-- [!] **Experiência mobile de produção:** testar câmera, permissões, foco, desempenho, rolagem e controles em diferentes navegadores e aparelhos; corrigir diferenças específicas de plataforma.
+- [~] **Experiência mobile:** reforçar alvos de toque, rolagem, foco acessível e comportamento do painel em telas pequenas; testes em aparelhos/navegadores reais ainda pendentes.
 - [~] **Testes automatizados de regressão:** CI e primeiros testes de QR, sintaxe e integridade HTML adicionados; falta execução verde e cobertura de cadastro, ficha, planta, navegação, API e persistência.
 
 ## 3. Futuro — recursos avançados
 
 ### Realidade aumentada (AR)
-- [ ] Investigar uso de WebXR e, quando necessário, soluções nativas com ARCore/ARKit.
+- [~] Adicionar diagnóstico de compatibilidade WebXR/câmera/sensores/WebGL sem solicitar permissões; sessão AR ancorada e integração ARCore/ARKit continuam pendentes.
 - [ ] Ancorar marcadores e fichas de ativos em posições físicas reconhecidas pela câmera.
 - [ ] Avaliar reconhecimento de paredes, planos, profundidade e obstáculos em dispositivos compatíveis.
 - [ ] Criar uma experiência de orientação visual que indique o caminho até o ativo.
