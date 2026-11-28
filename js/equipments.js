@@ -6,6 +6,8 @@ const EquipmentModule = {
   painelAberto: false,
 
   abrir() {
+    if (typeof UIShell !== 'undefined') UIShell.abrirPainel();
+    if (typeof ScannerModule !== 'undefined') ScannerModule.fechar();
     if (State.perfilAtual === 'cliente') {
       alert('O modo cliente pode apenas visualizar os equipamentos.');
       return;
