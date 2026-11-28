@@ -54,10 +54,10 @@ const AuthUI = {
   async restaurarSessao(api) {
     try {
       const token = sessionStorage.getItem('smuploc_api_token');
-      const response = await fetch(api.replace(/\\/+$/, '') + '/api/me', { headers: { Authorization: 'Bearer ' + token } });
+      const response = await fetch(api.replace(/\/+$/, '') + '/api/me', { headers: { Authorization: 'Bearer ' + token } });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.user) throw new Error('Sessão expirada. Entre novamente.');
-      if (window.SmupLocApi) { SmupLocApi.token = token; SmupLocApi.baseUrl = api.replace(/\\/+$/, ''); }
+      if (window.SmupLocApi) { SmupLocApi.token = token; SmupLocApi.baseUrl = api.replace(/\/+$/, ''); }
       this.ativarSessao(data.user, false);
     } catch (_) { try { sessionStorage.removeItem('smuploc_api_token'); } catch (e) {} }
   },
