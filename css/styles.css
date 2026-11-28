@@ -833,3 +833,20 @@ body.scanner-ativo > #btn-explorar {
   -webkit-user-drag:none;
 }
 .mapa-zoom-controles { display:none !important; }
+
+/* Mapa geográfico externo: OpenStreetMap + Leaflet */
+.smuploc-mapa-abas{display:flex;gap:6px;flex:0 0 auto;padding:0 0 7px}
+.smuploc-mapa-abas button{flex:1;min-height:34px;border:1px solid rgba(0,229,255,.28);border-radius:9px;background:#0a2d46;color:#c9e7f2;font-weight:800;font-size:11px}
+.smuploc-mapa-abas button.ativa{background:#007da5;color:#fff;border-color:#37d4ed}
+.mapa-externo{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:6px}
+#mapa-externo-leaflet{flex:1 1 auto;min-height:150px;width:100%;border-radius:10px;overflow:hidden;background:#dce7eb;z-index:1}
+#mapa-interno-painel{display:none;flex:1 1 auto;min-height:0;flex-direction:column}
+#mapa-interno-painel.ativo{display:flex}
+#mapa-interno-painel #canvas-expandido-container{flex:1 1 auto;min-height:120px}
+.mapa-externo-acoes{display:flex;flex-wrap:wrap;gap:5px}
+.mapa-externo-acoes button{min-height:34px;padding:6px 10px;border:1px solid rgba(0,229,255,.25);border-radius:8px;background:#075b83;color:#fff;font-size:10px;font-weight:800}
+.mapa-externo-acoes button.ativo{background:#00a6c8;color:#041d2b}
+.mapa-externo-status{color:#a9c5d5;font-size:10px;min-height:14px}
+.leaflet-container{font:12px 'Segoe UI',system-ui,sans-serif}
+.leaflet-control-attribution{font-size:9px!important}
+@media(max-width:650px){.mapa-externo-acoes button{flex:1 1 30%}#mapa-externo-leaflet{min-height:145px}}

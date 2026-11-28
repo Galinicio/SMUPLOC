@@ -46,8 +46,29 @@ const UIShell = {
 
 
     if (canvas) {
-      mapaPainel.append(mapaTitulo, canvas);
+      const abasMapa = document.createElement('div');
+      abasMapa.className = 'smuploc-mapa-abas';
+      abasMapa.innerHTML = '<button type="button" class="ativa" data-mapa-aba="externo" onclick="MapaExternoModule.mostrar()">Mapa externo</button><button type="button" data-mapa-aba="interno" onclick="MapaExternoModule.mostrarInterno()">Planta interna</button>';
+      const externo = document.createElement('div');
+      externo.id = 'mapa-externo';
+      externo.className = 'mapa-externo';
+      const acoesExternas = document.createElement('div');
+      acoesExternas.className = 'mapa-externo-acoes';
+      acoesExternas.innerHTML = '<button type="button" onclick="MapaExternoModule.localizar()">Minha localização</button><button type="button" onclick="MapaExternoModule.marcarCasa()">Marcar minha casa</button><button type="button" onclick="MapaExternoModule.alternarModoPonto()" id="btn-adicionar-ponto">＋ Adicionar ponto</button>';
+      const statusExterno = document.createElement('div');
+      statusExterno.id = 'mapa-externo-status';
+      statusExterno.className = 'mapa-externo-status';
+      statusExterno.textContent = 'Use sua localização para posicionar o laboratório em casa.';
+      const mapaExternoCanvas = document.createElement('div');
+      mapaExternoCanvas.id = 'mapa-externo-leaflet';
+      mapaExternoCanvas.setAttribute('aria-label','Mapa geográfico OpenStreetMap');
+      externo.append(acoesExternas, statusExterno, mapaExternoCanvas);
+      const interno = document.createElement('div');
+      interno.id = 'mapa-interno-painel';
+      interno.appendChild(canvas);
+      mapaPainel.append(mapaTitulo, abasMapa, externo, interno);
       this.vincularGestosMapa(canvas);
+      MapaExternoModule.iniciar();
     } else {
       mapaPainel.append(mapaTitulo);
     }
