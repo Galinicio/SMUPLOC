@@ -581,3 +581,7 @@ body.scanner-ativo > #btn-explorar {
   #canvas-expandido-container { height:38vh; min-height:210px; }
 }
 @media(prefers-reduced-motion:reduce) { #modal-planta { transition:none; } }
+
+/* Referências espaciais QR */
+#spatial-anchor-count { display:block; width:100%; margin:6px 0; color:#005e93; font-size:.82rem; }
+.equipamento-card p { overflow-wrap:anywhere; }
