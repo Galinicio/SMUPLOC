@@ -27,6 +27,6 @@ test('HTML carrega assinaturas QR antes do leitor e mantém a ficha digital', as
   assert.ok(html.indexOf('js/device-signatures.js') >= 0);
   assert.ok(html.indexOf('js/device-signatures.js') < html.indexOf('js/qr-scanner.js'));
   for (const id of ['device-detail-overlay', 'device-detail-tabs', 'device-detail-content', 'device-detail-page-count']) {
-    assert.match(html, new RegExp('id=["\\']' + id + '["\\']'));
+    assert.ok(html.includes('id="' + id + '"') || html.includes("id='" + id + "'"), 'ID ausente: ' + id);
   }
 });
