@@ -20,6 +20,17 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 - [ ] Implementar backend de bootstrap único, código de e-mail com hash/expiração/uso único, nome de usuário e troca obrigatória da credencial temporária. E-mail inicial autorizado configurado exclusivamente em `BOOTSTRAP_ADMIN_EMAIL` no servidor; não expor no frontend ou repositório.
 - [ ] Adicionar MFA administrativo, revogação de sessão, recuperação segura e testes de isolamento multi-organização.
 
+
+### Autenticação pelo bot Telegram
+- [x] Definir arquitetura de identidade externa para suportar Telegram sem acoplar a autorização do SMUPLOC ao bot.
+- [!] Confirmar qual bot Telegram será usado, seu proprietário/acesso ao BotFather e se ele poderá representar oficialmente o SMUPLOC.
+- [ ] Registrar domínio e URLs permitidas no BotFather e obter credenciais de Telegram Login/OIDC.
+- [ ] Implementar login Telegram no backend com Authorization Code + PKCE, validação de state/nonce, assinatura JWKS e claims.
+- [ ] Criar vinculação segura entre identidade Telegram (iss + sub) e conta SMUPLOC já existente.
+- [ ] Permitir login por Telegram somente para contas vinculadas e ativas; manter e-mail/senha como alternativa durante a transição.
+- [ ] Separar autenticação web de notificações do bot; solicitar consentimento para mensagens e não usar chat_id/username como prova de identidade.
+- [ ] Testar replay, callback adulterado, conta não vinculada, usuário desativado, desvinculação e preservação de papéis/organizações.
+
 ### Leitura de QR Code e ficha digital
 - [x] Leitura de QR Code validada pelo usuário no dispositivo testado; falta repetir no outro tipo de aparelho (computador/celular).
 - [x] Confirmar que a leitura de QR Code abre a ficha digital sobre a câmera (validado pelo usuário).
