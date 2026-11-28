@@ -7,7 +7,7 @@ const SpatialAnchors = {
   listar() {
     return (State.equipamentos || []).filter(eq =>
       eq && eq.referenciaEspacial === true &&
-      eq.posicionado !== false &&
+      eq.posicionado === true &&
       Number.isFinite(Number(eq.x)) && Number.isFinite(Number(eq.z))
     );
   },
@@ -15,7 +15,7 @@ const SpatialAnchors = {
   definir(id) {
     const eq = State.equipamentos.find(item => String(item.id) === String(id));
     if (!eq) return;
-    if (eq.posicionado === false) {
+    if (eq.posicionado !== true) {
       alert('Posicione o equipamento na planta antes de torná-lo uma referência espacial.');
       return;
     }
