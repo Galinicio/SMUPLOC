@@ -31,3 +31,10 @@ test('HTML carrega assinaturas QR antes do leitor e mantém a ficha digital', as
     assert.ok(html.includes('id="' + id + '"') || html.includes("id='" + id + "'"), 'ID ausente: ' + id);
   }
 });
+
+
+test('desenho de paredes bloqueia arraste de ativos nos eventos de ponteiro', async () => {
+  const app = await readFile(new URL('../../js/app.js', import.meta.url), 'utf8');
+  assert.match(app, /IndoorRouting\.ativo\s*&&\s*IndoorRouting\.registrarToque\(evento\)/);
+  assert.match(app, /MinimapModule\.bloquearArraste\s*=\s*true/);
+});
