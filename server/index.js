@@ -141,7 +141,7 @@ app.post('/api/users', auth(['admin']), async (req, res, next) => {
     res.status(201).json({ user: { id, email: v.email.toLowerCase(), name: v.displayName, role: v.role } });
   } catch (error) {
     await client.query('ROLLBACK');
-    if (error.code === '23505') return res.status(409).json({ error: 'Este e-mail já está cadastrado nesta organização.' });
+    if (error.code === '23505') return res.status(409).json({ error: 'Este e-mail já está cadastrado no SMUPLOC.' });
     next(error);
   } finally { client.release(); }
 });
