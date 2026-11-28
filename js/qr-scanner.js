@@ -14,7 +14,7 @@ const QRScannerModule = {
     return typeof DeviceSignatures !== 'undefined'
       ? DeviceSignatures.detectar(payload)
       : null;
-  
+  },
 
   configurarCamera() {
     const video = document.querySelector('a-scene video') || document.querySelector('video');
