@@ -16,7 +16,52 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
+<body>\n  <section id="auth-gate" class="auth-gate" hidden aria-labelledby="auth-title">
+    <div class="auth-card">
+      <div class="auth-brand"><span class="auth-mark">S</span><div><strong>SMUPLOC</strong><small>LOCALIZAÇÃO INTELIGENTE</small></div></div>
+      <div data-auth-view="login">
+        <p class="auth-eyebrow">ACESSO SEGURO</p>
+        <h1 id="auth-title">Bem-vindo de volta</h1>
+        <p class="auth-intro">Entre com suas credenciais para acessar os ambientes autorizados.</p>
+        <form id="auth-login-form" autocomplete="on">
+          <label for="auth-username">Nome de usuário</label>
+          <input id="auth-username" name="username" autocomplete="username" placeholder="admin" maxlength="40" required>
+          <label for="auth-password">Senha</label>
+          <input id="auth-password" name="password" type="password" autocomplete="current-password" placeholder="Sua senha" required>
+          <button class="auth-primary" type="submit">Entrar <span>→</span></button>
+        </form>
+        <button id="auth-show-first" class="auth-link" type="button">Primeiro acesso? Configurar administrador</button>
+        <button id="auth-local-demo" class="auth-secondary" type="button">Entrar na demonstração local</button>
+      </div>
+      <div data-auth-view="first" hidden>
+        <p class="auth-eyebrow">CONFIGURAÇÃO INICIAL</p>
+        <h1>Ativar administrador</h1>
+        <p class="auth-intro">O primeiro acesso exige a credencial temporária do servidor e a criação de uma identidade administrativa.</p>
+        <form id="auth-first-access-form" autocomplete="off">
+          <label for="auth-bootstrap-password">Senha temporária de ativação</label>
+          <input id="auth-bootstrap-password" type="password" autocomplete="one-time-code" required>
+          <label for="auth-cpf">CPF do administrador</label>
+          <input id="auth-cpf" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" maxlength="14" required>
+          <label for="auth-new-username">Novo nome de usuário</label>
+          <input id="auth-new-username" autocomplete="username" minlength="4" maxlength="40" required>
+          <label for="auth-new-password">Nova senha (mínimo 12 caracteres)</label>
+          <input id="auth-new-password" type="password" autocomplete="new-password" minlength="12" required>
+          <label for="auth-confirm-password">Confirmar nova senha</label>
+          <input id="auth-confirm-password" type="password" autocomplete="new-password" minlength="12" required>
+          <button class="auth-primary" type="submit">Validar e configurar <span>→</span></button>
+        </form>
+        <button id="auth-back-login" class="auth-link" type="button">Voltar ao login</button>
+      </div>
+      <p id="auth-message" class="auth-message" role="status" aria-live="polite"></p>
+      <div class="auth-security-note"><span>◈</span><p><strong>Segurança em primeiro lugar</strong><br>Senhas e CPFs não são salvos neste dispositivo. A autenticação real depende da API HTTPS.</p></div>
+      <div class="auth-footer"><span id="auth-api-status">Verificando configuração…</span><span>SMUPLOC · Acesso controlado</span></div>
+    </div>
+  </section>
+  <div id="auth-session-actions" class="auth-session-actions" hidden>
+    <span id="auth-session-label"></span>
+    <button id="auth-logout" type="button">Sair</button>
+  </div>
+
 
   <!-- Topo Status -->
   <div id="badge-topo">
@@ -60,13 +105,7 @@
       </div>
     </div>
 
-    <details id="perfil-acoes"><summary>Perfil de acesso</summary>
-      <select id="perfil-select" class="perfil-selector" onchange="State.setPerfil(this.value)">
-        <option value="admin">Administrador</option>
-        <option value="tecnico">Técnico</option>
-        <option value="cliente">Cliente</option>
-      </select>
-    </details>
+    <div id="perfil-acoes" class="perfil-acesso-status">Acesso controlado pela conta autenticada</div>
     <details id="ambientes-acoes"><summary>Ambientes e compartilhamento</summary>
     <section id="ambientes-toolbar" aria-label="Ambientes cadastrados">
       <label for="ambiente-select">Ambiente ativo</label>
@@ -214,7 +253,7 @@
   <canvas id="qr-canvas" style="display:none;"></canvas>
 
   <!-- Scripts Modulares -->
-  <script src="js/api-client.js"></script>
+  <script src="js/api-client.js"></script>\n  <script src="js/auth-ui.js"></script>
   <script src="js/state.js"></script>
   <script src="js/environments.js"></script>
   <script src="js/equipments.js"></script>
