@@ -19,6 +19,7 @@ Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcion
 - [ ] Testar navegação entre páginas, botões anterior/próximo, abas e fechamento da ficha.
 - [ ] Confirmar que a câmera/leitor volta a funcionar depois de fechar a ficha.
 - [ ] Testar QR Code desconhecido, inválido, repetido e equipamento sem dados opcionais.
+- [x] Alinhar a busca no inventário aos identificadores aceitos pelo leitor (ID, UUID, código, código único, serial, número de série, tag e IDs externos).
 - [ ] Revisar a experiência em telas pequenas: painel, textos, botões, rolagem e toque.
 - [ ] Melhorar mensagens de erro e estados vazios para que o usuário saiba o que aconteceu e como continuar.
 - [ ] Verificar se os elementos da ficha continuam funcionando quando faltam informações de certificado, localização ou monitoramento.
