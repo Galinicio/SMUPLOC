@@ -192,7 +192,7 @@ const QRScannerModule = {
     const normalizar = valor => String(valor || '').trim().toLocaleLowerCase('pt-BR').replace(/[^a-z0-9]/g, '');
     const equipamentoEncontrado = Array.isArray(State.equipamentos) &&
       State.equipamentos.find(eq => {
-        const candidatos = [eq.id, eq.nome, eq.codigo, eq.tag, eq.serial, eq.uuid];
+        const candidatos = [eq.id, eq.uuid, eq.codigo, eq.codigoUnico, eq.serial, eq.numeroSerie, eq.tag, eq.deviceId, eq.objectId, eq.nome, eq.name];
         const alvo = normalizar(idLido);
         return candidatos.some(valor => normalizar(valor) === alvo);
       });
