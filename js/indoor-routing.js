@@ -170,18 +170,26 @@ const IndoorRouting = {
       alert('Somente administrador ou técnico pode cadastrar paredes e obstáculos.');
       return;
     }
+    const canvas = document.getElementById('canvas-expandido');
+    if (!canvas) {
+      alert('Abra a planta interna antes de adicionar uma parede.');
+      return;
+    }
     this.ativo = true;
     this.primeiroPonto = null;
     const status = document.getElementById('tracking-status');
-    if (status) status.textContent = 'Marque o primeiro ponto da parede na planta.';
-    alert('Toque em dois pontos da planta para desenhar uma parede ou obstáculo. Depois informe a largura aproximada em metros.');
+    if (status) status.textContent = 'Modo parede ativo: toque no início da parede e depois no fim.';
+    const botao = document.getElementById('btn-obstaculo-iniciar');
+    if (botao) botao.setAttribute('aria-pressed', 'true');
   },
 
   cancelarCadastro() {
     this.ativo = false;
     this.primeiroPonto = null;
     const status = document.getElementById('tracking-status');
-    if (status) status.textContent = 'Marcação de obstáculo cancelada.';
+    if (status) status.textContent = 'Marcação de parede cancelada.';
+    const botao = document.getElementById('btn-obstaculo-iniciar');
+    if (botao) botao.setAttribute('aria-pressed', 'false');
   },
 
   registrarToque(evento) {
@@ -200,9 +208,8 @@ const IndoorRouting = {
     }
     const primeiro = this.primeiroPonto;
     this.primeiroPonto = null;
-    const respostaLargura = prompt('Largura da parede/obstáculo em metros:', '0.15');
-    if (respostaLargura === null) return true;
-    const larguraInformada = Number(respostaLargura);
+    const campoLargura = document.getElementById('obstacle-width');
+    const larguraInformada = Number(campoLargura && campoLargura.value);
     const largura = Number.isFinite(larguraInformada) && larguraInformada > 0
       ? Math.max(0.05, Math.min(2, larguraInformada)) : 0.15;
     if (Math.hypot(ponto.x - primeiro.x, ponto.z - primeiro.z) < 0.15) {
@@ -213,12 +220,15 @@ const IndoorRouting = {
     State.obstaculos.push({ id: State.gerarId('obs'), x1: primeiro.x, z1: primeiro.z, x2: ponto.x, z2: ponto.z, largura });
     State.sincronizarAmbienteAtual();
     this.chaveRota = '';
+    this.ativo = false;
+    const botao = document.getElementById('btn-obstaculo-iniciar');
+    if (botao) botao.setAttribute('aria-pressed', 'false');
     if (typeof MinimapModule !== 'undefined') {
       MinimapModule.renderExpandido();
       MinimapModule.renderPequeno();
     }
     const status = document.getElementById('tracking-status');
-    if (status) status.textContent = 'Obstáculo cadastrado. A próxima rota considerará esta parede.';
+    if (status) status.textContent = 'Parede cadastrada. A rota agora evita este trecho. Para adicionar outra, toque em “Adicionar parede” novamente.';
     return true;
   },
 
@@ -230,6 +240,8 @@ const IndoorRouting = {
     State.obstaculos.pop();
     State.sincronizarAmbienteAtual();
     this.chaveRota = '';
+    const status = document.getElementById('tracking-status');
+    if (status) status.textContent = 'Última parede removida.';
     if (typeof MinimapModule !== 'undefined') {
       MinimapModule.renderExpandido();
       MinimapModule.renderPequeno();
