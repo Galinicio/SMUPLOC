@@ -35,7 +35,7 @@
   </section>
 
   <!-- Minimapa Clicável -->
-  <div id="mapa-container" onclick="MinimapModule.abrirModal()">
+  <div id="mapa-container" role="button" tabindex="0" aria-label="Abrir menu do ambiente" onclick="UIShell.abrirPainel()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();UIShell.abrirPainel()}">
     <div id="mapa-header">🗺️ TOQUE PARA ABRIR A PLANTA</div>
     <canvas id="mapa-canvas" width="130" height="105"></canvas>
   </div>
@@ -52,18 +52,21 @@
     <div class="modal-header">
       <div>
         <div class="modal-title">🗺️ Seu ambiente</div>
-        <div class="subtitle-perfil" id="texto-modo-perfil">Modo: <b>ADMINISTRADOR</b></div>
+        <div class="subtitle-perfil" id="texto-modo-perfil">Modo: CLIENTE</div>
       </div>
       <div class="modal-header-actions">
-        <select id="perfil-select" class="perfil-selector" onchange="State.setPerfil(this.value)">
-          <option value="admin">👑 Admin</option>
-          <option value="tecnico">🛠️ Técnico</option>
-          <option value="cliente">👤 Cliente</option>
-        </select>
-        <button class="btn-fechar" onclick="MinimapModule.fecharModal()">❌ Fechar</button>
+        <button class="btn-fechar" onclick="UIShell.fecharPainel()" aria-label="Fechar menu">✕</button>
       </div>
     </div>
 
+    <details id="perfil-acoes"><summary>Perfil de acesso</summary>
+      <select id="perfil-select" class="perfil-selector" onchange="State.setPerfil(this.value)">
+        <option value="admin">Administrador</option>
+        <option value="tecnico">Técnico</option>
+        <option value="cliente">Cliente</option>
+      </select>
+    </details>
+    <details id="ambientes-acoes"><summary>Ambientes e compartilhamento</summary>
     <section id="ambientes-toolbar" aria-label="Ambientes cadastrados">
       <label for="ambiente-select">Ambiente ativo</label>
       <select id="ambiente-select" onchange="EnvironmentModule.selecionar(this.value)"></select>
@@ -74,7 +77,7 @@
       <div id="ambiente-atual-label" aria-live="polite"></div>
       <div id="ambiente-qr-area" hidden></div>
       <p class="aviso-sincronizacao">Nesta etapa, cada dispositivo mantém seus dados localmente. Para compartilhar com outro técnico, exporte e importe o cadastro. A sincronização automática será feita pela futura API SMUP.</p>
-    </section>
+    </section></details>
 
     <div id="canvas-expandido-container">
       <canvas id="canvas-expandido" width="360" height="360"></canvas>
@@ -102,8 +105,14 @@
       <div id="lista-equipamentos" class="lista-equipamentos"></div>
     </section>
 
-    <details id="ferramentas-avancadas"><summary>⚙️ Configurações e ferramentas</summary><div class="modal-controls">
-      <button class="btn-mapear" onclick="MapearModule.iniciar()">📏 MAPEAR SALA</button>
+    <details id="ferramentas-avancadas"><summary>⚙️ Ferramentas</summary><div class="modal-controls">
+      <div class="mapear-seletor">
+        <button class="btn-mapear" type="button" onclick="UIShell.alternarOpcoesMapeamento()" aria-expanded="false">📍 Mapear local</button>
+        <div id="mapear-opcoes" hidden>
+          <button type="button" onclick="UIShell.selecionarMapeamento('planta')">🗺️ Pela planta baixa</button>
+          <button type="button" onclick="UIShell.selecionarMapeamento('camera')">📷 Pela câmera (visual)</button>
+        </div>
+      </div>
       <button class="btn-admin btn-dark" type="button" onclick="MapearModule.iniciarCalibracao()">📐 Calibrar por 2 pontos</button>
       <button class="btn-admin btn-dark" type="button" onclick="PlanAnalysis.analisar()">🔎 Analisar planta</button>
       <div id="controles-admin">
@@ -116,6 +125,15 @@
       </div>
     </div></details>
   </div>
+
+  <section id="camera-mapeamento" hidden aria-label="Mapeamento visual pela câmera">
+    <div class="camera-mapeamento-topo">
+      <strong>Mapeamento pela câmera</strong>
+      <p>Use a imagem ao vivo para reconhecer o espaço. Para registrar medidas e posições precisas, escolha “Pela planta baixa”.</p>
+    </div>
+    <div class="camera-reticulo" aria-hidden="true"></div>
+    <button type="button" onclick="UIShell.voltarDaCamera()">Voltar ao menu</button>
+  </section>
 
   <!-- HUD Modo MAPEAR -->
   <div id="mapear-hud">
@@ -173,6 +191,7 @@
   <script src="js/scanner.js"></script>
   <script src="js/indoor-tracker.js"></script>
   <script src="js/mapear.js"></script>
+  <script src="js/ui-shell.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

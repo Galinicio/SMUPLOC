@@ -8,6 +8,8 @@ const ScannerModule = {
   destinoAtual: null,
 
   abrir() {
+    if (typeof UIShell !== 'undefined' && !UIShell.fecharPainel()) return;
+    if (typeof EquipmentModule !== 'undefined') EquipmentModule.fechar();
     const overlay = document.getElementById('scanner-overlay');
     const ambiente = State.obterAmbienteAtual();
     if (!ambiente) {
