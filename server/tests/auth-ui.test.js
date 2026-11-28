@@ -1,19 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import vm from 'node:vm';
 
 const source = fs.readFileSync(new URL('../../js/auth-ui.js', import.meta.url), 'utf8');
-const context = { document: { addEventListener() {} }, window: {} };
-vm.createContext(context);
-vm.runInContext(source, context);
-const cpfValido = vm.runInContext('AuthUI.cpfValido', context);
+const html = fs.readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
 
-test('CPF valida dígitos verificadores sem aceitar sequências repetidas', () => {
-  assert.equal(cpfValido('529.982.247-25'), true);
-  assert.equal(cpfValido('111.111.111-11'), false);
-  assert.equal(cpfValido('529.982.247-24'), false);
-  assert.equal(cpfValido('123'), false);
+test('primeiro acesso usa e-mail e código de verificação, sem CPF', () => {
+  assert.match(source, /auth\/bootstrap\/send-code/);
+  assert.match(source, /emailCode: code/);
+  assert.match(source, /alandesouzalobox@gmail\.com/);
+  assert.doesNotMatch(source, /cpfValido|auth-cpf|\bcpf\b/i);
+  assert.match(html, /auth-admin-email/);
+  assert.match(html, /auth-email-code/);
+  assert.doesNotMatch(html, /auth-cpf/);
 });
 
 test('interface não contém senha administrativa embutida', () => {
