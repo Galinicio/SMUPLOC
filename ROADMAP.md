@@ -13,11 +13,11 @@
 Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcionalidades.
 
 ### Autenticação, primeiro acesso e hierarquia
-- [x] Criar tela de login e primeiro acesso, com validação local dos dígitos verificadores do CPF e contrato de API documentado.
+- [x] Criar tela de login e primeiro acesso com e-mail autorizado, envio de código de verificação e contrato de API documentado.
 - [x] Remover seletor de perfil livre da interface; perfil passa a derivar da sessão autenticada.
-- [!] Login real, bootstrap de uso único, verificação de identidade do CPF, sessão segura e autorização server-side dependem da API HTTPS/PostgreSQL.
+- [!] Login real, bootstrap de uso único, verificação do código enviado ao e-mail bootstrap, sessão segura e autorização server-side dependem da API HTTPS/PostgreSQL.
 - [!] Modo demonstração local é explicitamente não autenticado e somente perfil cliente; não usar com dados reais.
-- [ ] Implementar backend de bootstrap único, CPF com proteção de dados, nome de usuário e troca obrigatória da credencial temporária.
+- [ ] Implementar backend de bootstrap único, código de e-mail com hash/expiração/uso único, nome de usuário e troca obrigatória da credencial temporária. E-mail inicial autorizado: alandesouzalobox@gmail.com (validar exclusivamente no servidor).
 - [ ] Adicionar MFA administrativo, revogação de sessão, recuperação segura e testes de isolamento multi-organização.
 
 ### Leitura de QR Code e ficha digital
