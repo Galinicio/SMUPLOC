@@ -12,6 +12,26 @@
 
 Objetivo: garantir que o fluxo atual seja confiável antes de ampliar as funcionalidades.
 
+### Autenticação, primeiro acesso e hierarquia
+- [x] Criar tela de login e primeiro acesso com e-mail autorizado, envio de código de verificação e contrato de API documentado.
+- [x] Remover seletor de perfil livre da interface; perfil passa a derivar da sessão autenticada.
+- [!] Login real, bootstrap de uso único, verificação do código enviado ao e-mail bootstrap, sessão segura e autorização server-side dependem da API HTTPS/PostgreSQL.
+- [!] Modo demonstração local é explicitamente não autenticado e somente perfil cliente; não usar com dados reais.
+- [ ] Implementar backend de bootstrap único, código de e-mail com hash/expiração/uso único, nome de usuário e troca obrigatória da credencial temporária. E-mail inicial autorizado configurado exclusivamente em `BOOTSTRAP_ADMIN_EMAIL` no servidor; não expor no frontend ou repositório.
+- [ ] Adicionar MFA administrativo, revogação de sessão, recuperação segura e testes de isolamento multi-organização.
+
+
+### Autenticação SMUP e acesso administrativo do SMUPLOC
+- [x] Definir a separação: usuários comuns autenticados integralmente pelo fluxo oficial da SMUP (e-mail, telefone e token SMS); conta administrativa local exclusiva para manutenção do SMUPLOC.
+- [x] Definir que o SMUPLOC não envia SMS, não valida token SMS e não cria senha local para usuários comuns.
+- [x] Definir que a autenticação confirmada pela SMUP será consumida pelo backend SMUPLOC por integração oficial e verificável; papéis e organizações continuam controlados pelo SMUPLOC.
+- [~] Preparar a arquitetura com adaptador de identidade SMUP independente do protocolo, sem presumir OIDC/OAuth/API/webhook ainda não documentado.
+- [!] Obter da SMUP a documentação, autorização e contrato técnico oficial para integrar o fluxo de autenticação existente.
+- [ ] Implementar o adaptador e a troca segura de identidade conforme o contrato real disponibilizado pela SMUP.
+- [ ] Vincular/provisionar contas SMUP às contas e organizações locais com regras aprovadas, sem conceder privilégios automaticamente.
+- [ ] Testar assinatura/origem, expiração, replay, sessão, conta não vinculada, usuário desativado e isolamento entre organizações.
+- [ ] Manter e testar o login local administrativo separado, com MFA, auditoria e permissões restritas à manutenção.
+
 ### Leitura de QR Code e ficha digital
 - [x] Leitura de QR Code validada pelo usuário no dispositivo testado; falta repetir no outro tipo de aparelho (computador/celular).
 - [x] Confirmar que a leitura de QR Code abre a ficha digital sobre a câmera (validado pelo usuário).
